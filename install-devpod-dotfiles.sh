@@ -68,8 +68,9 @@ get_target_dir() {
 
 should_skip() {
   local name="$1"
-  for skip in "${SKIP_FILES[@]}" "${SKIP_DIRS[@]}"; do
-    [[ "$name" == "$skip" ]] && return 0
+  local pattern
+  for pattern in "${SKIP_FILES[@]}" "${SKIP_DIRS[@]}"; do
+    [[ "$name" == "$pattern" ]] && return 0
   done
   return 1
 }
@@ -102,7 +103,7 @@ link_package() {
         break
       fi
     done
-    $skip && continue
+    [[ "$skip" == true ]] && continue
 
     local target_path="${target_base}/${rel_path}"
     local target_dir
