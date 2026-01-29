@@ -15,7 +15,7 @@ palette = "catppuccin_mocha"
 right_format = """$all"""
 
 [c]
-format = '[[ $symbol( $version) ]]($style)'
+format = '[ $symbol( $version) ]($style)'
 symbol = " "
 
 [character]
@@ -78,15 +78,15 @@ format = '[ $symbol( $version) ]($style)'
 symbol = ""
 
 [haskell]
-format = '[[ $symbol( $version) ]]($style)'
+format = '[ $symbol( $version) ]($style)'
 symbol = ""
 
 [java]
-format = '[[ $symbol( $version) ]]($style)'
+format = '[ $symbol( $version) ]($style)'
 symbol = " "
 
 [kotlin]
-format = '[[ $symbol( $version) ]]($style)'
+format = '[ $symbol( $version) ]($style)'
 symbol = ""
 
 [line_break]
@@ -149,15 +149,15 @@ text = "#cdd6f4"
 yellow = "#f9e2af"
 
 [php]
-format = '[[ $symbol( $version) ]]($style)'
+format = '[ $symbol( $version) ]($style)'
 symbol = ""
 
 [python]
-format = '[[ $symbol( $version) ]]($style)'
+format = '[ $symbol( $version) ]($style)'
 symbol = ""
 
 [rust]
-format = '[[ $symbol( $version) ]]($style)'
+format = '[ $symbol( $version) ]($style)'
 symbol = ""
 
 [time]
