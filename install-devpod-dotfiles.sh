@@ -55,6 +55,7 @@ get_target_dir() {
   local package="$1"
   case "$package" in
   bash | zsh | fish) echo "${HOME_DIR}" ;;
+  git) echo "${CONFIG_DIR}/git" ;;
   nvim) echo "${CONFIG_DIR}/nvim" ;;
   tmux) echo "${HOME_DIR}" ;;
   starship) echo "${CONFIG_DIR}" ;;
