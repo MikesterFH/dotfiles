@@ -1,0 +1,6 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Local/private overrides (never commit these)
+*.local

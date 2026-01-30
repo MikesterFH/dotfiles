@@ -1,0 +1,63 @@
+# =============================================================================
+# Git Configuration (public / shared)
+#
+# Identity is set per directory via includeIf. The corresponding
+# config.local.* files are NOT tracked by the dotfiles repo.
+#
+# On each machine, create the files you need:
+#   git config --file ~/.config/git/config.local.personal user.name "..."
+#   git config --file ~/.config/git/config.local.personal user.email "..."
+#   git config --file ~/.config/git/config.local.work user.name "..."
+#   git config --file ~/.config/git/config.local.work user.email "..."
+#   git config --file ~/.config/git/config.local.client user.name "..."
+#   git config --file ~/.config/git/config.local.client user.email "..."
+# =============================================================================
+
+# Personal projects (~/dev/personal/)
+[includeIf "gitdir:~/dev/personal/"]
+	path = config.local.personal
+
+# Employer projects (~/dev/work/)
+[includeIf "gitdir:~/dev/work/"]
+	path = config.local.work
+
+# Client projects (~/dev/client/)
+[includeIf "gitdir:~/dev/client/"]
+	path = config.local.client
+
+[init]
+	defaultBranch = main
+
+[core]
+	editor = nvim
+	autocrlf = input
+	pager = delta
+
+[pull]
+	rebase = true
+
+[push]
+	autoSetupRemote = true
+
+[merge]
+	conflictstyle = zdiff3
+
+[diff]
+	algorithm = histogram
+	colorMoved = default
+
+[rebase]
+	autoStash = true
+
+[rerere]
+	enabled = true
+
+[interactive]
+	diffFilter = delta --color-only
+
+[delta]
+	navigate = true
+	side-by-side = true
+
+[alias]
+	lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit

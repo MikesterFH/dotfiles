@@ -32,7 +32,7 @@ HOME_DIR="${HOME}"
 CONFIG_DIR="${HOME}/.config"
 
 # Packages to install in the container
-PACKAGES=(nvim starship zsh)
+PACKAGES=(git nvim starship zsh)
 
 # Files to skip
 SKIP_FILES=(
