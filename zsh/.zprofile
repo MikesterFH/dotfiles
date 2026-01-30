@@ -4,8 +4,8 @@
 
 # -- PATH ---------------------------------------------------------------------
 
+eval "$(/opt/homebrew/bin/brew shellenv)"
 export PATH="$HOME/.local/bin:$PATH"
-[ -d /opt/homebrew/sbin ] && export PATH="/opt/homebrew/sbin:$PATH"
 [ -d /opt/homebrew/opt/libpq/bin ] && export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
 
 # -- Environment --------------------------------------------------------------
