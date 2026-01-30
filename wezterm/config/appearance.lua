@@ -4,6 +4,8 @@ local color = Utils.fn.color
 ---@diagnostic disable-next-line: undefined-field
 local G = require("wezterm").GLOBAL
 
+local fs = Utils.fn.fs
+
 local Config = {}
 
 G.opacity = G.opacity or 0.75
@@ -14,17 +16,30 @@ Config.color_scheme = color.get_scheme()
 
 local theme = Config.color_schemes[Config.color_scheme]
 
-Config.macos_window_background_blur = G.blur
-Config.win32_system_backdrop = "Acrylic"
-
-Config.background = {
-  {
-    source = { Color = theme.background },
-    width = "100%",
-    height = "100%",
-    opacity = G.opacity,
-  },
-}
+if fs.platform().is_win then
+  Config.win32_system_backdrop = "Mica"
+  Config.window_background_opacity = 0
+elseif fs.platform().is_mac then
+  Config.macos_window_background_blur = G.blur
+  Config.background = {
+    {
+      source = { Color = theme.background },
+      width = "100%",
+      height = "100%",
+      opacity = G.opacity,
+    },
+  }
+else
+  Config.kde_window_background_blur = true
+  Config.background = {
+    {
+      source = { Color = theme.background },
+      width = "100%",
+      height = "100%",
+      opacity = G.opacity,
+    },
+  }
+end
 
 Config.bold_brightens_ansi_colors = "BrightAndBold"
 

@@ -6,28 +6,20 @@ local Config = {}
 if fs.platform().is_mac then
   Config.default_prog = { "/bin/zsh", "-l" }
 elseif fs.platform().is_win then
-  Config.default_prog =
-    { "pwsh", "-NoLogo", "-ExecutionPolicy", "RemoteSigned", "-NoProfileLoadTime" }
+  Config.default_prog = { "C:\\Program Files\\Git\\bin\\bash.exe", "-i", "-l" }
 
   Config.launch_menu = {
     {
-      label = Icons.Progs["pwsh.exe"] .. " PowerShell V7",
-      args = {
-        "pwsh",
-        "-NoLogo",
-        "-ExecutionPolicy",
-        "RemoteSigned",
-        "-NoProfileLoadTime",
-      },
+      label = Icons.Progs["git"] .. " Git Bash",
+      args = { "C:\\Program Files\\Git\\bin\\bash.exe", "-i", "-l" },
+      domain = { DomainName = "local" },
       cwd = "~",
     },
     {
-      label = Icons.Progs["pwsh.exe"] .. " PowerShell V5",
+      label = Icons.Progs["pwsh.exe"] .. " PowerShell",
       args = { "powershell" },
       cwd = "~",
     },
-    { label = "Command Prompt", args = { "cmd.exe" }, cwd = "~" },
-    { label = Icons.Progs["git"] .. " Git bash", args = { "sh", "-l" }, cwd = "~" },
   }
 
   -- ref: https://wezfurlong.org/wezterm/config/lua/WslDomain.html

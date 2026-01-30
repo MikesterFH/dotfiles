@@ -1171,17 +1171,7 @@ M.color.set_scheme = function(Config, theme, name)
   Config.char_select_fg_color = theme.background
   Config.command_palette_bg_color = theme.brights[6]
   Config.command_palette_fg_color = theme.background
-  Config.background = {
-    {
-      source = { Color = theme.background },
-      width = "100%",
-      height = "100%",
-      opacity = G.opacity,
-    },
-  }
-  Config.macos_window_background_blur = G.blur
-  Config.win32_system_backdrop = "Acrylic"
-  Config.kde_window_background_blur = true
+
   M.color.set_tab_button(Config, theme)
 end --~~}}}
 
