@@ -8,16 +8,16 @@
 
     // NAVIGATION
     {
+        "key": "ctrl+h",
+        "command": "workbench.action.navigateLeft",
+    },
+    {
         "key": "ctrl+j",
         "command": "workbench.action.navigateDown",
     },
     {
         "key": "ctrl+k",
         "command": "workbench.action.navigateUp",
-    },
-    {
-        "key": "ctrl+h",
-        "command": "workbench.action.navigateLeft",
     },
     {
         "key": "ctrl+l",
@@ -45,23 +45,17 @@
         "command": "workbench.action.previousEditorInGroup",
         "when": "(vim.mode == 'Normal' || vim.mode == 'Visual') && (editorFocus || !inputFocus)"
     },
-    {
-        // escape from input focus in a non-editor context
-        "key": "escape",
-        "command": "workbench.action.blur",
-        "when": "inputFocus && !editorTextFocus && !sideBarFocus && !auxiliaryBarFocus"
-    },
 
     // Code editing
     {
         "key": "shift+j",
         "command": "editor.action.moveLinesDownAction",
-        "when": "editorTextFocus && vim.mode == 'Normal'"
+        "when": "(vim.mode == 'Normal' || vim.mode == 'Visual') && (editorFocus || !inputFocus)"
     },
     {
         "key": "shift+k",
         "command": "editor.action.moveLinesUpAction",
-        "when": "editorTextFocus && vim.mode == 'Normal'"
+        "when": "(vim.mode == 'Normal' || vim.mode == 'Visual') && (editorFocus || !inputFocus)"
     },
 
     // TERMINAL
@@ -97,6 +91,11 @@
     },
 
     // File Explorer
+    {
+        "key": "space",
+        "command": "vspacecode.space",
+        "when": "sideBarFocus"
+    },
     {
         "key": "r",
         "command": "renameFile",
@@ -184,5 +183,13 @@
     {
         "key": "ctrl+j",
         "command": "-workbench.action.togglePanel"
+    },
+    {
+        "key": "shift+enter",
+        "command": "-workbench.action.terminal.sendSequence",
+        "args": {
+            "text": "\\\r\n"
+        },
+        "when": "terminalFocus"
     },
 ]

@@ -1,6 +1,9 @@
 {
+  // === GENERAL SETTINGS =====================================================
+
   // open json editor for settings
   "workbench.settings.editor": "json",
+
   // Change font
   "terminal.integrated.fontFamily": "JetBrainsMono NFM Regular",
   "editor.fontFamily": "JetBrainsMono NFM Regular",
@@ -11,30 +14,20 @@
   "notebook.output.fontFamily": "JetBrainsMono NFM Regular",
   "markdown.preview.fontFamily": "JetBrainsMono NFM Regular",
   "editor.inlayHints.fontFamily": "JetBrainsMono NFM Regular",
+
   // Editor
   "editor.fontSize": 12,
   "terminal.integrated.fontSize": 12,
   "editor.cursorSurroundingLines": 8,
   "editor.bracketPairColorization.enabled": true,
   "editor.guides.bracketPairs": true,
-  "editor.formatOnSave": false,
-  "files.autoSave": "afterDelay",
   "files.autoSaveWhenNoErrors": true,
-  "git.autofetch": true,
-  "git.confirmSync": false,
   "editor.largeFileOptimizations": true,
   "diffEditor.experimental.useTrueInlineView": true,
-  "git.replaceTagsWhenPull": true,
   "notebook.lineNumbers": "on",
   "workbench.layoutControl.enabled": false,
   "diffEditor.ignoreTrimWhitespace": false,
   "files.trimTrailingWhitespace": true,
-  "[markdown]": {
-    "files.trimTrailingWhitespace": false
-  },
-  // Windsurf
-  "windsurf.autocompleteSpeed": "fast",
-  // UI
   "editor.minimap.enabled": false,
   "editor.scrollbar.vertical": "auto",
   "editor.cursorSmoothCaretAnimation": "on",
@@ -43,25 +36,99 @@
   "editor.lineNumbers": "relative",
   "update.showReleaseNotes": false,
   "window.title": "${dirty}${activeEditorLong}${separator}${rootName}",
-  "workbench.activityBar.location": "hidden",
+  "workbench.activityBar.location": "top",
   "workbench.iconTheme": "material-icon-theme",
-  "workbench.startupEditor": "none",
   "explorer.compactFolders": true,
   "window.density.editorTabHeight": "compact",
   "workbench.editor.tabSizing": "shrink",
   "breadcrumbs.filePath": "off",
+  "terminal.integrated.defaultProfile.windows": "Git Bash",
+  "window.commandCenter": false,
+  "workbench.startupEditor": "none",
+  "explorer.confirmDragAndDrop": false,
+  "editor.formatOnSave": false,
+  "files.autoSave": "afterDelay",
+  "chat.viewSessions.orientation": "stacked",
   "window.menuBarVisibility": "compact",
-  "glassit.alpha": 245,
+
+  // Git
+  "git.autofetch": true,
+  "git.confirmSync": false,
+  "git.replaceTagsWhenPull": true,
+  "git.ignoreRebaseWarning": true,
+
+  // Extensions
+  "cmake.showConfigureWithDebuggerNotification": false,
+  "github.copilot.enable": {
+    "*": true,
+    "plaintext": false,
+    "markdown": false,
+    "scminput": false,
+    "cpp": true,
+    "python": true
+  },
+  "github.copilot.nextEditSuggestions.enabled": true,
+  "gitlens.views.scm.grouped.views": {
+    "commits": true,
+    "branches": true,
+    "remotes": true,
+    "stashes": true,
+    "tags": true,
+    "worktrees": true,
+    "contributors": true,
+    "repositories": false,
+    "searchAndCompare": true,
+    "launchpad": false
+  },
+  "todo-tree.general.tags": [
+    "BUG",
+    "HACK",
+    "FIXME",
+    "TODO",
+    "XXX",
+    "[ ]",
+    "[x]",
+    "ToDo"
+  ],
+  "dev.containers.dockerPath": "podman",
+
+  // language specifics
+  "[markdown]": {
+    "files.trimTrailingWhitespace": false
+  },
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff"
+  },
+  "[cpp]": {
+    "editor.defaultFormatter": "xaver.clang-format",
+    "editor.wordBasedSuggestions": "off",
+    "editor.semanticHighlighting.enabled": true,
+    "editor.stickyScroll.defaultModel": "foldingProviderModel",
+    "editor.suggest.insertMode": "replace"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  "[lua]": {
+    "editor.defaultFormatter": "sumneko.lua"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+
   // Vim
-  "vim.easymotion": true,
   "vim.incsearch": true,
-  "vim.hlsearch": true,
+  "vim.searchHighlightColor": "#f6ff0080",
+  "vim.searchHighlightTextColor": "#fff",
   "vim.useSystemClipboard": true,
+  "vim.useCtrlKeys": true,
+  "vim.hlsearch": true,
   "vim.highlightedyank.enable": true,
+  "editor.stickyScroll.enabled": false, // very important -> fast moving again!
+  "vim.easymotion": true,
   "vim.highlightedyank.color": "#a9dc7660",
   "vim.highlightedyank.duration": 250,
-  "vim.useCtrlKeys": true,
-  "vim.statusBarColorControl": true,
+  "vim.statusBarColorControl": false,
   "vim.handleKeys": {
     "<C-a>": false,
     "<C-h>": false,
@@ -70,30 +137,24 @@
     "<S-j>": false,
     "<S-h>": false
   },
+  "vim.smartRelativeLine": true,
+  "vim.surround": true,
+  "extensions.experimental.affinity": {
+    "vscodevim.vim": 1
+  },
   "vim.insertModeKeyBindings": [
     {
-      "before": [
-        "j",
-        "j"
-      ],
-      "after": [
-        "<Esc>"
-      ]
+      "before": ["j", "j"],
+      "after": ["<Esc>"]
     }
   ],
   "vim.normalModeKeyBindingsNonRecursive": [
     {
-      "before": [
-        "<space>"
-      ],
-      "commands": [
-        "vspacecode.space"
-      ]
+      "before": ["<space>"],
+      "commands": ["vspacecode.space"]
     },
     {
-      "before": [
-        ","
-      ],
+      "before": [","],
       "commands": [
         "vspacecode.space",
         {
@@ -104,29 +165,23 @@
     },
     {
       // delete character under cursor without copying it
-      "before": [
-        "x"
-      ],
-      "after": [
-        "\"",
-        "_",
-        "x"
-      ]
+      "before": ["x"],
+      "after": ["\"","_","x"]
+    },
+    {
+      "before": ["<Esc>"],
+      "when": ["editorFocus"],
+      "commands": [":nohl"],
+      "silent": true
     },
   ],
   "vim.visualModeKeyBindingsNonRecursive": [
     {
-      "before": [
-        "<space>"
-      ],
-      "commands": [
-        "vspacecode.space"
-      ]
+      "before": ["<space>"],
+      "commands": ["vspacecode.space"]
     },
     {
-      "before": [
-        ","
-      ],
+      "before": [","],
       "commands": [
         "vspacecode.space",
         {
@@ -136,32 +191,17 @@
       ]
     },
     {
-      "before": [
-        ">"
-      ],
-      "commands": [
-        "editor.action.indentLines"
-      ]
+      "before": [">"],
+      "commands": ["editor.action.indentLines"]
     },
     {
-      "before": [
-        "<"
-      ],
-      "commands": [
-        "editor.action.outdentLines"
-      ]
+      "before": ["<"],
+      "commands": ["editor.action.outdentLines"]
     },
     {
       // keep last yank when pasting
-      "before": [
-        "p"
-      ],
-      "after": [
-        "\"",
-        "_",
-        "d",
-        "P"
-      ]
+      "before": ["p"],
+      "after": ["\"","_","d","P"]
     }
   ],
   "vspacecode.bindings": [
@@ -1399,11 +1439,24 @@
       "type": "bindings",
       "bindings": [
         {
+          "key": " ",
+          "name": "Toggle Sidebar",
+          "icon": "list-tree",
+          "type": "command",
+          "command": "workbench.action.toggleSidebarVisibility"
+        },
+        {
           "key": "e",
           "name": "Show explorer",
           "icon": "list-tree",
-          "type": "command",
+          "type": "conditional",
           "command": "workbench.view.explorer"
+        },
+        {
+          "key": "when:sideBarVisible && explorerViewletVisible",
+          "name": "Hide explorer",
+          "type": "command",
+          "command": "workbench.action.toggleSidebarVisibility"
         },
         {
           "key": "d",
@@ -1471,13 +1524,36 @@
       ]
     },
   ],
-  "workbench.colorCustomizations": {
-    "statusBar.background": "#005f5f",
-    "statusBar.noFolderBackground": "#005f5f",
-    "statusBar.debuggingBackground": "#005f5f",
-    "statusBar.foreground": "#ffffff",
-    "statusBar.debuggingForeground": "#ffffff"
+
+  // === PROJECT SETTINGS =====================================================
+  "python.analysis.typeCheckingMode": "standard",
+  "C_Cpp.default.cppStandard": "c++17",
+  "cmake.environment": {
+    "PATH": "c:/Users/mfehlmann/.vscode/extensions/stmicroelectronics.stm32cube-ide-build-cmake-1.42.2/resources/cube-cmake/win32;c:\\Users\\mfehlmann\\.vscode\\extensions\\stmicroelectronics.stm32cube-ide-core-1.0.3\\resources\\binaries\\win32\\x86_64;${env.PATH}"
   },
-  "workbench.sideBar.location": "right",
-  "chat.editing.alwaysSaveWithGeneratedChanges": true,
+  "security.workspace.trust.untrustedFiles": "open",
+  "cmake.cmakePath": "cube-cmake",
+  "[c]": {
+    "editor.defaultFormatter": "xaver.clang-format"
+  },
+  "chat.mcp.gallery.enabled": true,
+  "C_Cpp.intelliSenseEngine": "disabled",
+  "qt-core.additionalQtPaths": [
+    {
+      "name": "Qt-5.15.12-win32-msvc_from_PATH",
+      "path": "C:\\Qt\\5.15.12\\5.15.12\\msvc2019\\bin\\qtpaths.EXE"
+    }
+  ],
+  "qt-core.qtInstallationRoot": "C:\\Qt",
+  "diffEditor.maxComputationTime": 0,
+  "claudeCode.preferredLocation": "sidebar",
+
+  // Misc
+  "hexeditor.columnWidth": 16,
+  "hexeditor.showDecodedText": true,
+  "hexeditor.defaultEndianness": "little",
+  "hexeditor.inspectorType": "aside",
+  "jenkins.pipeline.linter.connector.user": "mfehlmann",
+  "jenkins.pipeline.linter.connector.url": "https://jenkins-pcm.seb.com/jenkins/pipeline-model-converter/validate",
+  "jenkins.pipeline.linter.connector.token": "1139541b3847ce4222567b138878a51ef0",
 }
