@@ -1,0 +1,175 @@
+#!/bin/bash
+# =============================================================================
+# .bashrc fuer Windows Git Bash
+# =============================================================================
+# Diese Datei ist speziell fuer Git Bash unter Windows optimiert.
+# Kopiere oder symlinke diese Datei nach ~/.bashrc
+#
+# WICHTIG: Diese Datei muss VOR mise aktiviert werden geladen werden,
+# um PATH-Probleme zu vermeiden.
+# =============================================================================
+
+# If not running interactively, don't do anything
+case $- in
+*i*) ;;
+*) return ;;
+esac
+
+# -----------------------------------------------------------------------------
+# History Settings
+# -----------------------------------------------------------------------------
+HISTCONTROL=ignoreboth
+shopt -s histappend
+HISTSIZE=1000
+HISTFILESIZE=2000
+
+# Check window size after each command
+shopt -s checkwinsize
+
+# -----------------------------------------------------------------------------
+# PATH - WICHTIG: VOR mise setzen!
+# -----------------------------------------------------------------------------
+# Speichere den originalen PATH fuer spaetere Verwendung
+ORIGINAL_PATH="$PATH"
+
+# Git Bash Standard-Pfade sicherstellen
+# Diese werden manchmal von mise ueberschrieben
+GIT_BASH_PATHS="/mingw64/bin:/usr/local/bin:/usr/bin:/bin:/mingw64/bin:/usr/bin/vendor_perl:/usr/bin/core_perl"
+
+# Funktion zum Hinzufuegen von Pfaden (falls nicht vorhanden)
+add_to_path() {
+    case ":$PATH:" in
+    *":$1:"*) ;;
+    *) PATH="$1:$PATH" ;;
+    esac
+}
+
+# -----------------------------------------------------------------------------
+# Prompt Configuration
+# -----------------------------------------------------------------------------
+case "$TERM" in
+xterm-color | *-256color) color_prompt=yes ;;
+esac
+
+force_color_prompt=yes
+
+if [ -n "$force_color_prompt" ]; then
+    if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
+        color_prompt=yes
+    else
+        color_prompt=
+    fi
+fi
+
+if [ "$color_prompt" = yes ]; then
+    PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+else
+    PS1='\u@\h:\w\$ '
+fi
+unset color_prompt force_color_prompt
+
+# Set terminal title
+case "$TERM" in
+xterm* | rxvt*)
+    PS1="\[\e]0;\u@\h: \w\a\]$PS1"
+    ;;
+*) ;;
+esac
+
+# -----------------------------------------------------------------------------
+# Color Support
+# -----------------------------------------------------------------------------
+if [ -x /usr/bin/dircolors ]; then
+    test -r ~/.dircolors && (eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)")
+fi
+
+# -----------------------------------------------------------------------------
+# Aliases
+# -----------------------------------------------------------------------------
+if [ -f ~/.bash_aliases ]; then
+    . "$HOME/.bash_aliases"
+fi
+
+# Basis-Aliases fuer den Fall dass .bash_aliases nicht existiert
+alias grep='grep --color=auto'
+alias ls='ls --color=auto'
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
+alias c=clear
+alias e=exit
+
+# -----------------------------------------------------------------------------
+# mise-en-place Setup (WICHTIG: Reihenfolge beachten!)
+# -----------------------------------------------------------------------------
+# Option 1: Shims verwenden (EMPFOHLEN fuer Windows/Git Bash)
+# Shims sind stabiler und verursachen keine PATH-Probleme
+if [ -d "$HOME/.local/share/mise/shims" ]; then
+    add_to_path "$HOME/.local/share/mise/shims"
+fi
+
+# Option 2: Vollstaendige Shell-Integration
+# Nur verwenden wenn Shims nicht ausreichen (z.B. fuer mise-spezifische Features)
+# ACHTUNG: Kann PATH-Probleme verursachen - deshalb auskommentiert
+#
+# if command -v mise &> /dev/null; then
+#     # PATH vor mise-Aktivierung sichern
+#     _PREMISE_PATH="$PATH"
+#
+#     # mise aktivieren
+#     eval "$(mise activate bash)"
+#
+#     # Git Bash Pfade wieder hinzufuegen falls sie fehlen
+#     for p in /mingw64/bin /usr/bin /bin; do
+#         case ":$PATH:" in
+#             *":$p:"*) ;;
+#             *) PATH="$PATH:$p" ;;
+#         esac
+#     done
+# fi
+
+# -----------------------------------------------------------------------------
+# Mise Shims initialisieren (falls mise installiert ist)
+# -----------------------------------------------------------------------------
+if command -v mise &> /dev/null; then
+    # Shims Verzeichnis erstellen falls nicht vorhanden
+    mise reshim &> /dev/null || true
+fi
+
+# -----------------------------------------------------------------------------
+# Completion
+# -----------------------------------------------------------------------------
+if ! shopt -oq posix; then
+    if [ -f /usr/share/bash-completion/bash_completion ]; then
+        . /usr/share/bash-completion/bash_completion
+    elif [ -f /etc/bash_completion ]; then
+        . /etc/bash_completion
+    fi
+fi
+
+# mise completion (falls verfuegbar)
+if command -v mise &> /dev/null; then
+    eval "$(mise completion bash 2>/dev/null)" || true
+fi
+
+# -----------------------------------------------------------------------------
+# Starship Prompt (optional - am Ende laden)
+# -----------------------------------------------------------------------------
+if command -v starship &> /dev/null; then
+    eval "$(starship init bash)"
+fi
+
+# -----------------------------------------------------------------------------
+# Finale PATH-Bereinigung
+# Stelle sicher dass kritische Pfade vorhanden sind
+# -----------------------------------------------------------------------------
+for critical_path in /mingw64/bin /usr/bin /bin; do
+    if [ -d "$critical_path" ]; then
+        case ":$PATH:" in
+        *":$critical_path:"*) ;;
+        *) PATH="$PATH:$critical_path" ;;
+        esac
+    fi
+done
+
+export PATH
