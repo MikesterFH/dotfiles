@@ -264,6 +264,7 @@ SKIP_FILES=(
   ".DS_Store" "Thumbs.db"
   ".gitkeep" "LICENSE" "CHANGELOG.md"
   "HELP.md"
+  "which-key.yaml"
 )
 
 # Directories to skip
@@ -665,6 +666,59 @@ setup_git_dirs() {
   fi
 }
 
+# -- Tmux plugins (TPM + which-key config) ------------------------------------
+
+TMUX_PLUGINS_DIR="${HOME}/.config/tmux/plugins"
+TPM_DIR="${TMUX_PLUGINS_DIR}/tpm"
+WHICH_KEY_DIR="${TMUX_PLUGINS_DIR}/tmux-which-key"
+
+setup_tmux_plugins() {
+  info "Setting up tmux plugins..."
+
+  mkdir -p "$TMUX_PLUGINS_DIR"
+
+  # TPM
+  if [ -d "${TPM_DIR}/.git" ]; then
+    info "TPM already installed, updating..."
+    if git -C "$TPM_DIR" pull --ff-only 2>/dev/null; then
+      success "TPM updated"
+    else
+      warn "TPM could not be fast-forwarded, keeping current state"
+    fi
+  else
+    info "Cloning TPM into ${TPM_DIR}..."
+    git clone https://github.com/tmux-plugins/tpm "$TPM_DIR"
+    success "TPM installed"
+  fi
+
+  # tmux-which-key config
+  mkdir -p "$WHICH_KEY_DIR"
+  local source_file="${DOTFILES_DIR}/tmux/which-key.yaml"
+  local target_file="${WHICH_KEY_DIR}/config.yaml"
+
+  if [ ! -f "$source_file" ]; then
+    warn "which-key.yaml not found in dotfiles, skipping"
+    return 0
+  fi
+
+  if [ -L "$target_file" ]; then
+    local current_target
+    current_target="$(readlink "$target_file")"
+    if [ "$current_target" = "$source_file" ]; then
+      success "tmux-which-key config already linked"
+      return 0
+    fi
+    rm "$target_file"
+  elif [ -e "$target_file" ]; then
+    mv "$target_file" "${target_file}.dotfiles-bak"
+    info "  Backed up ${target_file} -> ${target_file}.dotfiles-bak"
+  fi
+
+  ln -s "$source_file" "$target_file"
+  printf "  ${DIM}%s -> %s${NC}\n" "$source_file" "$target_file"
+  success "tmux-which-key config linked"
+}
+
 # -- Main ---------------------------------------------------------------------
 
 main() {
@@ -711,6 +765,7 @@ main() {
   if [ "$INSTALL_DOTFILES" = true ]; then
     run_step "Clone dotfiles" clone_dotfiles
     run_step "Install dotfiles" install_dotfiles
+    run_step "Tmux plugins (TPM + which-key)" setup_tmux_plugins
     run_step "Git project dirs & identities" setup_git_dirs
   fi
 
