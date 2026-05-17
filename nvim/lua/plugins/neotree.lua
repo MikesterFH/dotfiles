@@ -1,23 +1,16 @@
 return {
-  "nvim-neo-tree/neo-tree.nvim",
-  opts = {
-    window = {
-      position = "right",
-      mappings = {
-        ["Y"] = "none",
-      },
-    },
-    filesystem = {
-      filtered_items = {
-        hide_dotfiles = false,
-        hide_by_name = {
-          ".git",
-          ".DS_Store",
+    "nvim-neo-tree/neo-tree.nvim",
+    opts = {
+        window = {
+            position = "right",
+            mappings = {
+                ["Y"] = "none",
+            },
         },
-        always_show = {
-          ".env",
+        filesystem = {
+            filtered_items = {
+                visible = true,
+            },
         },
-      },
     },
-  },
 }
