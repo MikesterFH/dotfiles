@@ -1,0 +1,136 @@
+// Zed keymap
+//
+// For information on binding keys, see the Zed
+// documentation: https://zed.dev/docs/key-bindings
+//
+// To see the default key bindings run `zed: Open Default Keymap`
+// from the command palette.
+[
+  {
+    "context": "Editor && VimControl && !VimWaiting && !menu",
+    "bindings": {
+      "ctrl-w z": "workspace::ToggleZoom",
+      "ctrl-w t": "terminal_panel::ToggleFocus",
+      "g ]": "editor::GoToDiagnostic",
+      "g [": "editor::GoToPreviousDiagnostic",
+      "g r": "editor::FindAllReferences",
+      "shift-k": "editor::Hover",
+      "g c c": "editor::ToggleComments",
+      "space f": "file_finder::Toggle",
+      "space e": "workspace::ToggleLeftDock",
+      "space p": "outline::Toggle",
+      "space i":  "agent::Toggle",
+      "shift-l": "pane::ActivateNextItem",
+      "shift-h": "pane::ActivatePreviousItem",
+      "ctrl-shift-h": "vim::ResizePaneLeft",
+      "ctrl-shift-l": "vim::ResizePaneRight",
+      "ctrl-shift-k": "vim::ResizePaneUp",
+      "ctrl-shift-j": "vim::ResizePaneDown"
+    }
+  },
+  {
+    "bindings": {
+      "ctrl-h": "workspace::ActivatePaneLeft",
+      "ctrl-l": "workspace::ActivatePaneRight",
+      "ctrl-k": "workspace::ActivatePaneUp",
+      "ctrl-j": "workspace::ActivatePaneDown"
+    }
+  },
+  {
+    "context": "Picker",
+    "bindings": {
+      "ctrl-j": "menu::SelectNext",
+      "ctrl-k": "menu::SelectPrevious"
+    }
+  },
+  {
+    "context": "ProjectPanel",
+    "bindings": {
+      "ctrl-h": "workspace::ActivatePaneLeft",
+      "ctrl-l": "workspace::ActivatePaneRight",
+      "ctrl-k": "workspace::ActivatePaneUp",
+      "ctrl-j": "workspace::ActivatePaneDown",
+      "enter": "project_panel::OpenPermanent",
+      "r": "project_panel::Rename",
+      "c": "project_panel::Copy",
+      "p": "project_panel::Paste",
+      "x": "project_panel::Cut",
+      "d": "project_panel::Delete",
+      "a": "project_panel::NewFile",
+      "shift-a": "project_panel::NewDirectory",
+      "s": "project_panel::OpenSplitVertical"
+    }
+  },
+  {
+    "context": "Editor && vim_mode == insert && !menu",
+    "bindings": {
+      "j j": "vim::NormalBefore"
+    }
+  },
+  {
+    "context": "Editor && vim_mode == visual && !VimWaiting && !VimObject",
+    "bindings": {
+      "shift-j": "editor::MoveLineDown",
+      "shift-k": "editor::MoveLineUp"
+    }
+  },
+  {
+    "context": "Terminal",
+    "bindings": {
+      "ctrl-w z": "workspace::ToggleZoom",
+      "ctrl-w t": "terminal_panel::ToggleFocus",
+      "ctrl-h": "workspace::ActivatePaneLeft",
+      "ctrl-l": "workspace::ActivatePaneRight",
+      "ctrl-k": "workspace::ActivatePaneUp",
+      "ctrl-j": "workspace::ActivatePaneDown",
+      "ctrl-shift-h": "vim::ResizePaneLeft",
+      "ctrl-shift-l": "vim::ResizePaneRight",
+      "ctrl-shift-k": "vim::ResizePaneUp",
+      "ctrl-shift-j": "vim::ResizePaneDown"
+    }
+  },
+  {
+    "context": "Editor",
+    "bindings": {
+      "cmd-[": "editor::Outdent",
+      "cmd-]": "editor::Indent",
+      "cmd-alt-up": "editor::AddSelectionAbove",
+      "cmd-ctrl-p": "editor::AddSelectionAbove",
+      "cmd-alt-down": "editor::AddSelectionBelow",
+      "cmd-ctrl-n": "editor::AddSelectionBelow",
+      "cmd-d": [
+        "editor::SelectNext",
+        {
+          "replace_newest": false
+        }
+      ],
+      "ctrl-cmd-d": [
+        "editor::SelectPrevious",
+        {
+          "replace_newest": false
+        }
+      ],
+      "cmd-k cmd-d": [
+        "editor::SelectNext",
+        {
+          "replace_newest": true
+        }
+      ],
+      "cmd-k ctrl-cmd-d": [
+        "editor::SelectPrevious",
+        {
+          "replace_newest": true
+        }
+      ],
+      "alt-up": "editor::SelectLargerSyntaxNode",
+      "alt-down": "editor::SelectSmallerSyntaxNode",
+      "cmd-u": "editor::UndoSelection",
+      "cmd-shift-u": "editor::RedoSelection",
+      "ctrl-m": "editor::MoveToEnclosingBracket",
+      "space f f": "editor::Fold",
+      "space f u": "editor::UnfoldLines",
+      "ctrl-space": "editor::ShowCompletions",
+      "cmd-.": "editor::ToggleCodeActions"
+    }
+  }
+]
