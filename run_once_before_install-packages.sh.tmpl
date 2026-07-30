@@ -1,11 +1,14 @@
+{{- if ne .chezmoi.os "windows" -}}
 #!/usr/bin/env bash
 # =============================================================================
 # chezmoi run_once_before script: installs prerequisite Bootstrap Packages
 # (git, mise) and Docker before any managed dotfiles are applied.
 #
 # Ported from install.sh's ensure_git/install_mise/install_docker/
-# detect_linux_distro. macOS and Linux/WSL are implemented; native Windows
-# uses a separate .ps1 script, since bash doesn't run there natively.
+# detect_linux_distro. macOS and Linux/WSL only — native Windows uses the
+# sibling run_once_before_install-packages.ps1.tmpl instead, since bash
+# doesn't run there natively. This template renders empty on Windows so
+# chezmoi never attempts to execute it there.
 # =============================================================================
 set -euo pipefail
 
@@ -214,3 +217,4 @@ main() {
 }
 
 main "$@"
+{{- end -}}

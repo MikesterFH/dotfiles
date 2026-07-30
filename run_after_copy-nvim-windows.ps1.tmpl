@@ -1,0 +1,16 @@
+{{- if eq .chezmoi.os "windows" -}}
+# =============================================================================
+# Neovim on Windows reads %LOCALAPPDATA%\nvim, not the XDG-style ~/.config/nvim
+# every other platform uses. Rather than duplicating ~30 files under a second
+# managed path, chezmoi keeps the single canonical copy at ~/.config/nvim and
+# this script mirrors it to ~/AppData/Local/nvim after every apply.
+# =============================================================================
+$source = Join-Path $HOME ".config\nvim"
+$dest = Join-Path $HOME "AppData\Local\nvim"
+
+robocopy $source $dest /MIR /NFL /NDL /NJH /NJS
+if ($LASTEXITCODE -ge 8) {
+    Write-Error "robocopy failed mirroring nvim config (exit code $LASTEXITCODE)"
+    exit 1
+}
+{{- end -}}

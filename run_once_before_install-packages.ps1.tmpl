@@ -1,0 +1,47 @@
+{{- if eq .chezmoi.os "windows" -}}
+# =============================================================================
+# chezmoi run_once_before script: installs prerequisite Bootstrap Packages
+# (PowerShell 7, git, mise) via winget before any managed dotfiles are
+# applied. PowerShell 7 (pwsh) is included because the deployed profile
+# (Documents/PowerShell/Microsoft.PowerShell_profile.ps1) is the pwsh
+# profile path — Windows PowerShell 5.1 ships by default but never reads it.
+#
+# Windows Target only — no Docker step here; Docker is covered by the Linux
+# Target via WSL2. Sibling run_once_before_install-packages.sh.tmpl handles
+# macOS/Linux/WSL and renders empty on Windows, so only one of the two ever
+# actually runs.
+# =============================================================================
+$ErrorActionPreference = "Stop"
+
+function Test-CommandExists {
+    param([string]$Command)
+    return [bool](Get-Command $Command -ErrorAction SilentlyContinue)
+}
+
+function Ensure-WingetPackage {
+    param(
+        [string]$Command,
+        [string]$Id,
+        [string]$DisplayName
+    )
+    Write-Host "[INFO]  Checking $DisplayName..."
+    if (Test-CommandExists $Command) {
+        Write-Host "[OK]    $DisplayName already installed ($(& $Command --version))"
+        return
+    }
+    Write-Host "[INFO]  Installing $DisplayName..."
+    winget install --id $Id -e --source winget --accept-package-agreements --accept-source-agreements
+    if (Test-CommandExists $Command) {
+        Write-Host "[OK]    $DisplayName installed ($(& $Command --version))"
+    } else {
+        Write-Warning "$DisplayName installed but not yet available in this shell session. Restart your terminal."
+    }
+}
+
+Ensure-WingetPackage -Command "pwsh" -Id "Microsoft.PowerShell" -DisplayName "PowerShell 7"
+Ensure-WingetPackage -Command "git" -Id "Git.Git" -DisplayName "git"
+Ensure-WingetPackage -Command "mise" -Id "jdx.mise" -DisplayName "mise"
+
+Write-Warning "Remember to activate mise in your PowerShell profile:"
+Write-Warning "  Invoke-Expression (&mise activate pwsh)"
+{{- end -}}

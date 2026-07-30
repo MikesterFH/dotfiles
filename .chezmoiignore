@@ -5,24 +5,38 @@ docs
 install.sh
 install-devpod-dotfiles.sh
 
-# Not yet migrated into the chezmoi layout — native Windows Target lands in a
-# follow-up ticket (#5). Kept out of the managed tree until then so it doesn't
-# deploy as a bogus ~/windowsTerminal/ folder on macOS/Linux.
-windowsTerminal
-
-# macOS-only paths: Library/ holds both the vscode settings (macOS puts them
-# under ~/Library/Application Support/... instead of XDG ~/.config/) and the
-# iTerm2 Dynamic Profile — iTerm2 itself is macOS-only software. On Linux the
-# equivalent vscode path is dot_config/Code/User instead. Enumerated (not an
-# inverted darwin check) so a third OS — e.g. native Windows, which uses
-# neither path — fails safe by excluding both rather than guessing.
+# Per-OS paths, one switch on .chezmoi.os for everything that differs by
+# Target: vscode's settings live at a different real path per OS (macOS:
+# Library/, Linux: .config/Code, Windows: AppData); the iTerm2 Dynamic
+# Profile (Library/) and PowerShell profile (Documents/) are single-OS only;
+# zed lives at .config/zed everywhere except Windows (AppData/Roaming/Zed);
+# and the Windows Target has no shells of its own (no bash/zsh/tmux there).
+# Every branch lists everything *not* relevant to that OS, so an unlisted
+# fifth OS falls through to the catch-all and excludes all of it — fail
+# safe, not a guess.
 {{ if eq .chezmoi.os "darwin" }}
 .config/Code
+AppData
+Documents
 {{ else if eq .chezmoi.os "linux" }}
 Library
+AppData
+Documents
+{{ else if eq .chezmoi.os "windows" }}
+Library
+.config/Code
+.bashrc
+.bash_aliases
+.zshrc
+.zprofile
+.zsh_aliases
+.config/tmux
+.config/zed
 {{ else }}
 Library
 .config/Code
+AppData
+Documents
 {{ end }}
 
 # Preserves install.sh's SKIP_FILES/SKIP_DIRS behavior: matched by name,
