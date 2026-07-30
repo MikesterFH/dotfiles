@@ -10,6 +10,21 @@ install-devpod-dotfiles.sh
 # deploy as a bogus ~/windowsTerminal/ folder on macOS/Linux.
 windowsTerminal
 
+# macOS-only paths: Library/ holds both the vscode settings (macOS puts them
+# under ~/Library/Application Support/... instead of XDG ~/.config/) and the
+# iTerm2 Dynamic Profile — iTerm2 itself is macOS-only software. On Linux the
+# equivalent vscode path is dot_config/Code/User instead. Enumerated (not an
+# inverted darwin check) so a third OS — e.g. native Windows, which uses
+# neither path — fails safe by excluding both rather than guessing.
+{{ if eq .chezmoi.os "darwin" }}
+.config/Code
+{{ else if eq .chezmoi.os "linux" }}
+Library
+{{ else }}
+Library
+.config/Code
+{{ end }}
+
 # Preserves install.sh's SKIP_FILES/SKIP_DIRS behavior: matched by name,
 # anywhere in the tree — not just today's specific occurrences.
 **/README.md

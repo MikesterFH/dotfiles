@@ -3,10 +3,9 @@
 # chezmoi run_once_before script: installs prerequisite Bootstrap Packages
 # (git, mise) and Docker before any managed dotfiles are applied.
 #
-# Ported from install.sh's ensure_git/install_mise/install_docker. Only the
-# macOS branch is implemented so far; Linux/WSL branches land in a follow-up
-# ticket (native Windows uses a separate .ps1 script, since bash doesn't run
-# there natively).
+# Ported from install.sh's ensure_git/install_mise/install_docker/
+# detect_linux_distro. macOS and Linux/WSL are implemented; native Windows
+# uses a separate .ps1 script, since bash doesn't run there natively.
 # =============================================================================
 set -euo pipefail
 
@@ -34,6 +33,19 @@ detect_os() {
   esac
 }
 
+detect_linux_distro() {
+  DISTRO="unknown"
+  if [ -f /etc/os-release ]; then
+    # shellcheck disable=SC1091
+    . /etc/os-release
+    case "${ID:-}" in
+    debian | ubuntu | pop | linuxmint | elementary) DISTRO="debian" ;;
+    fedora | rhel | centos | rocky | alma) DISTRO="fedora" ;;
+    arch | manjaro | endeavouros) DISTRO="arch" ;;
+    esac
+  fi
+}
+
 # -- Git ----------------------------------------------------------------------
 
 ensure_git() {
@@ -46,15 +58,37 @@ ensure_git() {
 
   info "Installing git..."
 
-  if command_exists brew; then
-    brew install git
-  else
-    info "Installing Xcode Command Line Tools (includes git)..."
-    xcode-select --install 2>/dev/null || true
-    until command_exists git; do
-      sleep 5
-    done
-  fi
+  case "$OS" in
+  macos)
+    if command_exists brew; then
+      brew install git
+    else
+      info "Installing Xcode Command Line Tools (includes git)..."
+      xcode-select --install 2>/dev/null || true
+      until command_exists git; do
+        sleep 5
+      done
+    fi
+    ;;
+  linux | wsl)
+    case "$DISTRO" in
+    debian)
+      sudo apt-get update -qq
+      sudo apt-get install -y -qq git
+      ;;
+    fedora)
+      sudo dnf install -y git
+      ;;
+    arch)
+      sudo pacman -Sy --noconfirm git
+      ;;
+    *)
+      error "Cannot auto-install git on this distro. Please install git manually."
+      return 1
+      ;;
+    esac
+    ;;
+  esac
 
   if command_exists git; then
     success "git installed ($(git --version))"
@@ -76,11 +110,42 @@ install_mise() {
 
   info "Installing mise..."
 
-  if command_exists brew; then
-    brew install mise
-  else
-    curl https://mise.run | sh
-  fi
+  case "$OS" in
+  macos)
+    if command_exists brew; then
+      brew install mise
+    else
+      curl https://mise.run | sh
+    fi
+    ;;
+  linux | wsl)
+    case "$DISTRO" in
+    debian)
+      sudo apt-get update -qq
+      sudo apt-get install -y -qq gpg curl
+      sudo install -dm 755 /etc/apt/keyrings
+      curl -fsSL https://mise.jdx.dev/gpg-key.pub |
+        gpg --dearmor |
+        sudo tee /etc/apt/keyrings/mise-archive-keyring.gpg >/dev/null
+      echo "deb [signed-by=/etc/apt/keyrings/mise-archive-keyring.gpg arch=$(dpkg --print-architecture)] https://mise.jdx.dev/deb stable main" |
+        sudo tee /etc/apt/sources.list.d/mise.list >/dev/null
+      sudo apt-get update -qq
+      sudo apt-get install -y -qq mise
+      ;;
+    fedora)
+      sudo dnf install -y dnf-plugins-core
+      sudo dnf config-manager --add-repo https://mise.jdx.dev/rpm/mise.repo
+      sudo dnf install -y mise
+      ;;
+    arch)
+      sudo pacman -Sy --noconfirm mise
+      ;;
+    *)
+      curl https://mise.run | sh
+      ;;
+    esac
+    ;;
+  esac
 
   if command_exists mise; then
     success "mise installed ($(mise --version))"
@@ -110,20 +175,29 @@ install_docker() {
 
   info "Installing Docker..."
 
-  if command_exists brew; then
-    brew install --cask docker
-    warn "Docker Desktop installed. Please start it manually from Applications."
-  else
-    error "Homebrew not found. Install Docker Desktop manually:"
-    error "  https://docs.docker.com/desktop/install/mac-install/"
-    return
-  fi
+  case "$OS" in
+  macos)
+    if command_exists brew; then
+      brew install --cask docker
+      warn "Docker Desktop installed. Please start it manually from Applications."
+    else
+      error "Homebrew not found. Install Docker Desktop manually:"
+      error "  https://docs.docker.com/desktop/install/mac-install/"
+      return
+    fi
+    ;;
+  linux | wsl)
+    curl -fsSL https://get.docker.com | sh
+    sudo usermod -aG docker "$USER"
+    warn "Added $USER to docker group. Log out and back in for this to take effect."
+    ;;
+  esac
 
   if command_exists docker; then
     success "Docker installed ($(docker --version))"
   else
     warn "Docker installed but not yet available in this shell session."
-    warn "You may need to start Docker Desktop manually."
+    warn "You may need to start Docker Desktop (macOS) or re-login (Linux)."
   fi
 }
 
@@ -131,8 +205,7 @@ main() {
   detect_os
 
   if [ "$OS" != "macos" ]; then
-    error "This bootstrap script currently only supports macOS. OS detected: $OS"
-    exit 1
+    detect_linux_distro
   fi
 
   ensure_git
