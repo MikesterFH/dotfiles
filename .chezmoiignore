@@ -1,0 +1,25 @@
+# Repo meta — not part of the deployed dotfiles ($HOME) state.
+CLAUDE.md
+CONTEXT.md
+docs
+install.sh
+install-devpod-dotfiles.sh
+
+# Not yet migrated into the chezmoi layout — native Windows Target lands in a
+# follow-up ticket (#5). Kept out of the managed tree until then so it doesn't
+# deploy as a bogus ~/windowsTerminal/ folder on macOS/Linux.
+windowsTerminal
+
+# Preserves install.sh's SKIP_FILES/SKIP_DIRS behavior: matched by name,
+# anywhere in the tree — not just today's specific occurrences.
+**/README.md
+**/readme.md
+**/README
+**/LICENSE
+**/CHANGELOG.md
+**/HELP.md
+**/which-key.yaml
+**/Thumbs.db
+**/node_modules
+**/__pycache__
+**/venv

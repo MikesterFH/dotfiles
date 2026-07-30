@@ -2,6 +2,12 @@
 # .zshrc - Interactive shell setup
 # Loaded for every new terminal. For prompt, aliases, keybindings, history.
 
+# -- nix ------------------------------------------------------------------
+
+if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
+  . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+fi
+
 # -- oh-my-zsh ----------------------------------------------------------------
 
 plugins=(git)
