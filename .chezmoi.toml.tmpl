@@ -1,21 +1,40 @@
-{{- $personalName := promptStringOnce . "git.personal.name" "Personal git user.name" -}}
-{{- $personalEmail := promptStringOnce . "git.personal.email" "Personal git user.email" -}}
+{{- $profile := promptChoiceOnce . "profile" "Machine profile" (list "personal" "dev" "dev-server") -}}
+{{- $devpod := promptBoolOnce . "devpod" "Is this a DevPod/devcontainer" false -}}
+
+{{- /* work identity is used on every profile (personal/dev/dev-server) */ -}}
 {{- $workName := promptStringOnce . "git.work.name" "Work git user.name" -}}
 {{- $workEmail := promptStringOnce . "git.work.email" "Work git user.email" -}}
-{{- $clientName := promptStringOnce . "git.client.name" "Client git user.name" -}}
-{{- $clientEmail := promptStringOnce . "git.client.email" "Client git user.email" -}}
-{{- $devpod := promptBoolOnce . "devpod" "Is this a DevPod/devcontainer" false -}}
-[data]
-    devpod = {{ $devpod }}
 
-[data.git.personal]
-    name = {{ $personalName | quote }}
-    email = {{ $personalEmail | quote }}
+{{- /* personal identity: every profile except dev (see docs/adr/0004-machine-profiles.md) */ -}}
+{{- $personalName := "" -}}
+{{- $personalEmail := "" -}}
+{{- if ne $profile "dev" -}}
+{{-   $personalName = promptStringOnce . "git.personal.name" "Personal git user.name" -}}
+{{-   $personalEmail = promptStringOnce . "git.personal.email" "Personal git user.email" -}}
+{{- end -}}
+
+{{- /* client identity: dev profile only */ -}}
+{{- $clientName := "" -}}
+{{- $clientEmail := "" -}}
+{{- if eq $profile "dev" -}}
+{{-   $clientName = promptStringOnce . "git.client.name" "Client git user.name" -}}
+{{-   $clientEmail = promptStringOnce . "git.client.email" "Client git user.email" -}}
+{{- end -}}
+
+[data]
+    profile = {{ $profile | quote }}
+    devpod = {{ $devpod }}
 
 [data.git.work]
     name = {{ $workName | quote }}
     email = {{ $workEmail | quote }}
-
+{{ if ne $profile "dev" }}
+[data.git.personal]
+    name = {{ $personalName | quote }}
+    email = {{ $personalEmail | quote }}
+{{ end -}}
+{{ if eq $profile "dev" }}
 [data.git.client]
     name = {{ $clientName | quote }}
     email = {{ $clientEmail | quote }}
+{{ end -}}

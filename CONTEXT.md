@@ -23,3 +23,7 @@ _Avoid_: Windows (ambiguous alone), WSL Target
 **Bootstrap Package**:
 A prerequisite tool (`git`, `mise`) installed once per machine via the platform's package manager (winget on the Windows Target) before `chezmoi apply` can do anything useful.
 _Avoid_: dependency, tool install
+
+**Profile**:
+A `chezmoi init` prompt (`personal` | `dev` | `dev-server`) scoping which git identities and GUI configs a given physical machine gets, orthogonal to the Target and to `devpod`. See `docs/adr/0004-machine-profiles.md`.
+_Avoid_: environment, mode, setup type

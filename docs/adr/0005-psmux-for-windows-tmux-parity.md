@@ -1,0 +1,5 @@
+# psmux gives native Windows a tmux-compatible multiplexer
+
+Native Windows has never had a terminal multiplexer — `.chezmoiignore`'s OS switch has always excluded `.config/tmux` there, since real tmux doesn't run natively on Windows. We're adding [`psmux`](https://github.com/psmux/psmux) (a native Rust, tmux-compatible multiplexer for Windows that reads the same `.tmux.conf`) as a Windows-only Bootstrap Package installed via winget, and removing the `.config/tmux` exclusion on Windows so the same tracked `tmux.conf` already deployed on macOS/Linux now deploys there too. This applies unconditionally across all three Profiles (see `docs/adr/0004-machine-profiles.md`), matching how tmux already behaves on macOS/Linux — it's core tooling, not something scoped by `profile`.
+
+The alternative — leaving Windows without any multiplexer, or asking users to run one under WSL — keeps the workflow split across platforms instead of giving Windows parity with the config every other Target already has.

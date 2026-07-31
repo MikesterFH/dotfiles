@@ -33,7 +33,8 @@ This clones the repo as your Source Dir, prompts you for a few values, and immed
 
 You'll be prompted once for:
 
-- **git identity** — name + email for `personal`, `work`, and `client` git contexts. These generate `~/.config/git/config.local.{personal,work,client}`, which the tracked `~/.config/git/config` switches between automatically via `includeIf`, based on which directory you're in (`~/dev/personal/`, `~/dev/work/`, `~/dev/client/`).
+- **profile** — which kind of machine this is: `personal`, `dev`, or `dev-server`. Scopes which git identities you're asked for next. See `docs/adr/0004-machine-profiles.md` for the full rationale.
+- **git identity** — name + email for the git contexts your `profile` uses: `personal`+`work` for `personal`, `work`+`client` for `dev`, `personal`+`work` for `dev-server`. These generate `~/.config/git/config.local.{personal,work,client}` (only the ones your profile needs), which the tracked `~/.config/git/config` switches between automatically via `includeIf`, based on which directory you're in (`~/dev/personal/`, `~/dev/work/`, `~/dev/client/`).
 - **DevPod/devcontainer?** — answer `false` on a real machine (the default). See below for when to answer `true`.
 
 After the prompts, a `run_once_` script installs the prerequisite Bootstrap Packages (`git`, `mise`, and Docker on macOS/Linux) via your platform's package manager (`brew`/`apt`/`dnf`/`pacman` on macOS/Linux, `winget` on Windows) before the rest of the configs are applied.

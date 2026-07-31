@@ -38,6 +38,18 @@ AppData
 Documents
 {{ end }}
 
+# Machine Profile (chezmoi init --promptChoiceOnce profile=personal|dev|dev-server,
+# see docs/adr/0004-machine-profiles.md): narrows which git identity
+# config.local.* files exist to match which [data.git.*] tables
+# .chezmoi.toml.tmpl actually populated for the chosen profile — dev never
+# gets a personal identity, only dev gets a client identity. work is
+# generated on every profile, so it's never excluded here.
+{{ if eq .profile "dev" }}
+.config/git/config.local.personal
+{{ else }}
+.config/git/config.local.client
+{{ end }}
+
 # DevPod/devcontainer opt-in (chezmoi init --promptBool devpod=true), narrows
 # the managed set to today's install-devpod-dotfiles.sh PACKAGES: git, nvim,
 # starship, zsh. Listed on top of whatever the OS switch above already

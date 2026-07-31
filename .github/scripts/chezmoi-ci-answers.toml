@@ -1,12 +1,18 @@
 # Pre-seeds chezmoi's own config file (normally $HOME/.config/chezmoi/chezmoi.toml)
-# before `chezmoi init` runs, so promptStringOnce/promptBoolOnce in
-# .chezmoi.toml.tmpl find these values already present and never prompt.
+# before `chezmoi init` runs, so promptStringOnce/promptBoolOnce/promptChoiceOnce
+# in .chezmoi.toml.tmpl find these values already present and never prompt.
 #
 # `--promptString`/`--promptBool` on `chezmoi init` do NOT reliably satisfy the
 # *Once variants (https://github.com/twpayne/chezmoi/issues/3345) — pre-seeding
 # the config file's [data] table is the documented mechanism those functions
 # actually check, so it's what CI relies on here.
+#
+# profile is fixed at "personal" here — this job only verifies a single
+# representative render. Verifying all three profile values (personal/dev/
+# dev-server) across the OS matrix is out of scope for this seed file; see
+# https://github.com/MikesterFH/dotfiles/issues/15.
 [data]
+    profile = "personal"
     devpod = false
 
 [data.git.personal]
