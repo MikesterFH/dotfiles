@@ -4,6 +4,7 @@ CONTEXT.md
 docs
 install.sh
 install-devpod-dotfiles.sh
+migrate-from-install-sh.sh
 
 # Per-OS paths, one switch on .chezmoi.os for everything that differs by
 # Target: vscode's settings live at a different real path per OS (macOS:
