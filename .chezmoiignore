@@ -2,8 +2,6 @@
 CLAUDE.md
 CONTEXT.md
 docs
-install.sh
-install-devpod-dotfiles.sh
 migrate-from-install-sh.sh
 
 # Per-OS paths, one switch on .chezmoi.os for everything that differs by
