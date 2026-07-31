@@ -1,0 +1,17 @@
+{{- $personalName := promptStringOnce . "git.personal.name" "Personal git user.name" -}}
+{{- $personalEmail := promptStringOnce . "git.personal.email" "Personal git user.email" -}}
+{{- $workName := promptStringOnce . "git.work.name" "Work git user.name" -}}
+{{- $workEmail := promptStringOnce . "git.work.email" "Work git user.email" -}}
+{{- $clientName := promptStringOnce . "git.client.name" "Client git user.name" -}}
+{{- $clientEmail := promptStringOnce . "git.client.email" "Client git user.email" -}}
+[data.git.personal]
+    name = {{ $personalName | quote }}
+    email = {{ $personalEmail | quote }}
+
+[data.git.work]
+    name = {{ $workName | quote }}
+    email = {{ $workEmail | quote }}
+
+[data.git.client]
+    name = {{ $clientName | quote }}
+    email = {{ $clientEmail | quote }}
