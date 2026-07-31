@@ -39,6 +39,21 @@ AppData
 Documents
 {{ end }}
 
+# DevPod/devcontainer opt-in (chezmoi init --promptBool devpod=true), narrows
+# the managed set to today's install-devpod-dotfiles.sh PACKAGES: git, nvim,
+# starship, zsh. Listed on top of whatever the OS switch above already
+# excludes (a devpod container is always .chezmoi.os "linux", so Library/
+# AppData/Documents are already gone) — only the devpod-specific narrowing
+# lives here: no tmux, no GUI-app configs (wezterm/vscode/zed).
+{{ if .devpod }}
+.bashrc
+.bash_aliases
+.config/tmux
+.config/wezterm
+.config/Code
+.config/zed
+{{ end }}
+
 # Preserves install.sh's SKIP_FILES/SKIP_DIRS behavior: matched by name,
 # anywhere in the tree — not just today's specific occurrences.
 **/README.md

@@ -4,6 +4,10 @@
 {{- $workEmail := promptStringOnce . "git.work.email" "Work git user.email" -}}
 {{- $clientName := promptStringOnce . "git.client.name" "Client git user.name" -}}
 {{- $clientEmail := promptStringOnce . "git.client.email" "Client git user.email" -}}
+{{- $devpod := promptBoolOnce . "devpod" "Is this a DevPod/devcontainer" false -}}
+[data]
+    devpod = {{ $devpod }}
+
 [data.git.personal]
     name = {{ $personalName | quote }}
     email = {{ $personalEmail | quote }}
