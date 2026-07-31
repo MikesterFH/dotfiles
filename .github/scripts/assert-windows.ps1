@@ -32,13 +32,16 @@ function Assert-Absent {
     }
 }
 
-# Windows Target has no shells of its own
+# Windows Target has no bash/zsh of its own
 Assert-Absent ".bashrc"
 Assert-Absent ".bash_aliases"
 Assert-Absent ".zshrc"
 Assert-Absent ".zprofile"
 Assert-Absent ".zsh_aliases"
-Assert-Absent ".config\tmux\tmux.conf"
+
+# tmux config IS deployed on Windows — psmux reads the same tmux.conf, see
+# docs/adr/0005-psmux-for-windows-tmux-parity.md
+Assert-FileExists ".config\tmux\tmux.conf"
 
 # PowerShell profile, Windows-only
 Assert-FileExists "Documents\PowerShell\Microsoft.PowerShell_profile.ps1"

@@ -10,7 +10,7 @@ This repo *is* chezmoi's **Source Dir** — it's laid out to mirror `$HOME` usin
 | --- | --- |
 | macOS | bash, zsh, tmux, git, starship, wezterm, VS Code, nvim, zed, iTerm2 |
 | Linux / WSL | same as macOS, minus iTerm2 |
-| Native Windows | git, starship, wezterm, VS Code, nvim, zed, Windows Terminal, a PowerShell profile — no bash/zsh/tmux/iTerm2 |
+| Native Windows | git, starship, wezterm, VS Code, nvim, zed, tmux (via [psmux](https://github.com/psmux/psmux)), Windows Terminal, a PowerShell profile — no bash/zsh/iTerm2 |
 | DevPod / devcontainer | git, nvim, starship, zsh only (opt-in, see below) |
 
 WSL is treated as the Linux Target — there's no separate WSL handling anywhere in this repo.
@@ -37,7 +37,7 @@ You'll be prompted once for:
 - **git identity** — name + email for the git contexts your `profile` uses: `personal`+`work` for `personal`, `work`+`client` for `dev`, `personal`+`work` for `dev-server`. These generate `~/.config/git/config.local.{personal,work,client}` (only the ones your profile needs), which the tracked `~/.config/git/config` switches between automatically via `includeIf`, based on which directory you're in (`~/dev/personal/`, `~/dev/work/`, `~/dev/client/`).
 - **DevPod/devcontainer?** — answer `false` on a real machine (the default). See below for when to answer `true`.
 
-After the prompts, a `run_once_` script installs the prerequisite Bootstrap Packages (`git`, `mise`, and Docker on macOS/Linux) via your platform's package manager (`brew`/`apt`/`dnf`/`pacman` on macOS/Linux, `winget` on Windows) before the rest of the configs are applied.
+After the prompts, a `run_once_` script installs the prerequisite Bootstrap Packages (`git`, `mise`, and Docker on macOS/Linux; `git`, `mise`, and [`psmux`](https://github.com/psmux/psmux) on Windows) via your platform's package manager (`brew`/`apt`/`dnf`/`pacman` on macOS/Linux, `winget` on Windows) before the rest of the configs are applied.
 
 If you'd rather review what would happen before anything touches your `$HOME`, run `chezmoi init MikesterFH/dotfiles` (no `--apply`) followed by `chezmoi diff`, then `chezmoi apply` once you're happy with it.
 

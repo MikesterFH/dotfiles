@@ -1,10 +1,14 @@
 {{- if eq .chezmoi.os "windows" -}}
 # =============================================================================
 # chezmoi run_once_before script: installs prerequisite Bootstrap Packages
-# (PowerShell 7, git, mise) via winget before any managed dotfiles are
+# (PowerShell 7, git, mise, psmux) via winget before any managed dotfiles are
 # applied. PowerShell 7 (pwsh) is included because the deployed profile
 # (Documents/PowerShell/Microsoft.PowerShell_profile.ps1) is the pwsh
 # profile path — Windows PowerShell 5.1 ships by default but never reads it.
+# psmux (github.com/psmux/psmux) gives native Windows a tmux-compatible
+# multiplexer that reads the same tmux.conf as macOS/Linux — see
+# docs/adr/0005-psmux-for-windows-tmux-parity.md. Like the other Bootstrap
+# Packages, it's installed unconditionally, independent of `profile`.
 #
 # Windows Target only — no Docker step here; Docker is covered by the Linux
 # Target via WSL2. Sibling run_once_before_install-packages.sh.tmpl handles
@@ -41,6 +45,7 @@ function Ensure-WingetPackage {
 Ensure-WingetPackage -Command "pwsh" -Id "Microsoft.PowerShell" -DisplayName "PowerShell 7"
 Ensure-WingetPackage -Command "git" -Id "Git.Git" -DisplayName "git"
 Ensure-WingetPackage -Command "mise" -Id "jdx.mise" -DisplayName "mise"
+Ensure-WingetPackage -Command "psmux" -Id "marlocarlo.psmux" -DisplayName "psmux"
 
 Write-Warning "Remember to activate mise in your PowerShell profile:"
 Write-Warning "  Invoke-Expression (&mise activate pwsh)"
