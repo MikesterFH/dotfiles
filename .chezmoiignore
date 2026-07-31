@@ -51,6 +51,35 @@ Documents
 .config/git/config.local.client
 {{ end }}
 
+# GUI-app configs (chezmoi init --promptBool weztermConfig|vscodeConfig|
+# zedConfig|windowsTerminalConfig|iterm2Config=true|false, see
+# docs/adr/0004-machine-profiles.md): each app is excluded if its own bool is
+# false, OR unconditionally on dev-server (which never even prompts for
+# these bools — see .chezmoi.toml.tmpl — so they stay defaulted true,
+# unused, there; checking .profile directly avoids depending on that). One
+# guard per app, not a separate dev-server branch, so a path only ever needs
+# updating in one place. All three OS-specific paths are listed for
+# vscode/zed since personal/dev can be any OS — the OS switch above already
+# drops whichever two don't apply to the current Target.
+{{ if or (eq .profile "dev-server") (not .weztermConfig) }}
+.config/wezterm
+{{ end }}
+{{ if or (eq .profile "dev-server") (not .vscodeConfig) }}
+.config/Code
+Library/Application Support/Code
+AppData/Roaming/Code
+{{ end }}
+{{ if or (eq .profile "dev-server") (not .zedConfig) }}
+.config/zed
+AppData/Roaming/Zed
+{{ end }}
+{{ if or (eq .profile "dev-server") (not .windowsTerminalConfig) }}
+AppData/Local/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe
+{{ end }}
+{{ if or (eq .profile "dev-server") (not .iterm2Config) }}
+Library/Application Support/iTerm2
+{{ end }}
+
 # DevPod/devcontainer opt-in (chezmoi init --promptBool devpod=true), narrows
 # the managed set to today's install-devpod-dotfiles.sh PACKAGES: git, nvim,
 # starship, zsh. Listed on top of whatever the OS switch above already

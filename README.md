@@ -33,8 +33,9 @@ This clones the repo as your Source Dir, prompts you for a few values, and immed
 
 You'll be prompted once for:
 
-- **profile** — which kind of machine this is: `personal`, `dev`, or `dev-server`. Scopes which git identities you're asked for next. See `docs/adr/0004-machine-profiles.md` for the full rationale.
+- **profile** — which kind of machine this is: `personal`, `dev`, or `dev-server`. Scopes which git identities you're asked for next, and which GUI-app prompts (see below) you get. See `docs/adr/0004-machine-profiles.md` for the full rationale.
 - **git identity** — name + email for the git contexts your `profile` uses: `personal`+`work` for `personal`, `work`+`client` for `dev`, `personal`+`work` for `dev-server`. These generate `~/.config/git/config.local.{personal,work,client}` (only the ones your profile needs), which the tracked `~/.config/git/config` switches between automatically via `includeIf`, based on which directory you're in (`~/dev/personal/`, `~/dev/work/`, `~/dev/client/`).
+- **GUI-app configs** — on `personal`/`dev` only, one yes/no prompt per GUI app relevant to your OS (wezterm, VS Code, Zed, plus Windows Terminal on Windows or iTerm2 on macOS), each defaulting to `true`. Answer `false` to skip deploying that app's config on this machine. `dev-server` skips these prompts entirely and never gets any GUI-app config, regardless.
 - **DevPod/devcontainer?** — answer `false` on a real machine (the default). See below for when to answer `true`.
 
 After the prompts, a `run_once_` script installs the prerequisite Bootstrap Packages (`git`, `mise`, and Docker on macOS/Linux; `git`, `mise`, and [`psmux`](https://github.com/psmux/psmux) on Windows) via your platform's package manager (`brew`/`apt`/`dnf`/`pacman` on macOS/Linux, `winget` on Windows) before the rest of the configs are applied.

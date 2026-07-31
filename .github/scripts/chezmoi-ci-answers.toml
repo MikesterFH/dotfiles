@@ -8,12 +8,21 @@
 # actually check, so it's what CI relies on here.
 #
 # profile is fixed at "personal" here — this job only verifies a single
-# representative render. Verifying all three profile values (personal/dev/
-# dev-server) across the OS matrix is out of scope for this seed file; see
-# https://github.com/MikesterFH/dotfiles/issues/15.
+# representative render, at the true default for all five GUI-app bools.
+# Verifying all three profile values (personal/dev/dev-server) plus GUI
+# opt-out combinations across the OS matrix is out of scope for this seed
+# file; see https://github.com/MikesterFH/dotfiles/issues/15. All five bools
+# are seeded regardless of runner OS since this one file is shared across
+# the whole matrix — promptBoolOnce just never fires for the two that don't
+# apply to a given OS (windowsTerminalConfig, iterm2Config).
 [data]
     profile = "personal"
     devpod = false
+    weztermConfig = true
+    vscodeConfig = true
+    zedConfig = true
+    windowsTerminalConfig = true
+    iterm2Config = true
 
 [data.git.personal]
     name = "CI Runner"
