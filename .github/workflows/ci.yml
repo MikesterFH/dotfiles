@@ -1,0 +1,89 @@
+# Single verification seam for the chezmoi migration (see docs/adr/): renders
+# this repo's Source Dir into a throwaway directory on all three deployment
+# Targets and asserts the resulting Target State matches expectations.
+#
+# `chezmoi init` normally prompts for the identity data in .chezmoi.toml.tmpl
+# (git.personal/work/client name+email, devpod). CI pre-seeds chezmoi's own
+# config file with those answers before `init` runs — promptStringOnce and
+# promptBoolOnce read straight from that file, which sidesteps a known bug
+# where --promptString/--promptBool don't reliably satisfy the *Once variants
+# (https://github.com/twpayne/chezmoi/issues/3345).
+#
+# `--exclude=scripts` keeps `chezmoi apply` from running run_once_/run_after_
+# scripts (package installs via apt/brew/winget, Docker, the nvim-on-Windows
+# mirror) — this workflow verifies the rendered file tree, not the bootstrap
+# scripts' side effects.
+name: chezmoi apply verification
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Check out repo (chezmoi Source Dir)
+        uses: actions/checkout@v4
+
+      - name: Install chezmoi (macOS/Linux)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Install chezmoi (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $bindir = Join-Path $env:USERPROFILE "bin"
+          $installScript = Invoke-RestMethod 'https://get.chezmoi.io/ps1'
+          $installBlock = [ScriptBlock]::Create($installScript)
+          & $installBlock -b $bindir
+          Add-Content -Path $env:GITHUB_PATH -Value $bindir
+
+      - name: Seed non-interactive chezmoi identity answers (macOS/Linux)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          mkdir -p "$HOME/.config/chezmoi"
+          cp .github/scripts/chezmoi-ci-answers.toml "$HOME/.config/chezmoi/chezmoi.toml"
+
+      - name: Seed non-interactive chezmoi identity answers (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.config\chezmoi" | Out-Null
+          Copy-Item ".github\scripts\chezmoi-ci-answers.toml" "$env:USERPROFILE\.config\chezmoi\chezmoi.toml"
+
+      - name: chezmoi init --apply to a throwaway directory (macOS/Linux)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          dest="$RUNNER_TEMP/chezmoi-dest"
+          mkdir -p "$dest"
+          chezmoi init --source "$GITHUB_WORKSPACE" --destination "$dest" --exclude=scripts --force --apply
+
+      - name: chezmoi init --apply to a throwaway directory (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $dest = Join-Path $env:RUNNER_TEMP "chezmoi-dest"
+          New-Item -ItemType Directory -Force -Path $dest | Out-Null
+          chezmoi init --source "$env:GITHUB_WORKSPACE" --destination "$dest" --exclude=scripts --force --apply
+
+      - name: Assert Target-specific expectations (macOS/Linux)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: .github/scripts/assert-unix.sh "$RUNNER_TEMP/chezmoi-dest"
+
+      - name: Assert Target-specific expectations (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: .github\scripts\assert-windows.ps1 -Dest (Join-Path $env:RUNNER_TEMP "chezmoi-dest")

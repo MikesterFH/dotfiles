@@ -1,0 +1,22 @@
+# Pre-seeds chezmoi's own config file (normally $HOME/.config/chezmoi/chezmoi.toml)
+# before `chezmoi init` runs, so promptStringOnce/promptBoolOnce in
+# .chezmoi.toml.tmpl find these values already present and never prompt.
+#
+# `--promptString`/`--promptBool` on `chezmoi init` do NOT reliably satisfy the
+# *Once variants (https://github.com/twpayne/chezmoi/issues/3345) — pre-seeding
+# the config file's [data] table is the documented mechanism those functions
+# actually check, so it's what CI relies on here.
+[data]
+    devpod = false
+
+[data.git.personal]
+    name = "CI Runner"
+    email = "ci-personal@example.invalid"
+
+[data.git.work]
+    name = "CI Runner"
+    email = "ci-work@example.invalid"
+
+[data.git.client]
+    name = "CI Runner"
+    email = "ci-client@example.invalid"
