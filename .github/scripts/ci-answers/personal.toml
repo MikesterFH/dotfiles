@@ -7,14 +7,11 @@
 # the config file's [data] table is the documented mechanism those functions
 # actually check, so it's what CI relies on here.
 #
-# profile is fixed at "personal" here — this job only verifies a single
-# representative render, at the true default for all five GUI-app bools.
-# Verifying all three profile values (personal/dev/dev-server) plus GUI
-# opt-out combinations across the OS matrix is out of scope for this seed
-# file; see https://github.com/MikesterFH/dotfiles/issues/15. All five bools
-# are seeded regardless of runner OS since this one file is shared across
-# the whole matrix — promptBoolOnce just never fires for the two that don't
-# apply to a given OS (windowsTerminalConfig, iterm2Config).
+# personal profile: personal+work git identities only (dev-server's seed is
+# identical on this axis — see docs/adr/0004-machine-profiles.md — but kept
+# as a separate file since dev-server's GUI bools are never even prompted
+# for). All five GUI-app bools at their true default; see ci.yml for the
+# separate personal-vscode-disabled.toml that exercises the opt-out path.
 [data]
     profile = "personal"
     devpod = false
@@ -31,7 +28,3 @@
 [data.git.work]
     name = "CI Runner"
     email = "ci-work@example.invalid"
-
-[data.git.client]
-    name = "CI Runner"
-    email = "ci-client@example.invalid"

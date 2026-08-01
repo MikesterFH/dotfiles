@@ -1,11 +1,21 @@
 # Asserts the chezmoi Target State rendered by CI for the native Windows
-# Target matches expectations. Usage: assert-windows.ps1 -Dest <dest-dir>
+# Target matches expectations, for a given machine Profile (personal/dev/
+# dev-server, see docs/adr/0004-machine-profiles.md).
+# Usage: assert-windows.ps1 -Dest <dest-dir> -MachineProfile <profile>
+#
+# Parameter is -MachineProfile, not -Profile: $Profile is a PowerShell
+# automatic variable (path to the user's profile script) — reusing the name
+# would shadow it.
 #
 # Every assertion runs and every failure is reported, instead of stopping at
 # the first one.
 param(
     [Parameter(Mandatory = $true)]
-    [string]$Dest
+    [string]$Dest,
+
+    [Parameter(Mandatory = $true)]
+    [ValidateSet("personal", "dev", "dev-server")]
+    [string]$MachineProfile
 )
 
 $script:failed = $false
@@ -32,6 +42,8 @@ function Assert-Absent {
     }
 }
 
+Write-Host "--- profile=$MachineProfile ---"
+
 # Windows Target has no bash/zsh of its own
 Assert-Absent ".bashrc"
 Assert-Absent ".bash_aliases"
@@ -39,16 +51,45 @@ Assert-Absent ".zshrc"
 Assert-Absent ".zprofile"
 Assert-Absent ".zsh_aliases"
 
-# tmux config IS deployed on Windows — psmux reads the same tmux.conf, see
+# tmux config IS deployed on Windows, unconditional across every profile —
+# psmux reads the same tmux.conf, see
 # docs/adr/0005-psmux-for-windows-tmux-parity.md
 Assert-FileExists ".config\tmux\tmux.conf"
 
-# PowerShell profile, Windows-only
+# PowerShell profile, Windows-only, unconditional across every profile
 Assert-FileExists "Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
 
-# zed, on every Target (Windows path differs from macOS/Linux)
-Assert-FileExists "AppData\Roaming\Zed\keymap.jsonc"
-Assert-FileExists "AppData\Roaming\Zed\settings.jsonc"
+# Git identity: which config.local.* files exist depends on profile (see
+# docs/adr/0004-machine-profiles.md) — personal -> personal+work,
+# dev -> work+client, dev-server -> personal+work.
+switch ($MachineProfile) {
+    { $_ -in "personal", "dev-server" } {
+        Assert-FileExists ".config\git\config.local.personal"
+        Assert-FileExists ".config\git\config.local.work"
+        Assert-Absent ".config\git\config.local.client"
+    }
+    "dev" {
+        Assert-Absent ".config\git\config.local.personal"
+        Assert-FileExists ".config\git\config.local.work"
+        Assert-FileExists ".config\git\config.local.client"
+    }
+}
+
+# GUI-app configs: dev-server gets none at all; personal/dev get every app
+# (CI's GUI opt-out case is Linux-only, see ci.yml — Windows always renders
+# at the true default here).
+if ($MachineProfile -eq "dev-server") {
+    Assert-Absent ".config\wezterm"
+    Assert-Absent "AppData\Roaming\Code"
+    Assert-Absent "AppData\Roaming\Zed"
+    Assert-Absent "AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe"
+} else {
+    Assert-FileExists ".config\wezterm\wezterm.lua"
+    Assert-FileExists "AppData\Roaming\Code\User\settings.json"
+    Assert-FileExists "AppData\Roaming\Zed\keymap.jsonc"
+    Assert-FileExists "AppData\Roaming\Zed\settings.jsonc"
+    Assert-FileExists "AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
+}
 
 # Rendered git config: autocrlf must be "true", never "input"
 $gitConfigPath = Join-Path $Dest ".config\git\config"
@@ -88,8 +129,8 @@ if ($skipHits) {
 }
 
 if ($script:failed) {
-    Write-Error "One or more assertions failed."
+    Write-Error "One or more assertions failed (profile=$MachineProfile)."
     exit 1
 }
 
-Write-Host "All Windows Target assertions passed."
+Write-Host "All Windows Target assertions passed (profile=$MachineProfile)."

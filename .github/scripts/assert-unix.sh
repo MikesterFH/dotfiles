@@ -1,12 +1,24 @@
 #!/usr/bin/env bash
 # Asserts the chezmoi Target State rendered by CI for the macOS/Linux Target
-# matches expectations. Usage: assert-unix.sh <dest-dir>
+# matches expectations, for a given machine Profile (personal/dev/dev-server,
+# see docs/adr/0004-machine-profiles.md).
+# Usage: assert-unix.sh <dest-dir> <profile> [--vscode-disabled]
+#
+# Shared between the macOS and Linux CI jobs — self-detects which of the two
+# via `uname -s`, since VS Code's and iTerm2's paths differ between them.
 #
 # Doesn't use `set -e`: every assertion runs and every failure is reported,
 # instead of stopping at the first one.
 set -uo pipefail
 
 dest="$1"
+profile="$2"
+vscode_disabled=false
+if [ "${3:-}" = "--vscode-disabled" ]; then
+    vscode_disabled=true
+fi
+
+os="$(uname -s)" # Darwin or Linux
 fail=0
 
 ok() { printf '[OK]   %s\n' "$*"; }
@@ -31,7 +43,9 @@ assert_absent() {
     fi
 }
 
-# Shells + tmux
+echo "--- profile=$profile os=$os vscode_disabled=$vscode_disabled ---"
+
+# Shells + tmux — core tooling, unconditional across every profile
 assert_file ".bashrc"
 assert_file ".bash_aliases"
 assert_file ".zshrc"
@@ -44,9 +58,55 @@ assert_absent "Documents/PowerShell/Microsoft.PowerShell_profile.ps1"
 assert_absent "AppData"
 assert_absent "AppData/Local/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json"
 
-# zed, on every Target
-assert_file ".config/zed/keymap.jsonc"
-assert_file ".config/zed/settings.jsonc"
+# Git identity: which config.local.* files exist depends on profile —
+# personal -> personal+work, dev -> work+client, dev-server -> personal+work.
+case "$profile" in
+personal | dev-server)
+    assert_file ".config/git/config.local.personal"
+    assert_file ".config/git/config.local.work"
+    assert_absent ".config/git/config.local.client"
+    ;;
+dev)
+    assert_absent ".config/git/config.local.personal"
+    assert_file ".config/git/config.local.work"
+    assert_file ".config/git/config.local.client"
+    ;;
+*)
+    bad "unknown profile: $profile"
+    ;;
+esac
+
+# GUI-app configs: dev-server gets none at all; personal/dev get every app
+# unless its bool was seeded false (only vscodeConfig is exercised as false
+# in CI, via --vscode-disabled).
+if [ "$profile" = "dev-server" ]; then
+    assert_absent ".config/wezterm"
+    assert_absent ".config/zed"
+    if [ "$os" = "Darwin" ]; then
+        assert_absent "Library/Application Support/Code"
+        assert_absent "Library/Application Support/iTerm2"
+    else
+        assert_absent ".config/Code"
+    fi
+else
+    assert_file ".config/wezterm/wezterm.lua"
+    assert_file ".config/zed/keymap.jsonc"
+    assert_file ".config/zed/settings.jsonc"
+    if [ "$os" = "Darwin" ]; then
+        if [ "$vscode_disabled" = true ]; then
+            assert_absent "Library/Application Support/Code"
+        else
+            assert_file "Library/Application Support/Code/User/settings.json"
+        fi
+        assert_file "Library/Application Support/iTerm2/DynamicProfiles/Nvim_Tmux_Term.json"
+    else
+        if [ "$vscode_disabled" = true ]; then
+            assert_absent ".config/Code"
+        else
+            assert_file ".config/Code/User/settings.json"
+        fi
+    fi
+fi
 
 # Rendered git config: autocrlf must be "input", never "true"
 gitconfig="$dest/.config/git/config"
@@ -82,8 +142,8 @@ else
 fi
 
 if [ "$fail" -ne 0 ]; then
-    echo "One or more assertions failed." >&2
+    echo "One or more assertions failed (profile=$profile)." >&2
     exit 1
 fi
 
-echo "All macOS/Linux Target assertions passed."
+echo "All macOS/Linux Target assertions passed (profile=$profile)."

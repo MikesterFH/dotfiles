@@ -1,18 +1,23 @@
 # Single verification seam for the chezmoi migration (see docs/adr/): renders
 # this repo's Source Dir into a throwaway directory on all three deployment
-# Targets and asserts the resulting Target State matches expectations.
+# Targets, once per machine Profile (personal/dev/dev-server, see
+# docs/adr/0004-machine-profiles.md — 9 render/assert passes across the 3-OS
+# matrix), and asserts the resulting Target State matches expectations for
+# that Target+Profile combination.
 #
-# `chezmoi init` normally prompts for the identity data in .chezmoi.toml.tmpl
-# (git.personal/work/client name+email, devpod). CI pre-seeds chezmoi's own
-# config file with those answers before `init` runs — promptStringOnce and
-# promptBoolOnce read straight from that file, which sidesteps a known bug
-# where --promptString/--promptBool don't reliably satisfy the *Once variants
-# (https://github.com/twpayne/chezmoi/issues/3345).
+# `chezmoi init` normally prompts for the data in .chezmoi.toml.tmpl
+# (profile, git identities, devpod, GUI-app bools). CI pre-seeds chezmoi's
+# own config file with those answers before `init` runs — promptStringOnce/
+# promptBoolOnce/promptChoiceOnce read straight from that file, which
+# sidesteps a known bug where --promptString/--promptBool don't reliably
+# satisfy the *Once variants (https://github.com/twpayne/chezmoi/issues/3345).
+# Each Profile scenario has its own seed file under
+# .github/scripts/ci-answers/.
 #
 # `--exclude=scripts` keeps `chezmoi apply` from running run_once_/run_after_
-# scripts (package installs via apt/brew/winget, Docker, the nvim-on-Windows
-# mirror) — this workflow verifies the rendered file tree, not the bootstrap
-# scripts' side effects.
+# scripts (package installs via apt/brew/winget, Docker, psmux, the
+# nvim-on-Windows mirror) — this workflow verifies the rendered file tree,
+# not the bootstrap scripts' side effects.
 name: chezmoi apply verification
 
 on:
@@ -48,42 +53,49 @@ jobs:
           & $installBlock -b $bindir
           Add-Content -Path $env:GITHUB_PATH -Value $bindir
 
-      - name: Seed non-interactive chezmoi identity answers (macOS/Linux)
+      - name: Render + assert every Profile (macOS/Linux)
         if: runner.os != 'Windows'
         shell: bash
         run: |
           mkdir -p "$HOME/.config/chezmoi"
-          cp .github/scripts/chezmoi-ci-answers.toml "$HOME/.config/chezmoi/chezmoi.toml"
+          for profile in personal dev dev-server; do
+            echo "::group::profile=$profile"
+            cp ".github/scripts/ci-answers/$profile.toml" "$HOME/.config/chezmoi/chezmoi.toml"
+            dest="$RUNNER_TEMP/chezmoi-dest-$profile"
+            mkdir -p "$dest"
+            chezmoi init --source "$GITHUB_WORKSPACE" --destination "$dest" --exclude=scripts --force --apply
+            .github/scripts/assert-unix.sh "$dest" "$profile"
+            echo "::endgroup::"
+          done
 
-      - name: Seed non-interactive chezmoi identity answers (Windows)
+      - name: Render + assert every Profile (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.config\chezmoi" | Out-Null
-          Copy-Item ".github\scripts\chezmoi-ci-answers.toml" "$env:USERPROFILE\.config\chezmoi\chezmoi.toml"
+          # $machineProfile, not $profile: $PROFILE is a PowerShell automatic
+          # variable (case-insensitive), reusing the name would shadow it.
+          foreach ($machineProfile in @("personal", "dev", "dev-server")) {
+            Write-Host "::group::profile=$machineProfile"
+            Copy-Item ".github\scripts\ci-answers\$machineProfile.toml" "$env:USERPROFILE\.config\chezmoi\chezmoi.toml"
+            $dest = Join-Path $env:RUNNER_TEMP "chezmoi-dest-$machineProfile"
+            New-Item -ItemType Directory -Force -Path $dest | Out-Null
+            chezmoi init --source "$env:GITHUB_WORKSPACE" --destination "$dest" --exclude=scripts --force --apply
+            .github\scripts\assert-windows.ps1 -Dest $dest -MachineProfile $machineProfile
+            Write-Host "::endgroup::"
+          }
 
-      - name: chezmoi init --apply to a throwaway directory (macOS/Linux)
-        if: runner.os != 'Windows'
+      # One extra case verifying the GUI opt-out prompt itself, not just the
+      # true default (see docs/adr/0004-machine-profiles.md). Linux-only —
+      # the opt-out mechanism isn't OS-specific, so one Target is enough.
+      - name: Render + assert GUI opt-out case (Linux only)
+        if: runner.os == 'Linux'
         shell: bash
         run: |
-          dest="$RUNNER_TEMP/chezmoi-dest"
+          echo "::group::profile=personal vscodeConfig=false"
+          cp ".github/scripts/ci-answers/personal-vscode-disabled.toml" "$HOME/.config/chezmoi/chezmoi.toml"
+          dest="$RUNNER_TEMP/chezmoi-dest-personal-vscode-disabled"
           mkdir -p "$dest"
           chezmoi init --source "$GITHUB_WORKSPACE" --destination "$dest" --exclude=scripts --force --apply
-
-      - name: chezmoi init --apply to a throwaway directory (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          $dest = Join-Path $env:RUNNER_TEMP "chezmoi-dest"
-          New-Item -ItemType Directory -Force -Path $dest | Out-Null
-          chezmoi init --source "$env:GITHUB_WORKSPACE" --destination "$dest" --exclude=scripts --force --apply
-
-      - name: Assert Target-specific expectations (macOS/Linux)
-        if: runner.os != 'Windows'
-        shell: bash
-        run: .github/scripts/assert-unix.sh "$RUNNER_TEMP/chezmoi-dest"
-
-      - name: Assert Target-specific expectations (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: .github\scripts\assert-windows.ps1 -Dest (Join-Path $env:RUNNER_TEMP "chezmoi-dest")
+          .github/scripts/assert-unix.sh "$dest" "personal" --vscode-disabled
+          echo "::endgroup::"

@@ -1,0 +1,20 @@
+# See personal.toml in this directory for the seeding mechanism explanation.
+#
+# dev profile: work+client git identities only (no personal). All five
+# GUI-app bools at their true default.
+[data]
+    profile = "dev"
+    devpod = false
+    weztermConfig = true
+    vscodeConfig = true
+    zedConfig = true
+    windowsTerminalConfig = true
+    iterm2Config = true
+
+[data.git.work]
+    name = "CI Runner"
+    email = "ci-work@example.invalid"
+
+[data.git.client]
+    name = "CI Runner"
+    email = "ci-client@example.invalid"

@@ -1,0 +1,16 @@
+# See personal.toml in this directory for the seeding mechanism explanation.
+#
+# dev-server profile: personal+work git identities. No GUI-app bools seeded
+# here — .chezmoi.toml.tmpl never prompts for them on this profile at all
+# (see docs/adr/0004-machine-profiles.md), so they'd be unused if present.
+[data]
+    profile = "dev-server"
+    devpod = false
+
+[data.git.personal]
+    name = "CI Runner"
+    email = "ci-personal@example.invalid"
+
+[data.git.work]
+    name = "CI Runner"
+    email = "ci-work@example.invalid"
