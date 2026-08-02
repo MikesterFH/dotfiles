@@ -9,9 +9,12 @@ migrate-from-install-sh.sh
 # Library/, Linux: .config/Code, Windows: AppData); the iTerm2 Dynamic
 # Profile (Library/) and PowerShell profile (Documents/) are single-OS only;
 # zed lives at .config/zed everywhere except Windows (AppData/Roaming/Zed);
-# and the Windows Target has no bash/zsh of its own. tmux IS deployed on
-# Windows (.config/tmux is not excluded there) — psmux reads the same
-# tmux.conf, see docs/adr/0005-psmux-for-windows-tmux-parity.md.
+# the macOS Application manifest (.config/homebrew, see
+# docs/adr/0006-application-category-and-profile-manifests.md) is macOS-only,
+# there being no Homebrew-on-Linux/Windows Application support; and the
+# Windows Target has no bash/zsh of its own. tmux IS deployed on Windows
+# (.config/tmux is not excluded there) — psmux reads the same tmux.conf, see
+# docs/adr/0005-psmux-for-windows-tmux-parity.md.
 # Every branch lists everything *not* relevant to that OS, so an unlisted
 # fifth OS falls through to the catch-all and excludes all of it — fail
 # safe, not a guess.
@@ -23,6 +26,7 @@ Documents
 Library
 AppData
 Documents
+.config/homebrew
 {{ else if eq .chezmoi.os "windows" }}
 Library
 .config/Code
@@ -32,11 +36,13 @@ Library
 .zprofile
 .zsh_aliases
 .config/zed
+.config/homebrew
 {{ else }}
 Library
 .config/Code
 AppData
 Documents
+.config/homebrew
 {{ end }}
 
 # Machine Profile (chezmoi init --promptChoiceOnce profile=personal|dev|dev-server,

@@ -1,0 +1,45 @@
+{{- if eq .chezmoi.os "darwin" -}}
+#!/usr/bin/env bash
+# =============================================================================
+# chezmoi run_onchange_after script: installs the current Profile's macOS
+# Application list via `brew bundle`, reading the Brewfile rendered by
+# dot_config/homebrew/Brewfile.tmpl from the Application list computed in
+# .chezmoi.toml.tmpl. See
+# docs/adr/0006-application-category-and-profile-manifests.md.
+#
+# `run_onchange_` (not `run_once_`) so editing the Profile's Application list
+# and re-running `chezmoi apply` reaches an already-provisioned machine, not
+# only a fresh install — the "applications" comment below is what changes
+# the rendered script's content, and therefore its re-run hash, whenever the
+# resolved list changes.
+#
+# `_after_` so this always runs once every Managed File — including the
+# Brewfile itself — has already been written; combined with Bootstrap
+# (run_once_before_install-packages.sh.tmpl) always running before any
+# Managed File, Homebrew is guaranteed installed by the time this runs.
+# chezmoi runs each script as its own process though, so Bootstrap's `eval
+# "$(brew shellenv)"` doesn't carry over here — re-derive PATH the same way
+# Bootstrap does, rather than trusting the inherited one, since a fresh
+# Apple Silicon Mac won't have /opt/homebrew/bin on its default PATH yet.
+#
+# applications: {{ .applications | join "," }}
+# =============================================================================
+set -euo pipefail
+
+if [ -x /opt/homebrew/bin/brew ]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+elif [ -x /usr/local/bin/brew ]; then
+  eval "$(/usr/local/bin/brew shellenv)"
+fi
+
+brewfile="$HOME/.config/homebrew/Brewfile"
+
+if ! command -v brew &>/dev/null; then
+  echo "[ERROR] Homebrew not found; cannot install Applications. Was the Bootstrap step skipped?" >&2
+  exit 1
+fi
+
+echo "[INFO]  Installing macOS Applications via brew bundle..."
+brew bundle --file="$brewfile"
+echo "[OK]    macOS Applications installed."
+{{- end -}}

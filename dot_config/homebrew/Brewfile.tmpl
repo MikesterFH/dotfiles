@@ -1,0 +1,22 @@
+{{- /* Homebrew Bundle manifest for the current Profile's Application list
+       (see docs/adr/0006-application-category-and-profile-manifests.md).
+       One `cask` line per app in .applications that has a macOS identifier;
+       apps with no macOS packaging (e.g. windows-terminal) are simply
+       absent — same convention already used for GUI configs limited to one
+       platform. Each app is assigned to exactly one Homebrew identifier
+       here, decided when the app was added — no runtime fallback between
+       formula/cask. Installed via
+       run_onchange_after_install-macos-applications.sh.tmpl. */ -}}
+{{- $homebrewCasks := dict
+      "wezterm" "wezterm"
+      "vscode" "visual-studio-code"
+      "zed" "zed"
+      "iterm2" "iterm2"
+-}}
+{{- $lines := list -}}
+{{- range .applications -}}
+{{- if hasKey $homebrewCasks . -}}
+{{- $lines = append $lines (printf "cask %q" (index $homebrewCasks .)) -}}
+{{- end -}}
+{{- end -}}
+{{ $lines | join "\n" }}

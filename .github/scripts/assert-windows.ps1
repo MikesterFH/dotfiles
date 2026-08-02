@@ -90,6 +90,10 @@ if ($MachineProfile -eq "dev-server") {
     Assert-FileExists "AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
 }
 
+# macOS Application manifest (Homebrew) is macOS-only, see
+# docs/adr/0006-application-category-and-profile-manifests.md
+Assert-Absent ".config\homebrew"
+
 # Rendered git config: autocrlf must be "true", never "input"
 $gitConfigPath = Join-Path $Dest ".config\git\config"
 if (Test-Path -Path $gitConfigPath -PathType Leaf) {

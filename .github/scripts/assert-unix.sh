@@ -95,6 +95,35 @@ else
     fi
 fi
 
+# macOS Application manifest (Homebrew), see
+# docs/adr/0006-application-category-and-profile-manifests.md: macOS-only,
+# one `cask` line per app in the Profile's Application list that has a
+# macOS identifier (windows-terminal doesn't, so it's never expected here).
+if [ "$os" = "Darwin" ]; then
+    brewfile="$dest/.config/homebrew/Brewfile"
+    assert_file ".config/homebrew/Brewfile"
+    if [ "$profile" = "dev-server" ]; then
+        if [ -f "$brewfile" ] && grep -q '^cask ' "$brewfile"; then
+            bad "Brewfile should have no cask entries for dev-server, has some"
+        else
+            ok "Brewfile has no cask entries for dev-server"
+        fi
+    else
+        for cask in wezterm visual-studio-code zed iterm2; do
+            if [ -f "$brewfile" ] && grep -qE "^cask \"$cask\"\$" "$brewfile"; then
+                ok "Brewfile: cask \"$cask\" present"
+            else
+                bad "Brewfile: cask \"$cask\" missing"
+            fi
+        done
+        if [ -f "$brewfile" ] && grep -q 'windows-terminal' "$brewfile"; then
+            bad "Brewfile: windows-terminal should never appear (no macOS identifier)"
+        fi
+    fi
+else
+    assert_absent ".config/homebrew"
+fi
+
 # Rendered git config: autocrlf must be "input", never "true"
 gitconfig="$dest/.config/git/config"
 if [ -f "$gitconfig" ]; then
