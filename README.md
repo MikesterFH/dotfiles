@@ -43,7 +43,7 @@ On the macOS Target, once Bootstrap and the rest of the Managed Files have run, 
 
 On the Linux Target, when the distro is Debian-family (Debian, Ubuntu, Pop!\_OS, Linux Mint, elementary OS — matching Bootstrap's own distro detection; no Fedora/Arch Application manifest yet), the same pattern installs your Profile's Applications (wezterm, VS Code, Zed — whichever apply to Linux) via `apt-get install` against a package list rendered to `~/.config/apt-packages.txt`.
 
-Windows Application manifests aren't implemented yet.
+On the Windows Target, the same pattern installs your Profile's Applications (wezterm, VS Code, Zed, Windows Terminal — whichever apply to Windows) via `winget import` against a manifest rendered to `~/.config/winget/packages.json`.
 
 If you'd rather review what would happen before anything touches your `$HOME`, run `chezmoi init MikesterFH/dotfiles` (no `--apply`) followed by `chezmoi diff`, then `chezmoi apply` once you're happy with it.
 

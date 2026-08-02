@@ -9,9 +9,10 @@ migrate-from-install-sh.sh
 # Library/, Linux: .config/Code, Windows: AppData); the iTerm2 Dynamic
 # Profile (Library/) and PowerShell profile (Documents/) are single-OS only;
 # zed lives at .config/zed everywhere except Windows (AppData/Roaming/Zed);
-# the macOS Application manifest (.config/homebrew) and the Linux Application
-# manifest (.config/apt-packages.txt, further narrowed to Debian/apt below —
-# see docs/adr/0006-application-category-and-profile-manifests.md) are each
+# the macOS Application manifest (.config/homebrew), the Linux Application
+# manifest (.config/apt-packages.txt, further narrowed to Debian/apt below),
+# and the Windows Application manifest (.config/winget — see
+# docs/adr/0006-application-category-and-profile-manifests.md) are each
 # single-OS; and the Windows Target has no bash/zsh of its own. tmux IS
 # deployed on Windows (.config/tmux is not excluded there) — psmux reads the
 # same tmux.conf, see docs/adr/0005-psmux-for-windows-tmux-parity.md.
@@ -23,11 +24,13 @@ migrate-from-install-sh.sh
 AppData
 Documents
 .config/apt-packages.txt
+.config/winget
 {{ else if eq .chezmoi.os "linux" }}
 Library
 AppData
 Documents
 .config/homebrew
+.config/winget
 {{ else if eq .chezmoi.os "windows" }}
 Library
 .config/Code
@@ -46,6 +49,7 @@ AppData
 Documents
 .config/homebrew
 .config/apt-packages.txt
+.config/winget
 {{ end }}
 
 # Linux Application manifest (apt, Debian only, see

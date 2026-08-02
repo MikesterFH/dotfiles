@@ -96,6 +96,38 @@ if ($MachineProfile -eq "dev-server") {
 Assert-Absent ".config\homebrew"
 Assert-Absent ".config\apt-packages.txt"
 
+# Windows Application manifest (winget), see
+# docs/adr/0006-application-category-and-profile-manifests.md: one package
+# entry per app in the Profile's Application list that has a winget package
+# ID (iterm2 doesn't, so never expected here).
+$wingetManifestPath = Join-Path $Dest ".config\winget\packages.json"
+Assert-FileExists ".config\winget\packages.json"
+if (Test-Path -Path $wingetManifestPath -PathType Leaf) {
+    $wingetManifest = Get-Content -Path $wingetManifestPath -Raw | ConvertFrom-Json
+    $packageIds = @($wingetManifest.Sources[0].Packages | ForEach-Object { $_.PackageIdentifier })
+    if ($MachineProfile -eq "dev-server") {
+        if ($packageIds.Count -eq 0) {
+            Write-Host "[OK]   winget manifest has no packages for dev-server"
+        } else {
+            Write-Host "[FAIL] winget manifest should have no packages for dev-server, has: $($packageIds -join ', ')"
+            $script:failed = $true
+        }
+    } else {
+        foreach ($id in @("wez.wezterm", "Microsoft.VisualStudioCode", "Zed.Zed", "Microsoft.WindowsTerminal")) {
+            if ($packageIds -contains $id) {
+                Write-Host "[OK]   winget manifest: $id present"
+            } else {
+                Write-Host "[FAIL] winget manifest: $id missing"
+                $script:failed = $true
+            }
+        }
+        if ($packageIds -contains "iterm2" -or $packageIds.Count -gt 4) {
+            Write-Host "[FAIL] winget manifest: unexpected extra package(s) present: $($packageIds -join ', ')"
+            $script:failed = $true
+        }
+    }
+}
+
 # Rendered git config: autocrlf must be "true", never "input"
 $gitConfigPath = Join-Path $Dest ".config\git\config"
 if (Test-Path -Path $gitConfigPath -PathType Leaf) {

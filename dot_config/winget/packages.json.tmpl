@@ -1,0 +1,38 @@
+{{- /* winget import manifest for the current Profile's Application list
+       (see docs/adr/0006-application-category-and-profile-manifests.md).
+       One package entry per app in .applications that has a winget package
+       ID; apps with no Windows packaging (e.g. iterm2) are simply absent —
+       same convention already used for GUI configs limited to one
+       platform. Each app is assigned to exactly one winget package ID
+       here, decided when the app was added. Installed via
+       run_onchange_after_install-windows-applications.ps1.tmpl.
+       CreationDate is a fixed placeholder, not the actual render time, so
+       this file doesn't change on every `chezmoi apply` just from a
+       timestamp — only the Application list changing should touch it. */ -}}
+{{- $wingetPackages := dict
+      "wezterm" "wez.wezterm"
+      "vscode" "Microsoft.VisualStudioCode"
+      "zed" "Zed.Zed"
+      "windows-terminal" "Microsoft.WindowsTerminal"
+-}}
+{{- $packages := list -}}
+{{- range .applications -}}
+{{- if hasKey $wingetPackages . -}}
+{{- $packages = append $packages (dict "PackageIdentifier" (index $wingetPackages .)) -}}
+{{- end -}}
+{{- end -}}
+{{- $manifest := dict
+      "$schema" "https://aka.ms/winget-packages.schema.2.0.json"
+      "CreationDate" "1970-01-01T00:00:00.000-00:00"
+      "Sources" (list (dict
+          "Packages" $packages
+          "SourceDetails" (dict
+              "Argument" "https://cdn.winget.microsoft.com/cache"
+              "Identifier" "Microsoft.Winget.Source_8wekyb3d8bbwe"
+              "Name" "winget"
+              "Type" "Microsoft.PreIndexed.Package"
+          )
+      ))
+      "WinGetVersion" "1.0.0"
+-}}
+{{ $manifest | toPrettyJson }}

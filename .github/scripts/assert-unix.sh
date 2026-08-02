@@ -155,6 +155,10 @@ else
     assert_absent ".config/apt-packages.txt"
 fi
 
+# Windows Application manifest (winget) is Windows-only, see
+# docs/adr/0006-application-category-and-profile-manifests.md
+assert_absent ".config/winget"
+
 # Rendered git config: autocrlf must be "input", never "true"
 gitconfig="$dest/.config/git/config"
 if [ -f "$gitconfig" ]; then
