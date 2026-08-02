@@ -21,9 +21,13 @@ Native Windows (PowerShell), one of the three deployment targets. WSL is classif
 _Avoid_: Windows (ambiguous alone), WSL Target
 
 **Bootstrap Package**:
-A prerequisite tool (`git`, `mise`) installed once per machine via the platform's package manager (winget on the Windows Target) before `chezmoi apply` can do anything useful.
-_Avoid_: dependency, tool install
+A prerequisite tool — `git`, `mise`, and the platform's own package manager where it isn't preinstalled (Homebrew on the macOS Target; apt and winget already ship with their OS) — installed once per machine via `run_once_before_install-packages.*`, profile-independent. Strictly what chezmoi/dev work needs before anything else can run, not "software I always want" (that's an Application).
+_Avoid_: dependency, tool install, Application (see below)
+
+**Application**:
+Software a machine needs beyond the Bootstrap Package minimum — CLI tools and GUI apps alike (e.g. wezterm, VS Code, Zed) — installed via a package-manager-native manifest (`Brewfile`, `apt-packages.txt`, a winget manifest; one file per platform, each carrying its own package identifier per app) rendered from the machine's Profile. Manifests run via `run_onchange_`, so editing the app list reaches already-provisioned machines on their next `chezmoi apply`. See `docs/adr/0006-application-category-and-profile-manifests.md`.
+_Avoid_: package, tool (when meaning this specifically), Bootstrap Package (see above)
 
 **Profile**:
-A `chezmoi init` prompt (`personal` | `dev` | `dev-server`) scoping which git identities and GUI configs a given physical machine gets, orthogonal to the Target and to `devpod`. See `docs/adr/0004-machine-profiles.md`.
+A `chezmoi init` prompt (`personal` | `dev` | `dev-server`) scoping which git identities, GUI configs, and Applications a given physical machine gets, orthogonal to the Target and to `devpod`. Deviation within a Profile isn't supported — two machines needing different Applications need two distinct Profiles (e.g. `personal-laptop`, `personal-desktop`), not a per-machine override. See `docs/adr/0004-machine-profiles.md` and `docs/adr/0006-application-category-and-profile-manifests.md`.
 _Avoid_: environment, mode, setup type
