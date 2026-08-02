@@ -1,15 +1,11 @@
 # See personal.toml in this directory for the seeding mechanism explanation.
 #
-# dev profile: work+client git identities only (no personal). All five
-# GUI-app bools at their true default.
+# dev profile: work+client git identities only (no personal). The
+# Application list is derived from `profile` inside .chezmoi.toml.tmpl, not
+# prompted for, so nothing to seed here for it.
 [data]
     profile = "dev"
     devpod = false
-    weztermConfig = true
-    vscodeConfig = true
-    zedConfig = true
-    windowsTerminalConfig = true
-    iterm2Config = true
 
 [data.git.work]
     name = "CI Runner"

@@ -21,35 +21,23 @@
 {{-   $clientEmail = promptStringOnce . "git.client.email" "Client git user.email" -}}
 {{- end -}}
 
-{{- /* GUI-app config opt-out: personal/dev only, one prompt per app, only
-       when the app applies to this OS. dev-server never prompts here — it
-       never gets GUI configs regardless (see .chezmoiignore) — so these
-       just keep their true default, unused. */ -}}
-{{- $weztermConfig := true -}}
-{{- $vscodeConfig := true -}}
-{{- $zedConfig := true -}}
-{{- $windowsTerminalConfig := true -}}
-{{- $iterm2Config := true -}}
-{{- if ne $profile "dev-server" -}}
-{{-   $weztermConfig = promptBoolOnce . "weztermConfig" "Deploy wezterm config" true -}}
-{{-   $vscodeConfig = promptBoolOnce . "vscodeConfig" "Deploy VS Code config" true -}}
-{{-   $zedConfig = promptBoolOnce . "zedConfig" "Deploy Zed config" true -}}
-{{-   if eq .chezmoi.os "windows" -}}
-{{-     $windowsTerminalConfig = promptBoolOnce . "windowsTerminalConfig" "Deploy Windows Terminal config" true -}}
-{{-   end -}}
-{{-   if eq .chezmoi.os "darwin" -}}
-{{-     $iterm2Config = promptBoolOnce . "iterm2Config" "Deploy iTerm2 config" true -}}
-{{-   end -}}
-{{- end -}}
+{{- /* Application list: per-Profile, platform-agnostic (see
+       docs/adr/0006-application-category-and-profile-manifests.md).
+       Replaces the five per-app GUI config opt-out prompts from ADR-0004 —
+       Profile alone decides the app set now, no per-machine override. A
+       machine needing a different set needs a distinct Profile, not a
+       prompt answered differently here. */ -}}
+{{- $applicationsByProfile := dict
+      "personal" (list "wezterm" "vscode" "zed" "windows-terminal" "iterm2")
+      "dev" (list "wezterm" "vscode" "zed" "windows-terminal" "iterm2")
+      "dev-server" (list)
+-}}
+{{- $applications := index $applicationsByProfile $profile -}}
 
 [data]
     profile = {{ $profile | quote }}
     devpod = {{ $devpod }}
-    weztermConfig = {{ $weztermConfig }}
-    vscodeConfig = {{ $vscodeConfig }}
-    zedConfig = {{ $zedConfig }}
-    windowsTerminalConfig = {{ $windowsTerminalConfig }}
-    iterm2Config = {{ $iterm2Config }}
+    applications = [{{ range $i, $app := $applications }}{{ if $i }}, {{ end }}{{ $app | quote }}{{ end }}]
 
 [data.git.work]
     name = {{ $workName | quote }}

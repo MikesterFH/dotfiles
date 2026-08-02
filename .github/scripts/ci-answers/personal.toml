@@ -9,17 +9,12 @@
 #
 # personal profile: personal+work git identities only (dev-server's seed is
 # identical on this axis — see docs/adr/0004-machine-profiles.md — but kept
-# as a separate file since dev-server's GUI bools are never even prompted
-# for). All five GUI-app bools at their true default; see ci.yml for the
-# separate personal-vscode-disabled.toml that exercises the opt-out path.
+# as a separate file for clarity). The Application list is derived from
+# `profile` inside .chezmoi.toml.tmpl, not prompted for, so nothing to seed
+# here for it.
 [data]
     profile = "personal"
     devpod = false
-    weztermConfig = true
-    vscodeConfig = true
-    zedConfig = true
-    windowsTerminalConfig = true
-    iterm2Config = true
 
 [data.git.personal]
     name = "CI Runner"

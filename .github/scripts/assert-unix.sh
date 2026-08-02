@@ -2,7 +2,7 @@
 # Asserts the chezmoi Target State rendered by CI for the macOS/Linux Target
 # matches expectations, for a given machine Profile (personal/dev/dev-server,
 # see docs/adr/0004-machine-profiles.md).
-# Usage: assert-unix.sh <dest-dir> <profile> [--vscode-disabled]
+# Usage: assert-unix.sh <dest-dir> <profile>
 #
 # Shared between the macOS and Linux CI jobs — self-detects which of the two
 # via `uname -s`, since VS Code's and iTerm2's paths differ between them.
@@ -13,10 +13,6 @@ set -uo pipefail
 
 dest="$1"
 profile="$2"
-vscode_disabled=false
-if [ "${3:-}" = "--vscode-disabled" ]; then
-    vscode_disabled=true
-fi
 
 os="$(uname -s)" # Darwin or Linux
 fail=0
@@ -43,7 +39,7 @@ assert_absent() {
     fi
 }
 
-echo "--- profile=$profile os=$os vscode_disabled=$vscode_disabled ---"
+echo "--- profile=$profile os=$os ---"
 
 # Shells + tmux — core tooling, unconditional across every profile
 assert_file ".bashrc"
@@ -76,9 +72,8 @@ dev)
     ;;
 esac
 
-# GUI-app configs: dev-server gets none at all; personal/dev get every app
-# unless its bool was seeded false (only vscodeConfig is exercised as false
-# in CI, via --vscode-disabled).
+# GUI-app configs: dev-server's Application list is empty, so it gets none;
+# personal/dev's Application list carries every app (see .chezmoi.toml.tmpl).
 if [ "$profile" = "dev-server" ]; then
     assert_absent ".config/wezterm"
     assert_absent ".config/zed"
@@ -93,18 +88,10 @@ else
     assert_file ".config/zed/keymap.jsonc"
     assert_file ".config/zed/settings.jsonc"
     if [ "$os" = "Darwin" ]; then
-        if [ "$vscode_disabled" = true ]; then
-            assert_absent "Library/Application Support/Code"
-        else
-            assert_file "Library/Application Support/Code/User/settings.json"
-        fi
+        assert_file "Library/Application Support/Code/User/settings.json"
         assert_file "Library/Application Support/iTerm2/DynamicProfiles/Nvim_Tmux_Term.json"
     else
-        if [ "$vscode_disabled" = true ]; then
-            assert_absent ".config/Code"
-        else
-            assert_file ".config/Code/User/settings.json"
-        fi
+        assert_file ".config/Code/User/settings.json"
     fi
 fi
 

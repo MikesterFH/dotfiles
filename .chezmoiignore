@@ -51,32 +51,29 @@ Documents
 .config/git/config.local.client
 {{ end }}
 
-# GUI-app configs (chezmoi init --promptBool weztermConfig|vscodeConfig|
-# zedConfig|windowsTerminalConfig|iterm2Config=true|false, see
-# docs/adr/0004-machine-profiles.md): each app is excluded if its own bool is
-# false, OR unconditionally on dev-server (which never even prompts for
-# these bools — see .chezmoi.toml.tmpl — so they stay defaulted true,
-# unused, there; checking .profile directly avoids depending on that). One
-# guard per app, not a separate dev-server branch, so a path only ever needs
-# updating in one place. All three OS-specific paths are listed for
-# vscode/zed since personal/dev can be any OS — the OS switch above already
-# drops whichever two don't apply to the current Target.
-{{ if or (eq .profile "dev-server") (not .weztermConfig) }}
+# GUI-app configs (per-Profile Application list, see .chezmoi.toml.tmpl and
+# docs/adr/0006-application-category-and-profile-manifests.md): each app's
+# config is excluded exactly when that app isn't in .applications. dev-server
+# naturally excludes every GUI app this way, since its Application list is
+# empty — no separate dev-server branch needed. All three OS-specific paths
+# are listed for vscode/zed since personal/dev can be any OS — the OS switch
+# above already drops whichever two don't apply to the current Target.
+{{ if not (has "wezterm" .applications) }}
 .config/wezterm
 {{ end }}
-{{ if or (eq .profile "dev-server") (not .vscodeConfig) }}
+{{ if not (has "vscode" .applications) }}
 .config/Code
 Library/Application Support/Code
 AppData/Roaming/Code
 {{ end }}
-{{ if or (eq .profile "dev-server") (not .zedConfig) }}
+{{ if not (has "zed" .applications) }}
 .config/zed
 AppData/Roaming/Zed
 {{ end }}
-{{ if or (eq .profile "dev-server") (not .windowsTerminalConfig) }}
+{{ if not (has "windows-terminal" .applications) }}
 AppData/Local/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe
 {{ end }}
-{{ if or (eq .profile "dev-server") (not .iterm2Config) }}
+{{ if not (has "iterm2" .applications) }}
 Library/Application Support/iTerm2
 {{ end }}
 

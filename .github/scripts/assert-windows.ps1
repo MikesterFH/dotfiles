@@ -75,9 +75,8 @@ switch ($MachineProfile) {
     }
 }
 
-# GUI-app configs: dev-server gets none at all; personal/dev get every app
-# (CI's GUI opt-out case is Linux-only, see ci.yml — Windows always renders
-# at the true default here).
+# GUI-app configs: dev-server's Application list is empty, so it gets none;
+# personal/dev's Application list carries every app (see .chezmoi.toml.tmpl).
 if ($MachineProfile -eq "dev-server") {
     Assert-Absent ".config\wezterm"
     Assert-Absent "AppData\Roaming\Code"

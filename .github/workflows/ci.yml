@@ -6,8 +6,9 @@
 # that Target+Profile combination.
 #
 # `chezmoi init` normally prompts for the data in .chezmoi.toml.tmpl
-# (profile, git identities, devpod, GUI-app bools). CI pre-seeds chezmoi's
-# own config file with those answers before `init` runs — promptStringOnce/
+# (profile, git identities, devpod). The per-Profile Application list is
+# derived from `profile`, not prompted for. CI pre-seeds chezmoi's own
+# config file with the prompted answers before `init` runs — promptStringOnce/
 # promptBoolOnce/promptChoiceOnce read straight from that file, which
 # sidesteps a known bug where --promptString/--promptBool don't reliably
 # satisfy the *Once variants (https://github.com/twpayne/chezmoi/issues/3345).
@@ -84,18 +85,3 @@ jobs:
             .github\scripts\assert-windows.ps1 -Dest $dest -MachineProfile $machineProfile
             Write-Host "::endgroup::"
           }
-
-      # One extra case verifying the GUI opt-out prompt itself, not just the
-      # true default (see docs/adr/0004-machine-profiles.md). Linux-only —
-      # the opt-out mechanism isn't OS-specific, so one Target is enough.
-      - name: Render + assert GUI opt-out case (Linux only)
-        if: runner.os == 'Linux'
-        shell: bash
-        run: |
-          echo "::group::profile=personal vscodeConfig=false"
-          cp ".github/scripts/ci-answers/personal-vscode-disabled.toml" "$HOME/.config/chezmoi/chezmoi.toml"
-          dest="$RUNNER_TEMP/chezmoi-dest-personal-vscode-disabled"
-          mkdir -p "$dest"
-          chezmoi init --source "$GITHUB_WORKSPACE" --destination "$dest" --exclude=scripts --force --apply
-          .github/scripts/assert-unix.sh "$dest" "personal" --vscode-disabled
-          echo "::endgroup::"
