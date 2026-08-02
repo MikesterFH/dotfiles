@@ -2,7 +2,8 @@
 #!/usr/bin/env bash
 # =============================================================================
 # chezmoi run_once_before script: installs prerequisite Bootstrap Packages
-# (git, mise) and Docker before any managed dotfiles are applied.
+# (git, mise, Homebrew on macOS) and Docker before any managed dotfiles are
+# applied.
 #
 # Ported from install.sh's ensure_git/install_mise/install_docker/
 # detect_linux_distro. macOS and Linux/WSL only — native Windows uses the
@@ -46,6 +47,33 @@ detect_linux_distro() {
     fedora | rhel | centos | rocky | alma) DISTRO="fedora" ;;
     arch | manjaro | endeavouros) DISTRO="arch" ;;
     esac
+  fi
+}
+
+# -- Homebrew ------------------------------------------------------------------
+
+install_homebrew() {
+  info "Checking Homebrew..."
+
+  if command_exists brew; then
+    success "Homebrew already installed ($(brew --version | head -1))"
+    return
+  fi
+
+  info "Installing Homebrew..."
+  NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+  if [ -x /opt/homebrew/bin/brew ]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+  elif [ -x /usr/local/bin/brew ]; then
+    eval "$(/usr/local/bin/brew shellenv)"
+  fi
+
+  if command_exists brew; then
+    success "Homebrew installed ($(brew --version | head -1))"
+  else
+    error "Homebrew installation could not be verified"
+    return 1
   fi
 }
 
@@ -207,7 +235,9 @@ install_docker() {
 main() {
   detect_os
 
-  if [ "$OS" != "macos" ]; then
+  if [ "$OS" = "macos" ]; then
+    install_homebrew
+  else
     detect_linux_distro
   fi
 

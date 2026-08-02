@@ -38,7 +38,7 @@ You'll be prompted once for:
 - **GUI-app configs** — on `personal`/`dev` only, one yes/no prompt per GUI app relevant to your OS (wezterm, VS Code, Zed, plus Windows Terminal on Windows or iTerm2 on macOS), each defaulting to `true`. Answer `false` to skip deploying that app's config on this machine. `dev-server` skips these prompts entirely and never gets any GUI-app config, regardless.
 - **DevPod/devcontainer?** — answer `false` on a real machine (the default). See below for when to answer `true`.
 
-After the prompts, a `run_once_` script installs the prerequisite Bootstrap Packages (`git`, `mise`, and Docker on macOS/Linux; `git`, `mise`, and [`psmux`](https://github.com/psmux/psmux) on Windows) via your platform's package manager (`brew`/`apt`/`dnf`/`pacman` on macOS/Linux, `winget` on Windows) before the rest of the configs are applied.
+After the prompts, a `run_once_` script installs the prerequisite Bootstrap Packages (`git`, `mise`, and Docker on macOS/Linux, plus Homebrew itself on macOS if it isn't already present; `git`, `mise`, and [`psmux`](https://github.com/psmux/psmux) on Windows) via your platform's package manager (`brew`/`apt`/`dnf`/`pacman` on macOS/Linux, `winget` on Windows) before the rest of the configs are applied.
 
 If you'd rather review what would happen before anything touches your `$HOME`, run `chezmoi init MikesterFH/dotfiles` (no `--apply`) followed by `chezmoi diff`, then `chezmoi apply` once you're happy with it.
 
