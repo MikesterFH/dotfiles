@@ -10,10 +10,10 @@
 # docs/adr/0005-psmux-for-windows-tmux-parity.md. Like the other Bootstrap
 # Packages, it's installed unconditionally, independent of `profile`.
 #
-# Windows Target only — no Docker step here; Docker is covered by the Linux
-# Target via WSL2. Sibling run_once_before_install-packages.sh.tmpl handles
-# macOS/Linux/WSL and renders empty on Windows, so only one of the two ever
-# actually runs.
+# Windows Target only — no Docker step here, nor in the macOS/Linux sibling;
+# Docker is intentionally not installed by this workflow on any Target.
+# Sibling run_once_before_install-packages.sh.tmpl handles macOS/Linux/WSL
+# and renders empty on Windows, so only one of the two ever actually runs.
 # =============================================================================
 $ErrorActionPreference = "Stop"
 

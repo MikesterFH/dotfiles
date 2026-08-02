@@ -2,11 +2,13 @@
 #!/usr/bin/env bash
 # =============================================================================
 # chezmoi run_once_before script: installs prerequisite Bootstrap Packages
-# (git, mise, Homebrew on macOS) and Docker before any managed dotfiles are
-# applied.
+# (git, mise, Homebrew on macOS) before any managed dotfiles are applied.
+# Docker is intentionally not installed here (or by any Application
+# manifest) — installing it is left to you, same as any tool this workflow
+# doesn't manage.
 #
-# Ported from install.sh's ensure_git/install_mise/install_docker/
-# detect_linux_distro. macOS and Linux/WSL only — native Windows uses the
+# Ported from install.sh's ensure_git/install_mise/detect_linux_distro.
+# macOS and Linux/WSL only — native Windows uses the
 # sibling run_once_before_install-packages.ps1.tmpl instead, since bash
 # doesn't run there natively. This template renders empty on Windows so
 # chezmoi never attempts to execute it there.
@@ -194,44 +196,6 @@ install_mise() {
   warn "  zsh:  eval \"\$(mise activate zsh)\""
 }
 
-# -- Docker ---------------------------------------------------------------------
-
-install_docker() {
-  info "Checking Docker..."
-
-  if command_exists docker; then
-    success "Docker already installed ($(docker --version))"
-    return
-  fi
-
-  info "Installing Docker..."
-
-  case "$OS" in
-  macos)
-    if command_exists brew; then
-      brew install --cask docker
-      warn "Docker Desktop installed. Please start it manually from Applications."
-    else
-      error "Homebrew not found. Install Docker Desktop manually:"
-      error "  https://docs.docker.com/desktop/install/mac-install/"
-      return
-    fi
-    ;;
-  linux | wsl)
-    curl -fsSL https://get.docker.com | sh
-    sudo usermod -aG docker "$USER"
-    warn "Added $USER to docker group. Log out and back in for this to take effect."
-    ;;
-  esac
-
-  if command_exists docker; then
-    success "Docker installed ($(docker --version))"
-  else
-    warn "Docker installed but not yet available in this shell session."
-    warn "You may need to start Docker Desktop (macOS) or re-login (Linux)."
-  fi
-}
-
 main() {
   detect_os
 
@@ -243,7 +207,6 @@ main() {
 
   ensure_git
   install_mise
-  install_docker
 }
 
 main "$@"
