@@ -124,6 +124,37 @@ else
     assert_absent ".config/homebrew"
 fi
 
+# Linux (Debian/apt) Application manifest, see
+# docs/adr/0006-application-category-and-profile-manifests.md: Debian/apt
+# only — CI's Linux runner is Ubuntu (Debian family), so this always renders
+# there. One package name per line, one per app in the Profile's
+# Application list that has an apt identifier (iterm2/windows-terminal
+# don't, so never expected here).
+if [ "$os" = "Linux" ]; then
+    aptfile="$dest/.config/apt-packages.txt"
+    assert_file ".config/apt-packages.txt"
+    if [ "$profile" = "dev-server" ]; then
+        if [ -f "$aptfile" ] && grep -qE '\S' "$aptfile"; then
+            bad "apt-packages.txt should have no packages for dev-server, has some"
+        else
+            ok "apt-packages.txt has no packages for dev-server"
+        fi
+    else
+        for pkg in wezterm code zed; do
+            if [ -f "$aptfile" ] && grep -qxF "$pkg" "$aptfile"; then
+                ok "apt-packages.txt: $pkg present"
+            else
+                bad "apt-packages.txt: $pkg missing"
+            fi
+        done
+        if [ -f "$aptfile" ] && grep -qE 'iterm2|windows-terminal' "$aptfile"; then
+            bad "apt-packages.txt: iterm2/windows-terminal should never appear (no Linux identifier)"
+        fi
+    fi
+else
+    assert_absent ".config/apt-packages.txt"
+fi
+
 # Rendered git config: autocrlf must be "input", never "true"
 gitconfig="$dest/.config/git/config"
 if [ -f "$gitconfig" ]; then

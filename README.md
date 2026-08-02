@@ -39,7 +39,11 @@ You'll be prompted once for:
 
 After the prompts, a `run_once_` script installs the prerequisite Bootstrap Packages (`git`, `mise`, and Docker on macOS/Linux, plus Homebrew itself on macOS if it isn't already present; `git`, `mise`, and [`psmux`](https://github.com/psmux/psmux) on Windows) via your platform's package manager (`brew`/`apt`/`dnf`/`pacman` on macOS/Linux, `winget` on Windows) before the rest of the configs are applied.
 
-On the macOS Target, once Bootstrap and the rest of the Managed Files have run, a `run_onchange_after_` script installs your Profile's Applications (wezterm, VS Code, Zed, iTerm2 — whichever apply to macOS) via `brew bundle` against a Homebrew manifest rendered to `~/.config/homebrew/Brewfile`. Since it's `run_onchange_`, editing the Application list and re-running `chezmoi apply` picks up newly-added apps on an already-provisioned machine too, not just on a fresh install. Linux and Windows Application manifests aren't implemented yet.
+On the macOS Target, once Bootstrap and the rest of the Managed Files have run, a `run_onchange_after_` script installs your Profile's Applications (wezterm, VS Code, Zed, iTerm2 — whichever apply to macOS) via `brew bundle` against a Homebrew manifest rendered to `~/.config/homebrew/Brewfile`. Since it's `run_onchange_`, editing the Application list and re-running `chezmoi apply` picks up newly-added apps on an already-provisioned machine too, not just on a fresh install.
+
+On the Linux Target, when the distro is Debian-family (Debian, Ubuntu, Pop!\_OS, Linux Mint, elementary OS — matching Bootstrap's own distro detection; no Fedora/Arch Application manifest yet), the same pattern installs your Profile's Applications (wezterm, VS Code, Zed — whichever apply to Linux) via `apt-get install` against a package list rendered to `~/.config/apt-packages.txt`.
+
+Windows Application manifests aren't implemented yet.
 
 If you'd rather review what would happen before anything touches your `$HOME`, run `chezmoi init MikesterFH/dotfiles` (no `--apply`) followed by `chezmoi diff`, then `chezmoi apply` once you're happy with it.
 

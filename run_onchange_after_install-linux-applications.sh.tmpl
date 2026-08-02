@@ -1,0 +1,41 @@
+{{- $debianLikeIDs := list "debian" "ubuntu" "pop" "linuxmint" "elementary" -}}
+{{- if and (eq .chezmoi.os "linux") (has .chezmoi.osRelease.id $debianLikeIDs) (not .devpod) -}}
+#!/usr/bin/env bash
+# =============================================================================
+# chezmoi run_onchange_after script: installs the current Profile's Linux
+# (Debian/apt) Application list via `apt-get install`, reading the package
+# list rendered by dot_config/apt-packages.txt.tmpl from the Application
+# list computed in .chezmoi.toml.tmpl. See
+# docs/adr/0006-application-category-and-profile-manifests.md.
+#
+# `run_onchange_` (not `run_once_`) so editing the Profile's Application list
+# and re-running `chezmoi apply` reaches an already-provisioned machine, not
+# only a fresh install — the "applications" comment below is what changes
+# the rendered script's content, and therefore its re-run hash, whenever the
+# resolved list changes.
+#
+# `_after_` so this always runs once every Managed File — including the
+# package list itself — has already been written. Unlike the macOS
+# Application manifest, no Bootstrap-installed package manager is required
+# first: apt ships with Debian/Ubuntu already.
+#
+# Debian/apt only, matching the Bootstrap script's own detect_linux_distro
+# categorization (debian/ubuntu/pop/linuxmint/elementary) — this renders
+# empty and never executes on Fedora/Arch/other distros, or on macOS/
+# Windows, see docs/adr/0006-application-category-and-profile-manifests.md.
+# Also excluded on devpod (a devpod container is always .chezmoi.os "linux",
+# so it could otherwise match here) — devpod's Profile still carries GUI
+# apps in its Application list, but a devcontainer shouldn't get them
+# installed, matching .chezmoiignore's existing devpod GUI-config exclusion.
+#
+# applications: {{ .applications | join "," }}
+# =============================================================================
+set -euo pipefail
+
+packages_file="$HOME/.config/apt-packages.txt"
+
+echo "[INFO]  Installing Linux Applications via apt-get..."
+sudo apt-get update -qq
+xargs -a "$packages_file" -r sudo apt-get install -y -qq
+echo "[OK]    Linux Applications installed."
+{{- end -}}

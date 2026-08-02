@@ -9,12 +9,12 @@ migrate-from-install-sh.sh
 # Library/, Linux: .config/Code, Windows: AppData); the iTerm2 Dynamic
 # Profile (Library/) and PowerShell profile (Documents/) are single-OS only;
 # zed lives at .config/zed everywhere except Windows (AppData/Roaming/Zed);
-# the macOS Application manifest (.config/homebrew, see
-# docs/adr/0006-application-category-and-profile-manifests.md) is macOS-only,
-# there being no Homebrew-on-Linux/Windows Application support; and the
-# Windows Target has no bash/zsh of its own. tmux IS deployed on Windows
-# (.config/tmux is not excluded there) — psmux reads the same tmux.conf, see
-# docs/adr/0005-psmux-for-windows-tmux-parity.md.
+# the macOS Application manifest (.config/homebrew) and the Linux Application
+# manifest (.config/apt-packages.txt, further narrowed to Debian/apt below —
+# see docs/adr/0006-application-category-and-profile-manifests.md) are each
+# single-OS; and the Windows Target has no bash/zsh of its own. tmux IS
+# deployed on Windows (.config/tmux is not excluded there) — psmux reads the
+# same tmux.conf, see docs/adr/0005-psmux-for-windows-tmux-parity.md.
 # Every branch lists everything *not* relevant to that OS, so an unlisted
 # fifth OS falls through to the catch-all and excludes all of it — fail
 # safe, not a guess.
@@ -22,6 +22,7 @@ migrate-from-install-sh.sh
 .config/Code
 AppData
 Documents
+.config/apt-packages.txt
 {{ else if eq .chezmoi.os "linux" }}
 Library
 AppData
@@ -37,12 +38,25 @@ Library
 .zsh_aliases
 .config/zed
 .config/homebrew
+.config/apt-packages.txt
 {{ else }}
 Library
 .config/Code
 AppData
 Documents
 .config/homebrew
+.config/apt-packages.txt
+{{ end }}
+
+# Linux Application manifest (apt, Debian only, see
+# docs/adr/0006-application-category-and-profile-manifests.md): the OS
+# switch above only excludes it on non-Linux Targets; within Linux, it's
+# further narrowed to Debian-family distros, matching the Bootstrap
+# script's own detect_linux_distro categorization (debian/ubuntu/pop/
+# linuxmint/elementary) — no Fedora/Arch Application manifest.
+{{ $debianLikeIDs := list "debian" "ubuntu" "pop" "linuxmint" "elementary" }}
+{{ if and (eq .chezmoi.os "linux") (not (has .chezmoi.osRelease.id $debianLikeIDs)) }}
+.config/apt-packages.txt
 {{ end }}
 
 # Machine Profile (chezmoi init --promptChoiceOnce profile=personal|dev|dev-server,
@@ -88,7 +102,13 @@ Library/Application Support/iTerm2
 # starship, zsh. Listed on top of whatever the OS switch above already
 # excludes (a devpod container is always .chezmoi.os "linux", so Library/
 # AppData/Documents are already gone) — only the devpod-specific narrowing
-# lives here: no tmux, no GUI-app configs (wezterm/vscode/zed).
+# lives here: no tmux, no GUI-app configs (wezterm/vscode/zed), and no Linux
+# Application manifest (a devpod container's Profile still carries GUI apps
+# in its Application list — this excludes the manifest itself so
+# run_onchange_after_install-linux-applications.sh.tmpl has nothing to
+# install; that script is separately gated on `not .devpod` too, since
+# excluding the manifest alone would just make it fail trying to read a
+# missing file).
 {{ if .devpod }}
 .bashrc
 .bash_aliases
@@ -96,6 +116,7 @@ Library/Application Support/iTerm2
 .config/wezterm
 .config/Code
 .config/zed
+.config/apt-packages.txt
 {{ end }}
 
 # Preserves install.sh's SKIP_FILES/SKIP_DIRS behavior: matched by name,

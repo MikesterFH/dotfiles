@@ -1,0 +1,22 @@
+{{- /* apt package list for the current Profile's Application list (see
+       docs/adr/0006-application-category-and-profile-manifests.md). One
+       package name per line, for apps in .applications that have a
+       Debian/apt identifier; apps with no Linux packaging (e.g. iterm2,
+       windows-terminal) are simply absent — same convention already used
+       for GUI configs limited to one platform. Each app is assigned to
+       exactly one apt package name here, decided when the app was added.
+       Installed via run_onchange_after_install-linux-applications.sh.tmpl.
+       Debian/apt only — this file doesn't render on Fedora/Arch/other
+       Linux distros, or on macOS/Windows, see .chezmoiignore. */ -}}
+{{- $aptPackages := dict
+      "wezterm" "wezterm"
+      "vscode" "code"
+      "zed" "zed"
+-}}
+{{- $lines := list -}}
+{{- range .applications -}}
+{{- if hasKey $aptPackages . -}}
+{{- $lines = append $lines (index $aptPackages .) -}}
+{{- end -}}
+{{- end -}}
+{{ $lines | join "\n" }}
