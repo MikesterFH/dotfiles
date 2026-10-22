@@ -27,10 +27,17 @@
        Profile alone decides the app set now, no per-machine override. A
        machine needing a different set needs a distinct Profile, not a
        prompt answered differently here. */ -}}
+{{- /* CLI tools the deployed configs rely on (git's delta pager, the
+       starship prompt, tmux plugins' fzf, yazi's previewers, ...) — the
+       same on every Profile, dev-server included, see
+       docs/adr/0008-cli-tools-are-applications.md. GUI apps vary by
+       Profile. */ -}}
+{{- $cliTools := list "delta" "starship" "neovim" "tmux" "fzf" "zoxide" "yazi" "glow" "bat" "lazygit" -}}
+{{- $guiApps := list "wezterm" "vscode" "zed" "windows-terminal" "iterm2" -}}
 {{- $applicationsByProfile := dict
-      "personal" (list "wezterm" "vscode" "zed" "windows-terminal" "iterm2")
-      "dev" (list "wezterm" "vscode" "zed" "windows-terminal" "iterm2")
-      "dev-server" (list)
+      "personal" (concat $cliTools $guiApps)
+      "dev" (concat $cliTools $guiApps)
+      "dev-server" $cliTools
 -}}
 {{- $applications := index $applicationsByProfile $profile -}}
 

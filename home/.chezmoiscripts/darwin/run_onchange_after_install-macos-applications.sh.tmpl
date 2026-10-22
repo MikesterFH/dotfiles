@@ -9,9 +9,9 @@
 #
 # `run_onchange_` (not `run_once_`) so editing the Profile's Application list
 # and re-running `chezmoi apply` reaches an already-provisioned machine, not
-# only a fresh install — the "applications" comment below is what changes
+# only a fresh install — the "manifest sha256" comment below is what changes
 # the rendered script's content, and therefore its re-run hash, whenever the
-# resolved list changes.
+# rendered manifest changes.
 #
 # `_after_` so this always runs once every Managed File — including the
 # Brewfile itself — has already been written; combined with Bootstrap

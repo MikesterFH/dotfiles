@@ -2,7 +2,7 @@
 #
 # dev-server profile: personal+work git identities. No Application list
 # seeded here — it's derived from `profile` inside .chezmoi.toml.tmpl, not
-# prompted for; dev-server resolves to an empty list, so no GUI configs.
+# prompted for; dev-server resolves to CLI tools only, so no GUI configs.
 [data]
     profile = "dev-server"
     devpod = false

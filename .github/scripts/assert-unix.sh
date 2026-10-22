@@ -73,7 +73,7 @@ dev)
     ;;
 esac
 
-# GUI-app configs: dev-server's Application list is empty, so it gets none;
+# GUI-app configs: dev-server's Application list holds only CLI tools, so it gets none;
 # personal/dev's Application list carries every app (see .chezmoi.toml.tmpl).
 if [ "$profile" = "dev-server" ]; then
     assert_absent ".config/wezterm"
@@ -98,11 +98,20 @@ fi
 
 # macOS Application manifest (Homebrew), see
 # docs/adr/0006-application-category-and-profile-manifests.md: macOS-only,
-# one `cask` line per app in the Profile's Application list that has a
-# macOS identifier (windows-terminal doesn't, so it's never expected here).
+# one `brew` line per CLI tool (every profile, see
+# docs/adr/0008-cli-tools-are-applications.md) and one `cask` line per GUI
+# app in the Profile's Application list that has a macOS identifier
+# (windows-terminal doesn't, so it's never expected here).
 if [ "$os" = "Darwin" ]; then
     brewfile="$dest/.config/homebrew/Brewfile"
     assert_file ".config/homebrew/Brewfile"
+    for formula in git-delta starship neovim tmux fzf zoxide yazi glow bat lazygit; do
+        if [ -f "$brewfile" ] && grep -qE "^brew \"$formula\"\$" "$brewfile"; then
+            ok "Brewfile: brew \"$formula\" present"
+        else
+            bad "Brewfile: brew \"$formula\" missing"
+        fi
+    done
     if [ "$profile" = "dev-server" ]; then
         if [ -f "$brewfile" ] && grep -q '^cask ' "$brewfile"; then
             bad "Brewfile should have no cask entries for dev-server, has some"
@@ -134,11 +143,18 @@ fi
 if [ "$os" = "Linux" ]; then
     aptfile="$dest/.config/apt-packages.txt"
     assert_file ".config/apt-packages.txt"
-    if [ "$profile" = "dev-server" ]; then
-        if [ -f "$aptfile" ] && grep -qE '\S' "$aptfile"; then
-            bad "apt-packages.txt should have no packages for dev-server, has some"
+    for pkg in git-delta starship neovim tmux fzf zoxide yazi glow bat lazygit; do
+        if [ -f "$aptfile" ] && grep -qxF "$pkg" "$aptfile"; then
+            ok "apt-packages.txt: $pkg present"
         else
-            ok "apt-packages.txt has no packages for dev-server"
+            bad "apt-packages.txt: $pkg missing"
+        fi
+    done
+    if [ "$profile" = "dev-server" ]; then
+        if [ -f "$aptfile" ] && grep -qxE 'wezterm|code|zed' "$aptfile"; then
+            bad "apt-packages.txt should have no GUI apps for dev-server, has some"
+        else
+            ok "apt-packages.txt has no GUI apps for dev-server"
         fi
     else
         for pkg in wezterm code zed; do

@@ -100,10 +100,10 @@ if [ -f ~/.bash_aliases ]; then
 fi
 
 # starship
-eval "$(starship init bash)"
+command -v starship &>/dev/null && eval "$(starship init bash)"
 
 # cargo
-. "$HOME/.cargo/env"
+[ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
 # esp toolchain for rust
 . "$HOME/export-esp.sh"
 

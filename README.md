@@ -33,17 +33,19 @@ This clones the repo as your Source Dir, prompts you for a few values, and immed
 
 You'll be prompted once for:
 
-- **profile** — which kind of machine this is: `personal`, `dev`, or `dev-server`. Scopes which git identities you're asked for next, and which Applications (wezterm, VS Code, Zed, Windows Terminal, iTerm2) get deployed — `personal`/`dev` get all of them (whichever apply to your OS), `dev-server` gets none. There's no per-app prompt or per-machine override; a machine needing a different app set needs a distinct profile. See `docs/adr/0004-machine-profiles.md` and `docs/adr/0006-application-category-and-profile-manifests.md` for the full rationale.
+- **profile** — which kind of machine this is: `personal`, `dev`, or `dev-server`. Scopes which git identities you're asked for next, and which Applications get installed. Every Profile gets the CLI tools the configs rely on (delta, starship, neovim, tmux, fzf, zoxide, yazi, glow, bat, lazygit); `personal`/`dev` also get the GUI apps (wezterm, VS Code, Zed, Windows Terminal, iTerm2 — whichever apply to your OS), `dev-server` gets none of those. There's no per-app prompt or per-machine override; a machine needing a different app set needs a distinct profile. See `docs/adr/0004-machine-profiles.md`, `docs/adr/0006-application-category-and-profile-manifests.md` and `docs/adr/0008-cli-tools-are-applications.md` for the full rationale.
 - **git identity** — name + email for the git contexts your `profile` uses: `personal`+`work` for `personal`, `work`+`client` for `dev`, `personal`+`work` for `dev-server`. These generate `~/.config/git/config.local.{personal,work,client}` (only the ones your profile needs), which the tracked `~/.config/git/config` switches between automatically via `includeIf`, based on which directory you're in (`~/dev/personal/`, `~/dev/work/`, `~/dev/client/`).
 - **DevPod/devcontainer?** — answer `false` on a real machine (the default). See below for when to answer `true`.
 
 After the prompts, a `run_once_` script installs the prerequisite Bootstrap Packages (`git`, `mise`, plus Homebrew itself on macOS if it isn't already present; `git`, `mise`, and [`psmux`](https://github.com/psmux/psmux) on Windows) via your platform's package manager (`brew`/`apt`/`dnf`/`pacman` on macOS/Linux, `winget` on Windows) before the rest of the configs are applied. Docker isn't installed by this workflow on any Target — set it up by hand if you need it.
 
-On the macOS Target, once Bootstrap and the rest of the Managed Files have run, a `run_onchange_after_` script installs your Profile's Applications (wezterm, VS Code, Zed, iTerm2 — whichever apply to macOS) via `brew bundle` against a Homebrew manifest rendered to `~/.config/homebrew/Brewfile`. Since it's `run_onchange_`, editing the Application list and re-running `chezmoi apply` picks up newly-added apps on an already-provisioned machine too, not just on a fresh install.
+On the macOS Target, once Bootstrap and the rest of the Managed Files have run, a `run_onchange_after_` script installs your Profile's Applications (the CLI tools as `brew` formulae; wezterm, VS Code, Zed, iTerm2 as casks) via `brew bundle` against a Homebrew manifest rendered to `~/.config/homebrew/Brewfile`. Since it's `run_onchange_`, editing the Application list and re-running `chezmoi apply` picks up newly-added apps on an already-provisioned machine too, not just on a fresh install.
 
-On the Linux Target, when the distro is Debian-family (Debian, Ubuntu, Pop!\_OS, Linux Mint, elementary OS — matching Bootstrap's own distro detection; no Fedora/Arch Application manifest yet), the same pattern installs your Profile's Applications (wezterm, VS Code, Zed — whichever apply to Linux) via `apt-get install` against a package list rendered to `~/.config/apt-packages.txt`.
+On the Linux Target, when the distro is Debian-family (Debian, Ubuntu, Pop!\_OS, Linux Mint, elementary OS — matching Bootstrap's own distro detection; no Fedora/Arch Application manifest yet), the same pattern installs your Profile's Applications (the CLI tools; wezterm, VS Code, Zed) via `apt-get install` against a package list rendered to `~/.config/apt-packages.txt`. Packages your release doesn't ship (older Debian/Ubuntu lack starship, yazi, glow, lazygit) are skipped and listed as a warning — install those by hand.
 
-On the Windows Target, the same pattern installs your Profile's Applications (wezterm, VS Code, Zed, Windows Terminal — whichever apply to Windows) via `winget import` against a manifest rendered to `~/.config/winget/packages.json`.
+On the Windows Target, the same pattern installs your Profile's Applications (the CLI tools except tmux, which psmux replaces; wezterm, VS Code, Zed, Windows Terminal) via `winget import` against a manifest rendered to `~/.config/winget/packages.json`.
+
+After the Applications, two more `run_onchange_after_` scripts install the plugin layers: tpm and the `@plugin`s from `tmux.conf` into `~/.config/tmux/plugins` (macOS/Linux), and the Yazi plugins pinned in `package.toml` via `ya pkg install` (every OS). Each reruns when its config file changes. See `docs/adr/0008-cli-tools-are-applications.md`.
 
 If you'd rather review what would happen before anything touches your `$HOME`, run `chezmoi init MikesterFH/dotfiles` (no `--apply`) followed by `chezmoi diff`, then `chezmoi apply` once you're happy with it.
 
@@ -87,9 +89,8 @@ unchanged. The configuration and pinned `package.toml` are deployed to
 script sets `YAZI_CONFIG_HOME` to that path instead of Yazi's default
 `AppData\Roaming\yazi\config`.
 
-Install `glow` and `bat` on each machine (`scoop install glow bat` on Windows,
-`brew install glow bat` on macOS, or your Linux package manager), then run
-`ya pkg install` after applying the dotfiles. Debian/Ubuntu may name the bat
+`glow` and `bat` are installed as Applications, and `ya pkg install` runs
+on apply whenever `package.toml` changes. Debian/Ubuntu name the bat
 executable `batcat`; make it available as `bat` on your PATH for these rules.
 
 Yazi needs `file` for MIME detection, and Piper needs `sh`. On Windows the same

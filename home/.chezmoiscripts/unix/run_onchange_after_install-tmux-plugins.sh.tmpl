@@ -1,0 +1,45 @@
+{{- if and (ne .chezmoi.os "windows") (not .devpod) -}}
+#!/usr/bin/env bash
+# =============================================================================
+# chezmoi run_onchange_after script: installs tpm and every `@plugin` listed
+# in ~/.config/tmux/tmux.conf into ~/.config/tmux/plugins, the path tmux.conf
+# sets as TMUX_PLUGIN_MANAGER_PATH. Without it, tmux.conf's final
+# `run '~/.config/tmux/plugins/tpm/tpm'` fails and tmux starts unthemed.
+#
+# Rerun trigger: hash of tmux.conf, so adding a plugin there installs it on
+# the next `chezmoi apply`. tpm's install_plugins skips plugins already
+# present, so a rerun is cheap.
+# tmux.conf sha256: {{ include "dot_config/tmux/tmux.conf" | sha256sum }}
+#
+# Sorts after the darwin/ and linux/ Application installs, so tmux itself is
+# already installed by then. macOS/Linux only, and not on devpod (no tmux
+# config there, see .chezmoiignore); Windows' psmux has its own plugin
+# manager, set up by hand (see README).
+# =============================================================================
+set -euo pipefail
+
+# chezmoi runs each script as its own process — re-derive Homebrew's PATH,
+# same as the macOS Application script, since a fresh Mac lacks it.
+if [ -x /opt/homebrew/bin/brew ]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+elif [ -x /usr/local/bin/brew ]; then
+  eval "$(/usr/local/bin/brew shellenv)"
+fi
+
+if ! command -v tmux &>/dev/null; then
+  echo "[WARN]  tmux not installed; skipping tmux plugins."
+  exit 0
+fi
+
+plugin_dir="$HOME/.config/tmux/plugins"
+tpm_dir="$plugin_dir/tpm"
+
+if [ ! -d "$tpm_dir" ]; then
+  echo "[INFO]  Cloning tpm..."
+  git clone --depth 1 https://github.com/tmux-plugins/tpm "$tpm_dir"
+fi
+
+echo "[INFO]  Installing tmux plugins..."
+"$tpm_dir/bin/install_plugins"
+echo "[OK]    tmux plugins installed."
+{{- end -}}

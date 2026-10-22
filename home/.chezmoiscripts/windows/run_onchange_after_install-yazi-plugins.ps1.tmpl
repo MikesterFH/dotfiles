@@ -1,0 +1,34 @@
+{{- if eq .chezmoi.os "windows" -}}
+# =============================================================================
+# chezmoi run_onchange_after script: installs the Yazi plugins pinned in
+# ~/.config/yazi/package.toml via `ya pkg install`. Windows sibling of
+# unix/run_onchange_after_install-yazi-plugins.sh.tmpl.
+#
+# Rerun trigger: hash of package.toml, so a new or re-pinned plugin is
+# installed on the next `chezmoi apply`.
+# package.toml sha256: {{ include "dot_config/yazi/package.toml" | sha256sum }}
+#
+# Sorts after install-windows-applications (yazi installed) but before
+# set-yazi-env-windows, so YAZI_CONFIG_HOME is set here for this process too.
+# =============================================================================
+$ErrorActionPreference = "Stop"
+
+$env:YAZI_CONFIG_HOME = Join-Path $HOME ".config\yazi"
+
+# winget just installed yazi in a sibling process — pick up its PATH entry.
+$env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" +
+    [Environment]::GetEnvironmentVariable("Path", "User")
+
+if (-not (Get-Command ya -ErrorAction SilentlyContinue)) {
+    Write-Host "[WARN]  yazi (ya) not installed; skipping Yazi plugins."
+    exit 0
+}
+
+Write-Host "[INFO]  Installing Yazi plugins..."
+ya pkg install
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "ya pkg install failed (exit code $LASTEXITCODE)"
+    exit 1
+}
+Write-Host "[OK]    Yazi plugins installed."
+{{- end -}}

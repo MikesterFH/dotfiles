@@ -25,7 +25,7 @@ A prerequisite tool — `git`, `mise`, and the platform's own package manager wh
 _Avoid_: dependency, tool install, Application (see below)
 
 **Application**:
-Software a machine needs beyond the Bootstrap Package minimum — CLI tools and GUI apps alike (e.g. wezterm, VS Code, Zed) — installed via a package-manager-native manifest (`Brewfile`, `apt-packages.txt`, a winget manifest; one file per platform, each carrying its own package identifier per app) rendered from the machine's Profile. Manifests run via `run_onchange_`, so editing the app list reaches already-provisioned machines on their next `chezmoi apply`. See `docs/adr/0006-application-category-and-profile-manifests.md`.
+Software a machine needs beyond the Bootstrap Package minimum — CLI tools the configs rely on (delta, starship, tmux, yazi, …; the same on every Profile) and GUI apps (e.g. wezterm, VS Code, Zed; per Profile) alike — installed via a package-manager-native manifest (`Brewfile`, `apt-packages.txt`, a winget manifest; one file per platform, each carrying its own package identifier per app) rendered from the machine's Profile. Manifests run via `run_onchange_`, so editing the app list reaches already-provisioned machines on their next `chezmoi apply`. See `docs/adr/0006-application-category-and-profile-manifests.md` and `docs/adr/0008-cli-tools-are-applications.md`.
 _Avoid_: package, tool (when meaning this specifically), Bootstrap Package (see above)
 
 **Profile**:

@@ -1,7 +1,8 @@
 {{- /* winget import manifest for the current Profile's Application list
        (see docs/adr/0006-application-category-and-profile-manifests.md).
        One package entry per app in .applications that has a winget package
-       ID; apps with no Windows packaging (e.g. iterm2) are simply absent —
+       ID; apps with no Windows packaging (e.g. iterm2, and tmux — psmux, a
+       Bootstrap Package, stands in for it) are simply absent —
        same convention already used for GUI configs limited to one
        platform. Each app is assigned to exactly one winget package ID
        here, decided when the app was added. Installed via
@@ -10,6 +11,15 @@
        this file doesn't change on every `chezmoi apply` just from a
        timestamp — only the Application list changing should touch it. */ -}}
 {{- $wingetPackages := dict
+      "delta" "dandavison.delta"
+      "starship" "Starship.Starship"
+      "neovim" "Neovim.Neovim"
+      "fzf" "junegunn.fzf"
+      "zoxide" "ajeetdsouza.zoxide"
+      "yazi" "sxyazi.yazi"
+      "glow" "charmbracelet.glow"
+      "bat" "sharkdp.bat"
+      "lazygit" "JesseDuffield.lazygit"
       "wezterm" "wez.wezterm"
       "vscode" "Microsoft.VisualStudioCode"
       "zed" "Zed.Zed"

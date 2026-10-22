@@ -1,0 +1,33 @@
+{{- if and (ne .chezmoi.os "windows") (not .devpod) -}}
+#!/usr/bin/env bash
+# =============================================================================
+# chezmoi run_onchange_after script: installs the Yazi plugins pinned in
+# ~/.config/yazi/package.toml via `ya pkg install`.
+#
+# Rerun trigger: hash of package.toml, so a new or re-pinned plugin is
+# installed on the next `chezmoi apply`.
+# package.toml sha256: {{ include "dot_config/yazi/package.toml" | sha256sum }}
+#
+# Sorts after the darwin/ and linux/ Application installs, so yazi (and its
+# `ya` CLI) is already installed by then. macOS/Linux only, and not on devpod
+# (no yazi config there, see .chezmoiignore); Windows has its own sibling.
+# =============================================================================
+set -euo pipefail
+
+# chezmoi runs each script as its own process — re-derive Homebrew's PATH,
+# same as the macOS Application script, since a fresh Mac lacks it.
+if [ -x /opt/homebrew/bin/brew ]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+elif [ -x /usr/local/bin/brew ]; then
+  eval "$(/usr/local/bin/brew shellenv)"
+fi
+
+if ! command -v ya &>/dev/null; then
+  echo "[WARN]  yazi (ya) not installed; skipping Yazi plugins."
+  exit 0
+fi
+
+echo "[INFO]  Installing Yazi plugins..."
+ya pkg install
+echo "[OK]    Yazi plugins installed."
+{{- end -}}
