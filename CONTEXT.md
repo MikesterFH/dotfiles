@@ -5,7 +5,7 @@ Personal configuration for macOS, Linux (incl. WSL), and native Windows, deploye
 ## Language
 
 **Source Dir**:
-This repo itself — chezmoi's source-of-truth directory. Its `home/` folder (chosen via `.chezmoiroot`) mirrors `$HOME` (e.g. `home/dot_bashrc` → `~/.bashrc`); repo meta (docs, CI, helper scripts) lives beside it.
+This repo itself — chezmoi's source-of-truth directory. One clone per machine (wherever `chezmoi init` was pointed; recorded as `sourceDir` in the chezmoi config), never a second working copy beside it. Its `home/` folder (chosen via `.chezmoiroot`) mirrors `$HOME` (e.g. `home/dot_bashrc` → `~/.bashrc`); repo meta (docs, CI, helper scripts) lives beside it.
 _Avoid_: dotfiles folder, source tree, repo root
 
 **Target State**:

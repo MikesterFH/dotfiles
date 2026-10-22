@@ -41,6 +41,13 @@
 -}}
 {{- $applications := index $applicationsByProfile $profile -}}
 
+{{- /* Remember where this repo was cloned, so every later chezmoi command
+       (apply, update, cd, edit) uses that one working tree instead of the
+       default ~/.local/share/chezmoi. workingTree, not sourceDir: sourceDir
+       already points into home/ (.chezmoiroot), while chezmoi needs the repo
+       root to find .chezmoiroot again. */}}
+sourceDir = {{ .chezmoi.workingTree | quote }}
+
 [data]
     profile = {{ $profile | quote }}
     devpod = {{ $devpod }}

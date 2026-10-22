@@ -29,7 +29,16 @@ See [chezmoi's install docs](https://www.chezmoi.io/install/) for other options.
 chezmoi init --apply MikesterFH/dotfiles
 ```
 
-This clones the repo as your Source Dir, prompts you for a few values, and immediately writes the rendered dotfiles into `$HOME`.
+This clones the repo as your Source Dir (to `~/.local/share/chezmoi`, chezmoi's default), prompts you for a few values, and immediately writes the rendered dotfiles into `$HOME`.
+
+To keep the repo somewhere visible instead, clone it yourself and point `init` at it — that clone then *is* the Source Dir, there's no second copy to keep in sync:
+
+```sh
+git clone git@github.com:MikesterFH/dotfiles.git ~/dotfiles
+chezmoi init --apply --source ~/dotfiles
+```
+
+Either way, `.chezmoi.toml.tmpl` writes the clone's path into `~/.config/chezmoi/chezmoi.toml` as `sourceDir`, so every later `chezmoi` command (`apply`, `update`, `cd`, `edit`) uses it without needing `--source` again.
 
 You'll be prompted once for:
 
