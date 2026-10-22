@@ -15,10 +15,11 @@ Config.color_schemes = color.get_schemes()
 Config.color_scheme = color.get_scheme()
 
 local theme = Config.color_schemes[Config.color_scheme]
+color.set_scheme(Config, theme, Config.color_scheme)
 
 if fs.platform().is_win then
-  Config.win32_system_backdrop = "Mica"
-  Config.window_background_opacity = 0
+  Config.win32_system_backdrop = "Disable"
+  Config.window_background_opacity = 1.0
 elseif fs.platform().is_mac then
   Config.macos_window_background_blur = G.blur
   Config.background = {
@@ -29,8 +30,20 @@ elseif fs.platform().is_mac then
       opacity = G.opacity,
     },
   }
+elseif fs.platform().is_linux then
+  local desktop = (os.getenv "XDG_CURRENT_DESKTOP" or ""):lower()
+  if desktop:find("kde", 1, true) or desktop:find("plasma", 1, true) then
+    Config.kde_window_background_blur = true
+  end
+  Config.background = {
+    {
+      source = { Color = theme.background },
+      width = "100%",
+      height = "100%",
+      opacity = G.opacity,
+    },
+  }
 else
-  Config.kde_window_background_blur = true
   Config.background = {
     {
       source = { Color = theme.background },
@@ -104,7 +117,5 @@ Config.skip_close_confirmation_for_processes_named = {
   "powershell.exe",
 }
 Config.window_close_confirmation = "AlwaysPrompt"
-
-color.set_tab_button(Config, theme)
 
 return Config

@@ -50,6 +50,17 @@ Assert-Absent ".bash_aliases"
 Assert-Absent ".zshrc"
 Assert-Absent ".zprofile"
 Assert-Absent ".zsh_aliases"
+Assert-FileExists ".psmux.conf"
+
+$psmuxConfig = Get-Content -LiteralPath (Join-Path $Dest ".psmux.conf") -Raw -ErrorAction SilentlyContinue
+if ($psmuxConfig -notmatch 'source-file ~/\.psmux\.conf' -or
+    $psmuxConfig -notmatch 'bind-key -n C-h if-shell' -or
+    $psmuxConfig -match 'psmux-battery|@\{?battery_display|psmux-vim-navigator') {
+    Write-Host "[FAIL] psmux config: reload, Neovim navigation, or removed plugin expectations violated"
+    $script:failed = $true
+} else {
+    Write-Host "[OK]   psmux config: dedicated reload, Neovim navigation, no battery or navigator poller"
+}
 
 # tmux config IS deployed on Windows, unconditional across every profile —
 # psmux reads the same tmux.conf, see
@@ -127,6 +138,11 @@ if (Test-Path -Path $wingetManifestPath -PathType Leaf) {
         }
     }
 }
+
+# Yazi uses AppData on Windows; the Unix config path must not be deployed.
+Assert-FileExists "AppData\Roaming\yazi\config\yazi.toml"
+Assert-FileExists "AppData\Roaming\yazi\config\package.toml"
+Assert-Absent ".config\yazi\yazi.toml"
 
 # Rendered git config: autocrlf must be "true", never "input"
 $gitConfigPath = Join-Path $Dest ".config\git\config"

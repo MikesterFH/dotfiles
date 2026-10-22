@@ -8,9 +8,9 @@ This repo *is* chezmoi's **Source Dir** — it's laid out to mirror `$HOME` usin
 
 | Target | What gets deployed |
 | --- | --- |
-| macOS | bash, zsh, tmux, git, starship, wezterm, VS Code, nvim, zed, iTerm2 |
+| macOS | bash, zsh, tmux, git, starship, wezterm, VS Code, nvim, zed, Yazi, iTerm2 |
 | Linux / WSL | same as macOS, minus iTerm2 |
-| Native Windows | git, starship, wezterm, VS Code, nvim, zed, tmux (via [psmux](https://github.com/psmux/psmux)), Windows Terminal, a PowerShell profile — no bash/zsh/iTerm2 |
+| Native Windows | git, starship, wezterm, VS Code, nvim, zed, Yazi, tmux (via [psmux](https://github.com/psmux/psmux), plus a Windows-only `~\.psmux.conf`), Windows Terminal, a PowerShell profile — no bash/zsh/iTerm2 |
 | DevPod / devcontainer | git, nvim, starship, zsh only (opt-in, see below) |
 
 WSL is treated as the Linux Target — there's no separate WSL handling anywhere in this repo.
@@ -62,6 +62,38 @@ chezmoi apply               # write the change into $HOME
 ```
 
 Every managed file is **copied**, not symlinked — editing the deployed copy in `$HOME` directly won't do anything on the next `chezmoi apply`, and won't feed back into this repo. This is deliberate (see `docs/adr/0003-copy-apply-not-live-symlinks.md`), mainly because native Windows symlinks need admin rights/Developer Mode.
+
+### Neovim and psmux on Windows
+
+`dot_config/nvim` is the canonical Neovim configuration, including `lazy-lock.json`.
+On Windows, `run_after_copy-nvim-windows.ps1.tmpl` mirrors its applied copy to
+`AppData\Local\nvim`. Make future changes in the Source Dir rather than only in
+that local copy.
+
+`dot_psmux.conf` deploys to `~\.psmux.conf` on native Windows only (not WSL or
+DevPod). psmux reads it before the legacy `~\.tmux.conf`, which is left untouched.
+It preserves the `Ctrl+f` prefix, Neovim-aware `Ctrl+h/j/k/l` navigation, network
+status and clock, without the battery plugin or vim-navigator background poller.
+Reload it with `Ctrl+f`, then `r`. The conditional navigation requires psmux 3.4+.
+PPM and the declared plugins must already be installed under `~\.psmux\plugins`;
+plugin scripts that invoke `pwsh` require PowerShell 7.
+
+### Yazi previews
+
+Markdown is rendered with Glow; text and code use bat with syntax highlighting
+and line numbers. Both run through the Piper plugin. Other previewers remain
+unchanged. The configuration and pinned `package.toml` are deployed to
+`AppData\Roaming\yazi\config` on Windows and `~/.config/yazi` on macOS/Linux.
+
+Install `glow` and `bat` on each machine (`scoop install glow bat` on Windows,
+`brew install glow bat` on macOS, or your Linux package manager), then run
+`ya pkg install` after applying the dotfiles. Debian/Ubuntu may name the bat
+executable `batcat`; make it available as `bat` on your PATH for these rules.
+
+Yazi needs `file` for MIME detection, and Piper needs `sh`. On Windows the
+`run_after_` script sets `YAZI_FILE_ONE` to Git for Windows' `usr\bin\file.exe`
+and adds Git's `bin` directory to your user PATH for `sh.exe`. Restart your
+terminal after the first apply so Yazi inherits the updated environment.
 
 ## Repo layout
 

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## [Unreleased]
+#### Bug Fixes
+- detect installed Git Bash and WSL distributions instead of assuming per-user paths or Ubuntu; set `WEZTERM_WSL_DISTRO` to select a WSL distribution
+- avoid yielding during WSL discovery so GUI configuration reloads complete and refresh the selected appearance
+- enable KDE background blur only in KDE/Plasma sessions and safely fall back on unknown GPU platforms
+- dim inactive panes in the dark theme to make the active pane easier to identify
+#### Performance
+- avoid allocating every status-bar cell combination when selecting what fits
+
+- - -
+
 ## [6.3.4](https://github.com/sravioli/wezterm/compare/83e571ae02cbb604c0f22d733d532d612e99588e..6.3.4) - 2025-01-17
 #### Bug Fixes
 - update git clone for windows - ([83e571a](https://github.com/sravioli/wezterm/commit/83e571ae02cbb604c0f22d733d532d612e99588e)) - Dawen

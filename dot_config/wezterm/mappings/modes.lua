@@ -5,10 +5,20 @@
 ---@diagnostic disable-next-line: undefined-field
 local act = require("wezterm").action
 local key = require("utils.fn").key
+local split = require "mappings.split"
 
 local Config = {}
 
 local key_tables = {
+  -- Repeat leader resizing until Escape, an unrelated key, or 1 second of inactivity.
+  resize_mode = {
+    { "<ESC>", "PopKeyTable", "exit" },
+    { "h", act.AdjustPaneSize { "Left", 5 }, "resize left" },
+    { "j", act.AdjustPaneSize { "Down", 5 }, "resize down" },
+    { "k", act.AdjustPaneSize { "Up", 5 }, "resize up" },
+    { "l", act.AdjustPaneSize { "Right", 5 }, "resize right" },
+  },
+
   -- {{{1 COPY MODE (copy_mode)
   copy_mode = {
     { "<ESC>", act.CopyMode "Close", "exit" },
@@ -83,8 +93,9 @@ local key_tables = {
     { "j", act.ActivatePaneDirection "Down", "down" },
     { "k", act.ActivatePaneDirection "Up", "up" },
     { "l", act.ActivatePaneDirection "Right", "right" },
-    { "v", act.SplitHorizontal { domain = "CurrentPaneDomain" }, "vsplit" },
-    { "s", act.SplitVertical { domain = "CurrentPaneDomain" }, "hsplit" },
+    { "m", act.TogglePaneZoomState, "toggle zoom" },
+    { "v", split.right, "vsplit" },
+    { "s", split.down, "hsplit" },
     { "p", act.PaneSelect, "pick" },
     { "x", act.PaneSelect { mode = "SwapWithActive" }, "swap" },
     { "o", act.TogglePaneZoomState, "toggle zoom" },
@@ -129,8 +140,8 @@ local key_tables = {
     { "<C-S-Space>", act.QuickSelect, "quick select" },
 
     ---quick split and nav
-    { '<C-S-">', act.SplitHorizontal { domain = "CurrentPaneDomain" }, "vsplit" },
-    { "<C-S-%>", act.SplitVertical { domain = "CurrentPaneDomain" }, "hsplit" },
+    { '<C-S-">', split.right, "vsplit" },
+    { "<C-S-%>", split.down, "hsplit" },
     { "<C-M-h>", act.ActivatePaneDirection "Left", "move left" },
     { "<C-M-j>", act.ActivatePaneDirection "Down", "mode down" },
     { "<C-M-k>", act.ActivatePaneDirection "Up", "move up" },

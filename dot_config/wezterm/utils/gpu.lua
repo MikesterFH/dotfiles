@@ -46,9 +46,10 @@ GpuAdapters.ENUMERATED_GPUS = wt.gui.enumerate_gpus()
 ---@return GpuAdapters
 ---@private
 function GpuAdapters:init()
+  local backends = self.AVAILABLE_BACKENDS[platform.os] or {}
   local initial = {
-    __backends = self.AVAILABLE_BACKENDS[platform.os],
-    __preferred_backend = self.AVAILABLE_BACKENDS[platform.os][1],
+    __backends = backends,
+    __preferred_backend = backends[1],
     DiscreteGpu = nil,
     IntegratedGpu = nil,
     Cpu = nil,
@@ -87,6 +88,11 @@ end
 ---Or feel free to re-arrange `GpuAdapters.AVAILABLE_BACKENDS` to you liking
 ---@return WeztermGPUAdapter|nil
 function GpuAdapters:pick_best()
+  if not self.__preferred_backend then
+    wt.log_error "No preferred GPU backend for this platform. Using Default Adapter."
+    return nil
+  end
+
   local adapters_options = self.DiscreteGpu
 
   if not adapters_options then

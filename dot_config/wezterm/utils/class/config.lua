@@ -39,6 +39,7 @@ end
 ---This function allows you to extend the Wezterm configuration by adding new options
 ---from a specified module.  If a string is provided, it requires the module and merges
 ---its options.  If a table is provided, it merges the table directly into the configuration.
+---Module loading errors propagate so Wezterm can report them instead of using a partial config.
 ---
 ---**Example usage**
 ---
@@ -51,10 +52,6 @@ end
 ---@return Utils.Class.Config # Modified Config object with the new options.
 function M:add(spec)
   if type(spec) == "string" then
-    if not (pcall(require, spec)) then
-      M.log:error("Unable to require module %s", spec)
-      return self
-    end
     spec = require(spec)
   end
 

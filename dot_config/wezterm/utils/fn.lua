@@ -470,13 +470,11 @@ end --~~ }}}
 ---@param len number The maximum length for each component of the path.
 ---@return string short_path
 M.fs.pathshortener = function(path, len)
-  CACHE["pathshortener"] = CACHE["pathshortener"] or {}
-  local key = path .. ":" .. tostring(len)
-  if CACHE["pathshortener"][key] then
-    return CACHE["pathshortener"][key]
+  if M.fs.is_win then
+    path = sgsub(path, "/", "\\")
   end
 
-  local splitted_path = M.str.split(path, M.fs.path_separator)
+  local splitted_path = M.str.split(path, M.fs.path_separator, { plain = true })
   local short_path = ""
   for i = 1, #splitted_path do
     local dir = splitted_path[i]
@@ -488,8 +486,7 @@ M.fs.pathshortener = function(path, len)
       .. (short_dir == "." and ssub(dir, 1, len + 1) or short_dir)
       .. M.fs.path_separator
   end
-  CACHE["pathshortener"][key] = short_path
-  return CACHE["pathshortener"][key]
+  return short_path
 end --~~ }}}
 
 --~~ {{{2 M.fs.pathconcat(...: string) -> string
@@ -503,7 +500,7 @@ end --~~ }}}
 
 --~~ {{{2 M.fs.ls_dir(directory: string) -> table[]|nil
 
----Reads the contents of a directory and returns a list of absolute filenames.
+---Returns directory entries refreshed by the top-level configuration on each reload.
 ---@param directory string absolute path to the directory to read.
 ---@return table|nil files list of files present in the directory. nil if not accessible.
 ---
@@ -516,44 +513,20 @@ end --~~ }}}
 ---end
 ---~~~
 M.fs.ls_dir = function(directory)
-  CACHE["read-dir"] = CACHE["read-dir"] or {}
-  if CACHE["read-dir"][directory] then
-    return CACHE["read-dir"][directory]
-  end
-
-  local filename = M.fs.basename(directory) .. ".txt"
-  local cmd = "find %s -maxdepth 1 -type f > %s"
-  local tempfile = M.fs.pathconcat("/tmp", filename)
-  if M.fs.is_win then
-    cmd = 'cmd /C "dir %s /B /S > %s"'
-    tempfile = M.fs.pathconcat(ogetenv "TEMP", filename)
-  end
-  cmd = sformat(cmd, directory, tempfile)
-
-  local files = {}
-  local file = ioopen(tempfile, "r")
-  if file then
-    for line in file:lines() do
-      files[#files + 1] = line
-    end
-    ioclose(file)
-  else
-    local success = oexec(cmd)
-    if not success then
-      return M.fs.log:error "[ls_dir] Unable to create temp file!"
-    end
-    file = ioopen(tempfile, "r")
-    if file then
-      for line in file:lines() do
-        files[#files + 1] = line
-      end
-      ioclose(file)
-    end
-  end
-
-  CACHE["read-dir"][directory] = files
-  return CACHE["read-dir"][directory]
+  return assert(
+    CACHE["read-dir"] and CACHE["read-dir"][directory],
+    "Directory must be refreshed before loading modules: " .. directory
+  )
 end --~~ }}}
+
+---Call outside require(): Wezterm's native directory reader yields.
+M.fs.refresh_dir = function(directory)
+  local files = wt.read_dir(directory)
+  CACHE["read-dir"] = CACHE["read-dir"] or {}
+  local entries = CACHE["read-dir"]
+  entries[directory] = files
+  CACHE["read-dir"] = entries
+end
 
 --~ }}}
 
@@ -916,19 +889,12 @@ end --~~ }}}
 ---@param opts? table|nil Optional parameters: `plain` (boolean): If true, treats the separator as plain text. `trimempty` (boolean): If true, trims empty segments from the start and end.
 ---@return table t A table containing the substrings.
 M.str.split = function(s, sep, opts)
-  local key = s .. ":" .. sep .. ":" .. tconcat(opts or {}, "-")
-  CACHE["split"] = CACHE["split"] or {}
-  if CACHE["split"][key] then
-    return CACHE["split"][key]
-  end
-
   local t = {}
   for c in M.str.gsplit(s, sep, opts) do
     t[#t + 1] = c
   end
 
-  CACHE["split"][key] = t
-  return CACHE["split"][key]
+  return t
 end --~~ }}}
 
 --~~ {{{2 M.str.format_tab_title(pane: wt.Pane, title: string, Config: table, max_width: integer)
@@ -1077,8 +1043,9 @@ end --~~}}}
 ---return Config
 ---~~~
 M.color.get_scheme = function()
-  if sfind((wt_gui and wt_gui.get_appearance() or ""), "Dark") then
-    return "future-term"
+  local appearance = wt_gui and wt_gui.get_appearance() or "Dark"
+  if sfind(appearance, "Dark") then
+    return "nvim-tmux-term"
   end
   return "kanagawa-lotus"
 end --~~}}}
@@ -1167,6 +1134,9 @@ end --~~}}}
 ---  and `kde_window_background_blur` (`true`).
 M.color.set_scheme = function(Config, theme, name)
   Config.color_scheme = name
+  Config.inactive_pane_hsb = name == "nvim-tmux-term"
+      and { saturation = 0.8, brightness = 0.65 }
+    or { saturation = 1, brightness = 1 }
   Config.char_select_bg_color = theme.brights[6]
   Config.char_select_fg_color = theme.background
   Config.command_palette_bg_color = theme.brights[6]

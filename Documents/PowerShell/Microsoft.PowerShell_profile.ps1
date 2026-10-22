@@ -4,9 +4,28 @@
 # doesn't yet provision on Windows (bat, eza, lazygit).
 
 Set-Alias vim nvim
+Set-Alias c clear
 
 function ga { git add . }
 function gc { param($m) git commit -m $m }
 function gs { git status -s }
 
 Invoke-Expression (&starship init powershell)
+
+if ((Get-Module PSReadLine).Version -ge [version]"2.1.0" -and -not [Console]::IsOutputRedirected) {
+  Set-PSReadLineOption -PredictionSource History
+  Set-PSReadLineOption -PredictionViewStyle InlineView
+  Set-PSReadLineKeyHandler -Key RightArrow -Function ForwardChar
+  Set-PSReadLineKeyHandler -Key Alt+f -Function AcceptNextSuggestionWord
+}
+
+$prompt = ""
+function Invoke-Starship-PreCommand {
+  $current_location = $executionContext.SessionState.Path.CurrentLocation
+  if ($current_location.Provider.Name -eq "FileSystem") {
+    $ansi_escape = [char]27
+    $provider_path = $current_location.ProviderPath -replace "\\", "/"
+    $prompt = "$ansi_escape]7;file://${env:COMPUTERNAME}/${provider_path}$ansi_escape\"
+  }
+  $host.ui.Write($prompt)
+}

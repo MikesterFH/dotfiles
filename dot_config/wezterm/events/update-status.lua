@@ -83,50 +83,46 @@ e.__get_width = function(Config, pane, window)
   }
 end -- }}}
 
--- {{{1 e.__compute_combination_width(combination, sep_width, pad_width)
+-- {{{1 e.__find_best_fit(sets, max_width, sep_width, pad_width)
 
----Computes the total width of a combination of elements, accounting for separators and
----padding.  This function iterates over the elements in the given `combination`,
----calculates the width of each element, and adds the width of separators and padding
----between the elements.
+---Finds the best-fitting combination without allocating the Cartesian product.
 ---
----@param combination table elements whose widths are to be calculated.
----@param sep_width number width of the separator to be added between each element.
----@param pad_width number width of the padding to be added around each element.
----@return number width computed width of the combination, including separators and padding.
-e.__compute_combination_width = function(combination, sep_width, pad_width)
-  local total_width = 0
-  for i = 1, #combination do
-    total_width = total_width + str.width(combination[i]) + sep_width + pad_width
-  end
-  return total_width
-end -- }}}
-
--- {{{1 e.__find_best_fit(combinations, max_width, sep_width, pad_width)
-
----Finds the combination that best fits within the specified maximum width.
----The function iterates over a list of combinations, calculates their total width, and
----selects the combination whose width is less than or equal to the specified `max_width`
----but as large as possible.
----
----@param combinations table multiple combinations of elements to evaluate.
+---@param sets table possible values for each status-bar cell.
 ---@param max_width number maximum allowable width for the combination.
 ---@param sep_width number width of the separator between elements in the combination.
 ---@param pad_width number padding width around each element in the combination.
----@return table best_fit best fitS within `max_width`, or am empty combination if none fit.
-e.__find_best_fit = function(combinations, max_width, sep_width, pad_width)
-  local best_fit = nil
-  local best_fit_width = 0
-
-  for i = 1, #combinations do
-    local total_width =
-      e.__compute_combination_width(combinations[i], sep_width, pad_width)
-    if total_width <= max_width and total_width > best_fit_width then
-      best_fit = combinations[i]
-      best_fit_width = total_width
+---@return table best_fit best fit within `max_width`, or an empty combination if none fit.
+e.__find_best_fit = function(sets, max_width, sep_width, pad_width)
+  local widths, selected = {}, {}
+  for i, set in ipairs(sets) do
+    widths[i] = {}
+    for j, cell in ipairs(set) do
+      widths[i][j] = str.width(cell) + sep_width + pad_width
     end
   end
 
+  local best_fit
+  local best_fit_width = 0
+
+  local function visit(set_index, total_width)
+    if set_index == 0 then
+      if total_width <= max_width and total_width > best_fit_width then
+        best_fit = { tunpack(selected, 1, #sets) }
+        best_fit_width = total_width
+      end
+      return
+    end
+
+    for i, cell in ipairs(sets[set_index]) do
+      local width = total_width + widths[set_index][i]
+      if width <= max_width then
+        selected[set_index] = cell
+        visit(set_index - 1, width)
+      end
+    end
+  end
+
+  visit(#sets, 0)
   return best_fit or { "", "", "", "" }
 end -- }}}
 
@@ -209,7 +205,7 @@ e.set_modal_prompts = function(window)
   window:set_right_status(rsb:format())
 end -- }}}
 
--- {{{1 e.update_width(Config, window, pane)
+-- {{{1 e.update_width(Config, window)
 
 ---Updates the width calculations for the window and pane, factoring in various UI elements.
 ---The function computes the width of tabs, mode, new button, and workspace, then returns
@@ -217,13 +213,16 @@ end -- }}}
 ---
 ---@param Config table The configuration settings used for formatting the tab titles.
 ---@param window wt.Window Wezterm's window object
----@param pane wt.Pane Wezterm's pane object
 ---@return number usable_width remaining usable width
-e.update_width = function(Config, window, pane)
-  for _ = 1, #window:mux_window():tabs() do
-    local tab_title = pane:get_title()
+e.update_width = function(Config, window)
+  for _, tab in ipairs(window:mux_window():tabs()) do
+    local pane = tab:active_pane()
+    local tab_title = tab:get_title()
+    if tab_title == "" then
+      tab_title = pane:get_title()
+    end
     e.width.tabs = e.width.tabs
-      + str.width(str.format_tab_title(pane, tab_title, Config, 25))
+      + str.width(str.format_tab_title(pane, tab_title, Config, Config.tab_max_width))
   end
 
   return e.width.usable - (e.width.tabs + e.width.mode + e.width.new_button + e.width.ws)
@@ -292,9 +291,7 @@ e.set_right_status = function(Config, window, pane)
     tinsert(sets, battery.cells)
   end
 
-  local cells = tbl.reverse(
-    e.__find_best_fit(tbl.cartesian(sets), e.width.usable, str.width(sep.sb.right), 5)
-  )
+  local cells = tbl.reverse(e.__find_best_fit(sets, e.width.usable, str.width(sep.sb.right), 5))
 
   -- Render the best fit, ensuring correct colors
   for i = 1, #cells do
@@ -321,7 +318,7 @@ wt.on("update-status", function(window, pane)
 
   e.set_left_status(window)
 
-  e.width.usable = e.update_width(Config, window, pane)
+  e.width.usable = e.update_width(Config, window)
 
   if e.mode and e.modes[e.mode] then
     e.set_modal_prompts(window)

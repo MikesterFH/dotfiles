@@ -50,6 +50,7 @@ assert_file ".zsh_aliases"
 assert_file ".config/tmux/tmux.conf"
 
 # Windows-only paths must not appear on macOS/Linux
+assert_absent ".psmux.conf"
 assert_absent "Documents/PowerShell/Microsoft.PowerShell_profile.ps1"
 assert_absent "AppData"
 assert_absent "AppData/Local/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json"
@@ -158,6 +159,10 @@ fi
 # Windows Application manifest (winget) is Windows-only, see
 # docs/adr/0006-application-category-and-profile-manifests.md
 assert_absent ".config/winget"
+
+# Yazi uses the XDG config path on macOS/Linux.
+assert_file ".config/yazi/yazi.toml"
+assert_file ".config/yazi/package.toml"
 
 # Rendered git config: autocrlf must be "input", never "true"
 gitconfig="$dest/.config/git/config"

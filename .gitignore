@@ -4,3 +4,6 @@ Thumbs.db
 
 # Local/private overrides (never commit these)
 *.local
+
+# Local tool binaries
+bin/

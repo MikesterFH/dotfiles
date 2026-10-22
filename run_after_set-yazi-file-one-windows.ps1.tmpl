@@ -1,0 +1,40 @@
+{{- if eq .chezmoi.os "windows" }}
+$gitCommand = Get-Command git.exe -ErrorAction SilentlyContinue
+$candidates = @()
+
+if ($gitCommand) {
+    $gitRoot = Split-Path (Split-Path $gitCommand.Source -Parent) -Parent
+    $candidates += Join-Path $gitRoot "usr\bin\file.exe"
+}
+
+$candidates += @(
+    (Join-Path $env:ProgramFiles "Git\usr\bin\file.exe"),
+    (Join-Path $env:LOCALAPPDATA "Programs\Git\usr\bin\file.exe"),
+    (Join-Path $HOME "scoop\apps\git\current\usr\bin\file.exe")
+)
+
+$fileOne = $candidates |
+    Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } |
+    Select-Object -First 1
+
+if (-not $fileOne) {
+    throw "Yazi needs Git for Windows' file.exe. Install Git for Windows, then apply dotfiles again."
+}
+
+[Environment]::SetEnvironmentVariable("YAZI_FILE_ONE", $fileOne, "User")
+$env:YAZI_FILE_ONE = $fileOne
+
+$gitRoot = Split-Path (Split-Path (Split-Path $fileOne -Parent) -Parent) -Parent
+$shellDir = Join-Path $gitRoot "bin"
+if (-not (Test-Path -LiteralPath (Join-Path $shellDir "sh.exe") -PathType Leaf)) {
+    throw "Yazi's Piper plugin needs Git for Windows' bin\sh.exe. Repair your Git installation."
+}
+
+$userPath = [Environment]::GetEnvironmentVariable("Path", "User")
+if (($userPath -split ";" | ForEach-Object { $_.TrimEnd("\") }) -notcontains $shellDir.TrimEnd("\")) {
+    [Environment]::SetEnvironmentVariable("Path", ($userPath.TrimEnd(";") + ";" + $shellDir), "User")
+}
+if (($env:Path -split ";" | ForEach-Object { $_.TrimEnd("\") }) -notcontains $shellDir.TrimEnd("\")) {
+    $env:Path += ";" + $shellDir
+}
+{{- end }}

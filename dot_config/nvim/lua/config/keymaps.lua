@@ -4,7 +4,6 @@
 --
 local keymap = vim.keymap
 local opts = { noremap = true, silent = true }
-local Util = require("lazyvim.util")
 
 -- navigation between Tmux and Neovim
 keymap.set("n", "<C-h>", "<Cmd>NvimTmuxNavigateLeft<CR>", { silent = true })
@@ -17,34 +16,76 @@ keymap.set("n", "<C-Space>", "<Cmd>NvimTmuxNavigateNavigateNext<CR>", { silent =
 -- escape alternative
 keymap.set({ "i" }, "jj", "<Esc>", { silent = true })
 
--- Borderless terminal
+-- Terminal in root dir
 vim.keymap.set("n", "<C-/>", function()
-  Util.terminal(nil, { border = "none" })
-end, { desc = "Term with border" })
+  Snacks.terminal(nil, { cwd = LazyVim.root() })
+end, { desc = "Terminal (root dir)" })
 
--- Borderless lazygit
-vim.keymap.set("n", "<leader>gg", function()
-  Util.terminal({ "lazygit" }, {
-    cwd = Util.root(),
-    esc_esc = false,
-    ctrl_hjkl = false,
-    border = "none",
+-- Git graph in floating window (paged via less, close with q)
+vim.keymap.set("n", "<leader>gG", function()
+  local graph = "git-graph --color always --style round"
+  local cmd
+  if vim.fn.has("win32") == 1 then
+    local less = vim.fn.exepath("less")
+    if less == "" then
+      less = vim.fn.fnamemodify(vim.fn.exepath("git"), ":h:h") .. "/usr/bin/less.exe"
+    end
+    cmd = { "cmd", "/c", graph .. ' | "' .. less .. '" -R -S' }
+  else
+    cmd = { "sh", "-c", graph .. " | less -R -S" }
+  end
+  Snacks.terminal(cmd, {
+    cwd = LazyVim.root.git(),
+    env = { LESSCHARSET = "utf-8" },
+    win = {
+      position = "float",
+      border = "rounded",
+      width = 0.9,
+      height = 0.9,
+    },
   })
-end, { desc = "Lazygit (root dir)" })
+end, { desc = "Git Graph (root dir)" })
 
 -- delete some keymaps
-keymap.del({ "n", "i", "v" }, "<A-j>")
-keymap.del({ "n", "i", "v" }, "<A-k>")
-keymap.del("n", "<C-Left>")
-keymap.del("n", "<C-Down>")
-keymap.del("n", "<C-Up>")
-keymap.del("n", "<C-Right>")
+pcall(keymap.del, { "n", "i", "v" }, "<A-j>")
+pcall(keymap.del, { "n", "i", "v" }, "<A-k>")
+pcall(keymap.del, "n", "<C-Left>")
+pcall(keymap.del, "n", "<C-Down>")
+pcall(keymap.del, "n", "<C-Up>")
+pcall(keymap.del, "n", "<C-Right>")
 
--- rezize tmux panels
-keymap.set("n", "<M-h>", '<Cmd>lua require("tmux").resize_left()<CR>', { silent = true })
-keymap.set("n", "<M-j>", '<Cmd>lua require("tmux").resize_bottom()<CR>', { silent = true })
-keymap.set("n", "<M-k>", '<Cmd>lua require("tmux").resize_top()<CR>', { silent = true })
-keymap.set("n", "<M-l>", '<Cmd>lua require("tmux").resize_right()<CR>', { silent = true })
+-- Resize panes without tmux.nvim's synchronous shell calls on Windows.
+if vim.fn.has("win32") == 1 then
+  for key, direction in pairs({ h = "L", j = "D", k = "U", l = "R" }) do
+    keymap.set("n", "<M-" .. key .. ">", function()
+      if not vim.env.TMUX or not vim.env.TMUX_PANE then
+        vim.notify("Pane resizing requires a psmux session", vim.log.levels.WARN)
+        return
+      end
+      vim.system({
+        "psmux",
+        "-S",
+        vim.env.TMUX:match("^[^,]+"),
+        "resize-pane",
+        "-t",
+        vim.env.TMUX_PANE,
+        "-" .. direction,
+        "1",
+      }, { text = true }, function(result)
+        if result.code ~= 0 then
+          vim.schedule(function()
+            vim.notify("psmux resize failed: " .. (result.stderr or result.stdout or ""), vim.log.levels.ERROR)
+          end)
+        end
+      end)
+    end, { silent = true })
+  end
+else
+  keymap.set("n", "<M-h>", '<Cmd>lua require("tmux").resize_left()<CR>', { silent = true })
+  keymap.set("n", "<M-j>", '<Cmd>lua require("tmux").resize_bottom()<CR>', { silent = true })
+  keymap.set("n", "<M-k>", '<Cmd>lua require("tmux").resize_top()<CR>', { silent = true })
+  keymap.set("n", "<M-l>", '<Cmd>lua require("tmux").resize_right()<CR>', { silent = true })
+end
 
 -- Split windows
 keymap.set("n", "ss", ":vsplit<Return>", opts)
