@@ -1,4 +1,10 @@
-{{- if eq .chezmoi.os "windows" }}
+{{- if eq .chezmoi.os "windows" -}}
+# Point Yazi at the same ~/.config/yazi every other platform uses, instead of
+# its Windows default %APPDATA%\yazi\config, so there's one managed copy.
+$yaziConfigHome = Join-Path $HOME ".config\yazi"
+[Environment]::SetEnvironmentVariable("YAZI_CONFIG_HOME", $yaziConfigHome, "User")
+$env:YAZI_CONFIG_HOME = $yaziConfigHome
+
 $gitCommand = Get-Command git.exe -ErrorAction SilentlyContinue
 $candidates = @()
 
@@ -37,4 +43,4 @@ if (($userPath -split ";" | ForEach-Object { $_.TrimEnd("\") }) -notcontains $sh
 if (($env:Path -split ";" | ForEach-Object { $_.TrimEnd("\") }) -notcontains $shellDir.TrimEnd("\")) {
     $env:Path += ";" + $shellDir
 }
-{{- end }}
+{{- end -}}

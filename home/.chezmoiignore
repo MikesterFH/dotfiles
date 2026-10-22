@@ -1,9 +1,3 @@
-# Repo meta — not part of the deployed dotfiles ($HOME) state.
-CLAUDE.md
-CONTEXT.md
-docs
-migrate-from-install-sh.sh
-
 # Per-OS paths, one switch on .chezmoi.os for everything that differs by
 # Target: vscode's settings live at a different real path per OS (macOS:
 # Library/, Linux: .config/Code, Windows: AppData); the iTerm2 Dynamic
@@ -44,7 +38,6 @@ Library
 .config/zed
 .config/homebrew
 .config/apt-packages.txt
-.config/yazi
 {{ else }}
 .psmux.conf
 Library

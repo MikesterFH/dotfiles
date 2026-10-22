@@ -2,7 +2,7 @@
 
 Personal configuration for macOS, Linux (including WSL), and native Windows, deployed and kept in sync via [chezmoi](https://www.chezmoi.io/).
 
-This repo *is* chezmoi's **Source Dir** — it's laid out to mirror `$HOME` using chezmoi's naming convention (e.g. `dot_bashrc` → `~/.bashrc`), not to be cloned and used directly. See `CONTEXT.md` for the vocabulary used throughout this repo and `docs/adr/` for the reasoning behind the bigger decisions (why chezmoi, why this repo is the Source Dir, why copy+apply instead of live symlinks).
+This repo *is* chezmoi's **Source Dir** — its `home/` folder (selected by `.chezmoiroot`) is laid out to mirror `$HOME` using chezmoi's naming convention (e.g. `dot_bashrc` → `~/.bashrc`), not to be cloned and used directly. See `CONTEXT.md` for the vocabulary used throughout this repo and `docs/adr/` for the reasoning behind the bigger decisions (why chezmoi, why this repo is the Source Dir, why copy+apply instead of live symlinks).
 
 ## Supported Targets
 
@@ -65,8 +65,8 @@ Every managed file is **copied**, not symlinked — editing the deployed copy in
 
 ### Neovim and psmux on Windows
 
-`dot_config/nvim` is the canonical Neovim configuration, including `lazy-lock.json`.
-On Windows, `run_after_copy-nvim-windows.ps1.tmpl` mirrors its applied copy to
+`home/dot_config/nvim` is the canonical Neovim configuration, including `lazy-lock.json`.
+On Windows, `home/.chezmoiscripts/windows/run_after_copy-nvim-windows.ps1.tmpl` mirrors its applied copy to
 `AppData\Local\nvim`. Make future changes in the Source Dir rather than only in
 that local copy.
 
@@ -83,25 +83,37 @@ plugin scripts that invoke `pwsh` require PowerShell 7.
 Markdown is rendered with Glow; text and code use bat with syntax highlighting
 and line numbers. Both run through the Piper plugin. Other previewers remain
 unchanged. The configuration and pinned `package.toml` are deployed to
-`AppData\Roaming\yazi\config` on Windows and `~/.config/yazi` on macOS/Linux.
+`~/.config/yazi` on every platform; on Windows the `run_after_set-yazi-env-windows`
+script sets `YAZI_CONFIG_HOME` to that path instead of Yazi's default
+`AppData\Roaming\yazi\config`.
 
 Install `glow` and `bat` on each machine (`scoop install glow bat` on Windows,
 `brew install glow bat` on macOS, or your Linux package manager), then run
 `ya pkg install` after applying the dotfiles. Debian/Ubuntu may name the bat
 executable `batcat`; make it available as `bat` on your PATH for these rules.
 
-Yazi needs `file` for MIME detection, and Piper needs `sh`. On Windows the
-`run_after_` script sets `YAZI_FILE_ONE` to Git for Windows' `usr\bin\file.exe`
+Yazi needs `file` for MIME detection, and Piper needs `sh`. On Windows the same
+script also sets `YAZI_FILE_ONE` to Git for Windows' `usr\bin\file.exe`
 and adds Git's `bin` directory to your user PATH for `sh.exe`. Restart your
 terminal after the first apply so Yazi inherits the updated environment.
 
 ## Repo layout
 
-- `dot_*`, `private_*`, `run_once_*`, `*.tmpl` — chezmoi-managed files, named per [chezmoi's attribute convention](https://www.chezmoi.io/reference/target-types/). `AppData/`, `Library/`, `Documents/` at the repo root are real (non-`dot_`) directory names — chezmoi applies literal names as-is.
-- `.chezmoiignore` — the single place that decides, per OS (and per the DevPod flag), which of the above actually gets deployed.
-- `.chezmoi.toml.tmpl` — the prompts described above.
-- `.chezmoitemplates/` — shared template partials (e.g. VS Code/zed settings reused across OS-specific target paths).
-- `migrate-from-install-sh.sh` — one-time cutover helper, see below. Not part of the regular chezmoi flow.
+```
+.chezmoiroot          # contains "home": chezmoi reads its Source State from home/
+home/                 # mirrors $HOME
+  dot_*, private_*, *.tmpl, AppData/, Library/, Documents/
+  .chezmoiignore      # per OS / Profile / DevPod: what actually gets deployed
+  .chezmoi.toml.tmpl  # the init prompts described above
+  .chezmoitemplates/  # shared template partials (VS Code/zed settings reused across OS paths)
+  .chezmoiscripts/    # run_* scripts, grouped by OS; creates no directory in $HOME
+    unix/  darwin/  linux/  windows/
+scripts/              # repo helpers outside the chezmoi flow (migrate-from-install-sh.sh)
+docs/  .github/       # ADRs, agent docs, CI
+```
+
+- `dot_*`, `private_*`, `run_once_*`, `*.tmpl` — chezmoi-managed files, named per [chezmoi's attribute convention](https://www.chezmoi.io/reference/target-types/). `AppData/`, `Library/`, `Documents/` are real (non-`dot_`) directory names — chezmoi applies literal names as-is.
+- The subfolders of `.chezmoiscripts/` are only for orientation: each script still guards itself with an OS check in its template, so the folder name alone doesn't decide where it runs.
 - `.github/workflows/ci.yml` — a 3-OS matrix (macOS/Linux/Windows) that applies this repo to a throwaway directory and asserts the Target-specific file set is correct on every push/PR.
 
 ## Backing up / migrating an existing machine
@@ -111,7 +123,7 @@ terminal after the first apply so Yazi inherits the updated environment.
 **If this machine previously used this repo's old `install.sh`** (a plain bash script that used to symlink files into place, before the chezmoi migration), run the one-time migration script *first*, before your first `chezmoi init --apply`:
 
 ```sh
-./migrate-from-install-sh.sh
+./scripts/migrate-from-install-sh.sh
 ```
 
 It walks every path `install.sh` could have symlinked and, per path:

@@ -139,10 +139,11 @@ if (Test-Path -Path $wingetManifestPath -PathType Leaf) {
     }
 }
 
-# Yazi uses AppData on Windows; the Unix config path must not be deployed.
-Assert-FileExists "AppData\Roaming\yazi\config\yazi.toml"
-Assert-FileExists "AppData\Roaming\yazi\config\package.toml"
-Assert-Absent ".config\yazi\yazi.toml"
+# Yazi reads ~/.config/yazi on Windows too (YAZI_CONFIG_HOME, set by the
+# run_after_set-yazi-env-windows script); no separate AppData copy.
+Assert-FileExists ".config\yazi\yazi.toml"
+Assert-FileExists ".config\yazi\package.toml"
+Assert-Absent "AppData\Roaming\yazi"
 
 # Rendered git config: autocrlf must be "true", never "input"
 $gitConfigPath = Join-Path $Dest ".config\git\config"
