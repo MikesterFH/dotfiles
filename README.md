@@ -65,6 +65,14 @@ chezmoi apply               # write the change into $HOME
 
 Every managed file is **copied**, not symlinked — editing the deployed copy in `$HOME` directly won't do anything on the next `chezmoi apply`, and won't feed back into this repo. This is deliberate (see `docs/adr/0003-copy-apply-not-live-symlinks.md`), mainly because native Windows symlinks need admin rights/Developer Mode.
 
+### Pulling changes on another machine
+
+```sh
+chezmoi update             # git pull in the Source Dir, then apply
+```
+
+If chezmoi warns `config file template has changed, run chezmoi init to regenerate config file`, run `chezmoi init` (it re-renders `~/.config/chezmoi/chezmoi.toml` from `.chezmoi.toml.tmpl` without asking again for answers it already has), then `chezmoi apply`. Skipping it leaves derived data stale — notably the Profile's Application list, so newly added Applications aren't installed.
+
 ### Neovim and psmux on Windows
 
 `home/dot_config/nvim` is the canonical Neovim configuration, including `lazy-lock.json`.
