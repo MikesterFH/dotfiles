@@ -71,6 +71,16 @@
     "enabled": false
   },
 
+  // LSP hover: mouse after hover_popover_delay ms, or `shift-k` / `g h` in
+  // vim normal mode. While it's open, ctrl-e/ctrl-y (line), ctrl-d/ctrl-u
+  // (half page) and ctrl-f/ctrl-b (page) scroll the popover instead of the
+  // buffer. Sticky keeps it open while the mouse moves into it.
+  "hover_popover_enabled": true,
+  "hover_popover_delay": 300,
+  "hover_popover_sticky": true,
+  // Show parameter info while typing a call's arguments.
+  "auto_signature_help": true,
+
   "buffer_font_family": "JetBrainsMono Nerd Font",
   "ui_font_size": 12.0,
   "buffer_font_size": 12.0,

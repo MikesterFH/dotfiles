@@ -15,6 +15,7 @@
       "g [": "editor::GoToPreviousDiagnostic",
       "g r": "editor::FindAllReferences",
       "shift-k": "editor::Hover",
+      "space k": "editor::ShowSignatureHelp",
       "g c c": "editor::ToggleComments",
       "space f": "file_finder::Toggle",
       "space e": "workspace::ToggleLeftDock",
