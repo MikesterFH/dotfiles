@@ -28,7 +28,9 @@
 # apps in its Application list, but a devcontainer shouldn't get them
 # installed, matching .chezmoiignore's existing devpod GUI-config exclusion.
 #
-# applications: {{ .applications | join "," }}
+# Rerun trigger: hash of the rendered manifest, so a changed package
+# identifier reruns this script too, not only a changed Application list.
+# manifest sha256: {{ includeTemplate "dot_config/empty_apt-packages.txt.tmpl" . | sha256sum }}
 # =============================================================================
 set -euo pipefail
 

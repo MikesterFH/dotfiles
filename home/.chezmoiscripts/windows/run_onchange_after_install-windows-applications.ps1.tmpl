@@ -20,7 +20,9 @@
 # script) — devpod is always .chezmoi.os "linux", so this Windows-only
 # script can never run in a devpod context in the first place.
 #
-# applications: {{ .applications | join "," }}
+# Rerun trigger: hash of the rendered manifest, so a changed package
+# identifier reruns this script too, not only a changed Application list.
+# manifest sha256: {{ includeTemplate "dot_config/winget/packages.json.tmpl" . | sha256sum }}
 # =============================================================================
 $ErrorActionPreference = "Stop"
 
