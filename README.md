@@ -108,7 +108,6 @@ home/                 # mirrors $HOME
   .chezmoitemplates/  # shared template partials (VS Code/zed settings reused across OS paths)
   .chezmoiscripts/    # run_* scripts, grouped by OS; creates no directory in $HOME
     unix/  darwin/  linux/  windows/
-scripts/              # repo helpers outside the chezmoi flow (migrate-from-install-sh.sh)
 docs/  .github/       # ADRs, agent docs, CI
 ```
 
@@ -116,23 +115,8 @@ docs/  .github/       # ADRs, agent docs, CI
 - The subfolders of `.chezmoiscripts/` are only for orientation: each script still guards itself with an OS check in its template, so the folder name alone doesn't decide where it runs.
 - `.github/workflows/ci.yml` — a 3-OS matrix (macOS/Linux/Windows) that applies this repo to a throwaway directory and asserts the Target-specific file set is correct on every push/PR.
 
-## Backing up / migrating an existing machine
+## Existing config on a machine
 
 **On a brand-new machine with no prior dotfiles setup, you don't need to do anything extra** — `chezmoi apply` only ever writes to the specific paths this repo manages, and there's nothing there to lose.
 
-**If this machine previously used this repo's old `install.sh`** (a plain bash script that used to symlink files into place, before the chezmoi migration), run the one-time migration script *first*, before your first `chezmoi init --apply`:
-
-```sh
-./scripts/migrate-from-install-sh.sh
-```
-
-It walks every path `install.sh` could have symlinked and, per path:
-
-- removes the symlink if it points back into this repo's old (pre-chezmoi) layout,
-- **backs up** (renames with a timestamped `.dotfiles-migration-bak.<timestamp>` suffix — never deletes) any real file it finds instead,
-- leaves alone and reports any symlink pointing somewhere else entirely,
-- does nothing if there's nothing at that path.
-
-It's safe to run on a machine that never used `install.sh` at all — everything will simply be reported as already absent.
-
-**If you have unrelated, hand-written config at any of the paths this repo manages** (not from `install.sh`, not from chezmoi) — `chezmoi apply` will silently overwrite it, chezmoi does not prompt per-file. Back up anything you'd miss yourself before your first apply, or run `chezmoi init` (without `--apply`) and `chezmoi diff` first to see exactly what would be overwritten.
+**If you have existing config at any of the paths this repo manages** — hand-written files, or symlinks left by this repo's old pre-chezmoi `install.sh` — `chezmoi apply` will silently overwrite them; chezmoi does not prompt per-file. Run `chezmoi init MikesterFH/dotfiles` (without `--apply`) and `chezmoi diff` first to see exactly what would be overwritten, back up anything you'd miss, then `chezmoi apply`. Old `install.sh` symlinks are simply replaced by real files.
