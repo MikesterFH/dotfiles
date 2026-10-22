@@ -24,3 +24,6 @@ alias ga='git add .'
 alias gc='git commit -m'
 alias gs='git status -s'
 alias gg=lazygit
+
+# Claude Code with separate work config
+alias claude-work='CLAUDE_CONFIG_DIR=$HOME/.claude-work claude'

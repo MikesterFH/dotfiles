@@ -9,6 +9,12 @@
 # appear for identities that profile actually generates.
 # =============================================================================
 
+# Default identity outside the directories below: personal, or work on the
+# dev profile (which has no personal identity). Must come before the includeIf
+# blocks so they override it.
+[include]
+	path = {{ if eq .profile "dev" }}config.local.work{{ else }}config.local.personal{{ end }}
+
 # Personal projects (~/dev/personal/) — every profile except dev
 {{- if ne .profile "dev" }}
 [includeIf "gitdir:~/dev/personal/"]
@@ -36,6 +42,10 @@
 [pull]
 	rebase = true
 
+[fetch]
+	prune = true
+	pruneTags = true
+
 [push]
 	autoSetupRemote = true
 
@@ -60,4 +70,14 @@
 	side-by-side = true
 
 [alias]
-	lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+	st = status
+	ci = commit
+	br = branch
+	co = checkout
+	df = diff
+	ls = ls-files
+	ign = ls-files -o -i --exclude-standard
+	lol = log --graph --decorate --pretty=oneline --abbrev-commit
+	lola = log --graph --decorate --pretty=oneline --abbrev-commit --all
+	whoami = "!echo \"Name:  $(git config user.name)\" && echo \"Email: $(git config user.email)\""
+	lg =log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit

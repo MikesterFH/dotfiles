@@ -86,8 +86,8 @@ if [ "$profile" = "dev-server" ]; then
     fi
 else
     assert_file ".config/wezterm/wezterm.lua"
-    assert_file ".config/zed/keymap.jsonc"
-    assert_file ".config/zed/settings.jsonc"
+    assert_file ".config/zed/keymap.json"
+    assert_file ".config/zed/settings.json"
     if [ "$os" = "Darwin" ]; then
         assert_file "Library/Application Support/Code/User/settings.json"
         assert_file "Library/Application Support/iTerm2/DynamicProfiles/Nvim_Tmux_Term.json"

@@ -96,8 +96,8 @@ if ($MachineProfile -eq "dev-server") {
 } else {
     Assert-FileExists ".config\wezterm\wezterm.lua"
     Assert-FileExists "AppData\Roaming\Code\User\settings.json"
-    Assert-FileExists "AppData\Roaming\Zed\keymap.jsonc"
-    Assert-FileExists "AppData\Roaming\Zed\settings.jsonc"
+    Assert-FileExists "AppData\Roaming\Zed\keymap.json"
+    Assert-FileExists "AppData\Roaming\Zed\settings.json"
     Assert-FileExists "AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
 }
 
