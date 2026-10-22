@@ -62,6 +62,11 @@
 [rerere]
 	enabled = true
 
+# New worktrees link to their repo with relative paths, so moving the repo
+# (e.g. reorganizing ~/dev) doesn't need `git worktree repair` (git >= 2.48)
+[worktree]
+	useRelativePaths = true
+
 [interactive]
 	diffFilter = delta --color-only
 
