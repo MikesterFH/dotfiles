@@ -1,0 +1,60 @@
+{{- if and (eq .chezmoi.os "windows") (has "zen" .applications) -}}
+# =============================================================================
+# chezmoi run_after script: copies ~/.config/zen-profile (user.js,
+# chrome/userChrome.css) into every default Zen Browser profile. Zen names
+# its profile folders randomly, so chezmoi can't target them as Managed
+# Files; profiles.ini says which one each Zen install starts with. Windows
+# counterpart of unix/run_after_install-zen-profile, see
+# docs/adr/0016-zen-browser-profile-files.md.
+#
+# `run_after_` (not `run_onchange_`) so a profile Zen creates later, on its
+# first start, picks the files up on the next apply.
+# =============================================================================
+$ErrorActionPreference = "Stop"
+
+$src = Join-Path $HOME ".config\zen-profile"
+$dataDir = Join-Path $env:APPDATA "zen"
+$ini = Join-Path $dataDir "profiles.ini"
+
+# Default profile paths from profiles.ini: each [Install...] section's
+# Default= (one per Zen install), else the [Profile...] marked Default=1.
+# The loop variable is $zenProfile, not $profile: that is PowerShell's
+# automatic profile-path variable.
+$installs = @()
+$fallback = $null
+if (Test-Path -Path $ini -PathType Leaf) {
+    $section = ""
+    $path = $null; $relative = $true; $isDefault = $false
+    foreach ($line in @(Get-Content -LiteralPath $ini) + "[End]") {
+        if ($line -match '^\[(.+)\]$') {
+            if ($isDefault -and $path) { $fallback = @{ Path = $path; Relative = $relative } }
+            $section = $Matches[1]
+            $path = $null; $relative = $true; $isDefault = $false
+        } elseif ($section -like "Install*" -and $line -match '^Default=(.+)$') {
+            $installs += @{ Path = $Matches[1]; Relative = -not [System.IO.Path]::IsPathRooted($Matches[1]) }
+        } elseif ($section -like "Profile*" -and $line -match '^Path=(.+)$') {
+            $path = $Matches[1]
+        } elseif ($section -like "Profile*" -and $line -match '^IsRelative=(\d)$') {
+            $relative = $Matches[1] -eq "1"
+        } elseif ($section -like "Profile*" -and $line -eq "Default=1") {
+            $isDefault = $true
+        }
+    }
+}
+$profiles = if ($installs.Count -gt 0) { $installs } elseif ($fallback) { @($fallback) } else { @() }
+
+$copied = 0
+foreach ($zenProfile in $profiles) {
+    $target = if ($zenProfile.Relative) { Join-Path $dataDir ($zenProfile.Path -replace '/', '\') } else { $zenProfile.Path }
+    if (-not (Test-Path -Path $target -PathType Container)) { continue }
+    New-Item -ItemType Directory -Force -Path (Join-Path $target "chrome") | Out-Null
+    Copy-Item -LiteralPath (Join-Path $src "user.js") -Destination (Join-Path $target "user.js") -Force
+    Copy-Item -LiteralPath (Join-Path $src "chrome\userChrome.css") -Destination (Join-Path $target "chrome\userChrome.css") -Force
+    Write-Host "[OK]    Zen profile files copied to $target"
+    $copied++
+}
+
+if ($copied -eq 0) {
+    Write-Host "[INFO]  No Zen profile yet; start Zen once, then re-run chezmoi apply."
+}
+{{- end -}}

@@ -95,6 +95,9 @@ AppData/Roaming/Zed
 {{ if not (has "windows-terminal" .applications) }}
 AppData/Local/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe
 {{ end }}
+{{ if not (has "zen" .applications) }}
+.config/zen-profile
+{{ end }}
 {{ if not (has "iterm2" .applications) }}
 Library/Application Support/iTerm2
 {{ end }}
@@ -121,6 +124,7 @@ Library/Application Support/iTerm2
 .config/zed
 .config/apt-packages.txt
 .config/yazi
+.config/zen-profile
 {{ end }}
 
 # Preserves install.sh's SKIP_FILES/SKIP_DIRS behavior: matched by name,

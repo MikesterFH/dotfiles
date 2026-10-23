@@ -1,0 +1,11 @@
+# 0016: Zen Browser as an Application, profile files copied by a script
+
+**Context:** Zen (a Firefox-based browser) keeps its settings in a profile folder with a random name (`Profiles/vght6nnv.Default (release)`), under `~/Library/Application Support/zen` on macOS, `%APPDATA%\zen` on Windows, and on Linux `~/.zen`, `~/.config/zen` or the Flatpak sandbox depending on build and install method. chezmoi targets fixed paths, so it can't manage `user.js` or `chrome/userChrome.css` there directly. Zen also has no apt package.
+
+**Decision:**
+- `zen` is a GUI Application on personal and dev: Homebrew cask `zen`, winget `Zen-Team.Zen-Browser`, and on Debian/Ubuntu the Flathub app `app.zen_browser.zen`, installed per user by the Linux Applications script (which installs `flatpak` from apt first if needed). It is the first Linux GUI app outside apt.
+- `user.js` and `chrome/userChrome.css` live in `home/dot_config/zen-profile/` and deploy to `~/.config/zen-profile/`, a staging folder Zen itself never reads. A `run_after_install-zen-profile` script (unix and windows) reads each data dir's `profiles.ini`, takes every `[Install…]` section's `Default=` profile (falling back to the `[Profile…]` marked `Default=1`), and copies both files into it. `user.js` turns on `toolkit.legacyUserProfileCustomizations.stylesheets`, without which Zen ignores `userChrome.css`.
+- The script is `run_after_`, not `run_onchange_`: a profile only exists once Zen has started, so the next apply after that first start fills it in.
+- Files Zen writes itself (`prefs.js`, `zen-themes.css` and `zen-themes.json` for mods, `zen-keyboard-shortcuts.json`) stay unmanaged; chezmoi would keep reporting them as changed.
+
+**Consequences:** prefs in `user.js` win over about:config after every Zen restart; removing a line hands the pref back, but its last value stays in `prefs.js`. A fresh machine needs Zen started once and `chezmoi apply` run again before the files arrive. Edits to the copies inside the profile are overwritten on the next apply, the same as any deployed file. Several installs (e.g. two copies of the app) each have their own default profile and all get the files. Bookmarks, passwords and open tabs are left to Zen's own sync.

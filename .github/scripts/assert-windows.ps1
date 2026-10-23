@@ -130,12 +130,15 @@ if ($MachineProfile -eq "dev-server") {
     Assert-Absent ".config\wezterm"
     Assert-Absent "AppData\Roaming\Code"
     Assert-Absent "AppData\Roaming\Zed"
+    Assert-Absent ".config\zen-profile"
     Assert-Absent "AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe"
 } else {
     Assert-FileExists ".config\wezterm\wezterm.lua"
     Assert-FileExists "AppData\Roaming\Code\User\settings.json"
     Assert-FileExists "AppData\Roaming\Zed\keymap.json"
     Assert-FileExists "AppData\Roaming\Zed\settings.json"
+    Assert-FileExists ".config\zen-profile\user.js"
+    Assert-FileExists ".config\zen-profile\chrome\userChrome.css"
     Assert-FileExists "AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
 }
 
@@ -165,7 +168,7 @@ if (Test-Path -Path $wingetManifestPath -PathType Leaf) {
         "linebender.resvg", "jqlang.jq", "Gyan.FFmpeg"
     )
     if ($MachineProfile -ne "dev-server") {
-        $expectedIds += @("wez.wezterm", "Microsoft.VisualStudioCode", "Zed.Zed", "Microsoft.WindowsTerminal", "DEVCOM.JetBrainsMonoNerdFont")
+        $expectedIds += @("wez.wezterm", "Microsoft.VisualStudioCode", "Zed.Zed", "Microsoft.WindowsTerminal", "DEVCOM.JetBrainsMonoNerdFont", "Zen-Team.Zen-Browser")
     }
     foreach ($id in $expectedIds) {
         if ($packageIds -contains $id) {

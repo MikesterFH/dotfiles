@@ -59,5 +59,16 @@ fi
 if [ "${#missing[@]}" -gt 0 ]; then
   echo "[WARN]  Not available via apt on this release, install by hand: ${missing[*]}"
 fi
+{{- if has "zen" .applications }}
+
+# zen: no apt package; Zen's official Linux build is the Flathub app.
+# Installed per user, so it needs no sudo beyond installing flatpak itself.
+# See docs/adr/0016-zen-browser-profile-files.md.
+if ! command -v flatpak &>/dev/null; then
+  sudo apt-get install -y -qq flatpak
+fi
+flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+flatpak install --user -y --noninteractive flathub app.zen_browser.zen
+{{- end }}
 echo "[OK]    Linux Applications installed."
 {{- end -}}

@@ -121,6 +121,7 @@ esac
 if [ "$profile" = "dev-server" ]; then
     assert_absent ".config/wezterm"
     assert_absent ".config/zed"
+    assert_absent ".config/zen-profile"
     if [ "$os" = "Darwin" ]; then
         assert_absent "Library/Application Support/Code"
         assert_absent "Library/Application Support/iTerm2"
@@ -131,6 +132,10 @@ else
     assert_file ".config/wezterm/wezterm.lua"
     assert_file ".config/zed/keymap.json"
     assert_file ".config/zed/settings.json"
+    # Zen profile files, copied into the random-named profile by a script,
+    # see docs/adr/0016-zen-browser-profile-files.md
+    assert_file ".config/zen-profile/user.js"
+    assert_file ".config/zen-profile/chrome/userChrome.css"
     if [ "$os" = "Darwin" ]; then
         assert_file "Library/Application Support/Code/User/settings.json"
         assert_file "Library/Application Support/iTerm2/DynamicProfiles/Nvim_Tmux_Term.json"
@@ -167,7 +172,7 @@ if [ "$os" = "Darwin" ]; then
             ok "Brewfile has no cask entries for dev-server"
         fi
     else
-        for cask in wezterm visual-studio-code zed iterm2 font-jetbrains-mono-nerd-font; do
+        for cask in wezterm visual-studio-code zed iterm2 font-jetbrains-mono-nerd-font zen; do
             if [ -f "$brewfile" ] && grep -qE "^cask \"$cask\"\$" "$brewfile"; then
                 ok "Brewfile: cask \"$cask\" present"
             else

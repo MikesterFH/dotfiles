@@ -1,0 +1,5 @@
+/* Zen Browser UI tweaks, copied into every default Zen profile's chrome/
+   folder by run_after_install-zen-profile, see
+   docs/adr/0016-zen-browser-profile-files.md. Takes effect after a Zen
+   restart. Zen's own mods live in zen-themes.css next to this file and are
+   left alone. Live-edit with the Browser Toolbox (Ctrl+Shift+Alt+I). */

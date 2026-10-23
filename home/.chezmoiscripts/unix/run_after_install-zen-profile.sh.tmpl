@@ -1,0 +1,75 @@
+{{- if and (has "zen" .applications) (or (eq .chezmoi.os "darwin") (eq .chezmoi.os "linux")) (not .devpod) -}}
+#!/usr/bin/env bash
+# =============================================================================
+# chezmoi run_after script: copies ~/.config/zen-profile (user.js,
+# chrome/userChrome.css) into every default Zen Browser profile. Zen names
+# its profile folders randomly ("vght6nnv.Default (release)"), so chezmoi
+# can't target them as Managed Files; profiles.ini says which one each Zen
+# install starts with. See docs/adr/0016-zen-browser-profile-files.md.
+#
+# `run_after_` (not `run_onchange_`) so a profile Zen creates later, on its
+# first start, picks the files up on the next apply. Copying two small
+# files is cheap and idempotent.
+#
+# Only these two files are written: prefs.js, zen-themes.css and the other
+# files Zen maintains itself stay untouched.
+# =============================================================================
+set -euo pipefail
+
+src="$HOME/.config/zen-profile"
+
+# Zen's data dir per install method: macOS app, Linux tarball (~/.zen, or
+# ~/.config/zen in newer XDG-aware builds) and the Flatpak sandbox.
+{{- if eq .chezmoi.os "darwin" }}
+data_dirs=("$HOME/Library/Application Support/zen")
+{{- else }}
+data_dirs=(
+  "$HOME/.zen"
+  "$HOME/.config/zen"
+  "$HOME/.var/app/app.zen_browser.zen/.zen"
+  "$HOME/.var/app/app.zen_browser.zen/zen"
+  "$HOME/.var/app/app.zen_browser.zen/config/zen"
+)
+{{- end }}
+
+# Default profile paths from profiles.ini: each [Install…] section's
+# Default= (one per Zen install), else the [Profile…] marked Default=1.
+default_profiles() {
+  tr -d '\r' <"$1" | awk -F= '
+    /^\[/ { flush(); sec = $0; path = ""; def = 0; next }
+    sec ~ /^\[Install/ && $1 == "Default" { sub(/^Default=/, ""); installs[$0] = 1 }
+    sec ~ /^\[Profile/ && $1 == "Path" { sub(/^Path=/, ""); path = $0 }
+    sec ~ /^\[Profile/ && $1 == "Default" && $2 == "1" { def = 1 }
+    function flush() { if (def && path != "") fallback = path }
+    END {
+      flush()
+      n = 0
+      for (p in installs) { print p; n++ }
+      if (n == 0 && fallback != "") print fallback
+    }
+  '
+}
+
+copied=0
+for dir in "${data_dirs[@]}"; do
+  ini="$dir/profiles.ini"
+  [ -f "$ini" ] || continue
+  while IFS= read -r profile; do
+    [ -n "$profile" ] || continue
+    case "$profile" in
+    /*) target="$profile" ;;
+    *) target="$dir/$profile" ;;
+    esac
+    [ -d "$target" ] || continue
+    mkdir -p "$target/chrome"
+    cp "$src/user.js" "$target/user.js"
+    cp "$src/chrome/userChrome.css" "$target/chrome/userChrome.css"
+    echo "[OK]    Zen profile files copied to $target"
+    copied=$((copied + 1))
+  done < <(default_profiles "$ini")
+done
+
+if [ "$copied" -eq 0 ]; then
+  echo "[INFO]  No Zen profile yet; start Zen once, then re-run chezmoi apply."
+fi
+{{- end -}}
