@@ -10,7 +10,8 @@
        manifest: the Visual Studio Build Tools need a workload override that
        `winget import` can't pass, so
        run_onchange_after_install-windows-applications.ps1.tmpl installs
-       them itself. Installed via
+       them itself. neovim and tree-sitter-cli come from mise, pinned, on
+       every OS (docs/adr/0013-neovim-pinned-via-mise.md). Installed via
        run_onchange_after_install-windows-applications.ps1.tmpl.
        CreationDate is a fixed placeholder, not the actual render time, so
        this file doesn't change on every `chezmoi apply` just from a
@@ -18,14 +19,12 @@
 {{- $wingetPackages := dict
       "delta" "dandavison.delta"
       "starship" "Starship.Starship"
-      "neovim" "Neovim.Neovim"
       "fzf" "junegunn.fzf"
       "zoxide" "ajeetdsouza.zoxide"
       "yazi" "sxyazi.yazi"
       "glow" "charmbracelet.glow"
       "bat" "sharkdp.bat"
       "lazygit" "JesseDuffield.lazygit"
-      "tree-sitter-cli" "tree-sitter.tree-sitter-cli"
       "ripgrep" "BurntSushi.ripgrep.MSVC"
       "fd" "sharkdp.fd"
       "cmake" "Kitware.CMake"

@@ -61,7 +61,7 @@ assert_file ".config/mise/config.toml"
 # not apt, see docs/adr/0012-linux-cli-tools-via-mise.md; macOS keeps them
 # in the Brewfile, so its mise config carries only the runtimes.
 misefile="$dest/.config/mise/config.toml"
-linux_mise_tools="dandavison/delta starship/starship neovim/neovim junegunn/fzf ajeetdsouza/zoxide sxyazi/yazi charmbracelet/glow sharkdp/bat jesseduffield/lazygit tree-sitter/tree-sitter BurntSushi/ripgrep sharkdp/fd"
+linux_mise_tools="dandavison/delta starship/starship junegunn/fzf ajeetdsouza/zoxide sxyazi/yazi charmbracelet/glow sharkdp/bat jesseduffield/lazygit BurntSushi/ripgrep sharkdp/fd"
 for tool in $linux_mise_tools; do
     if [ "$os" = "Linux" ]; then
         if [ -f "$misefile" ] && grep -qF "\"aqua:$tool\" = " "$misefile"; then
@@ -71,6 +71,16 @@ for tool in $linux_mise_tools; do
         fi
     elif [ -f "$misefile" ] && grep -qF "aqua:$tool" "$misefile"; then
         bad "mise config: aqua:$tool should be Linux-only"
+    fi
+done
+# Neovim and the tree-sitter CLI come from mise on every OS, pinned to an
+# exact version so the shared lazy-lock.json fits, see
+# docs/adr/0013-neovim-pinned-via-mise.md
+for tool in neovim/neovim tree-sitter/tree-sitter; do
+    if [ -f "$misefile" ] && grep -qE "^\"aqua:$tool\" = \"[0-9]+\.[0-9]+\.[0-9]+\"\$" "$misefile"; then
+        ok "mise config: aqua:$tool pinned"
+    else
+        bad "mise config: aqua:$tool missing or not pinned to an exact version"
     fi
 done
 
@@ -130,11 +140,16 @@ fi
 if [ "$os" = "Darwin" ]; then
     brewfile="$dest/.config/homebrew/Brewfile"
     assert_file ".config/homebrew/Brewfile"
-    for formula in git-delta starship neovim tmux fzf zoxide yazi glow bat lazygit tree-sitter-cli ripgrep fd cmake; do
+    for formula in git-delta starship tmux fzf zoxide yazi glow bat lazygit ripgrep fd cmake; do
         if [ -f "$brewfile" ] && grep -qE "^brew \"$formula\"\$" "$brewfile"; then
             ok "Brewfile: brew \"$formula\" present"
         else
             bad "Brewfile: brew \"$formula\" missing"
+        fi
+    done
+    for formula in neovim tree-sitter-cli; do
+        if [ -f "$brewfile" ] && grep -qE "^brew \"$formula\"\$" "$brewfile"; then
+            bad "Brewfile: $formula should come from mise (ADR 0013), not Homebrew"
         fi
     done
     if [ "$profile" = "dev-server" ]; then

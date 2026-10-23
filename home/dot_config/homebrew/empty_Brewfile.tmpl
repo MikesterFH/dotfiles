@@ -8,12 +8,13 @@
        app was added — no runtime fallback between formula/cask. unzip and
        build-tools (cc, make) have no entry: macOS ships unzip, and the
        Xcode Command Line Tools that Homebrew's own install requires bring
-       the compiler. Installed
+       the compiler. neovim and tree-sitter-cli have no entry either: they
+       come from mise, pinned, on every OS, see
+       docs/adr/0013-neovim-pinned-via-mise.md. Installed
        via run_onchange_after_install-macos-applications.sh.tmpl. */ -}}
 {{- $homebrewFormulae := dict
       "delta" "git-delta"
       "starship" "starship"
-      "neovim" "neovim"
       "tmux" "tmux"
       "fzf" "fzf"
       "zoxide" "zoxide"
@@ -21,7 +22,6 @@
       "glow" "glow"
       "bat" "bat"
       "lazygit" "lazygit"
-      "tree-sitter-cli" "tree-sitter-cli"
       "ripgrep" "ripgrep"
       "fd" "fd"
       "cmake" "cmake"

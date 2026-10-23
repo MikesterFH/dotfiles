@@ -1,5 +1,6 @@
-{{- /* Global mise tools, see docs/adr/0011-nvim-toolchain.md and
-       docs/adr/0012-linux-cli-tools-via-mise.md. Every OS gets the language
+{{- /* Global mise tools, see docs/adr/0011-nvim-toolchain.md,
+       docs/adr/0012-linux-cli-tools-via-mise.md and
+       docs/adr/0013-neovim-pinned-via-mise.md. Every OS gets the language
        runtimes Neovim's Mason needs for its npm- and pypi-based servers and
        tools (bashls, jsonls, prettier, pyright, ruff, ...). On Linux the CLI
        tool Applications come from here as well instead of apt, whose
@@ -23,13 +24,22 @@
       "ripgrep" "aqua:BurntSushi/ripgrep"
       "fd" "aqua:sharkdp/fd"
 -}}
+{{- /* Neovim and the tree-sitter CLI come from here on every OS, pinned:
+       nvim/lazy-lock.json is shared between machines, and its plugin
+       commits only fit one Neovim version. Bump these together with a
+       :Lazy update and commit both, see ADR 0013. Everything else floats
+       at latest. */ -}}
+{{- $pinned := dict
+      "neovim" "0.12.6"
+      "tree-sitter-cli" "0.27.1"
+-}}
 [tools]
 node = "lts"
 python = "3.13"
-{{- if eq .chezmoi.os "linux" }}
-{{-   range .applications }}
-{{-     if hasKey $miseTools . }}
+{{- range .applications }}
+{{-   if hasKey $pinned . }}
+{{ index $miseTools . | quote }} = {{ index $pinned . | quote }}
+{{-   else if and (eq $.chezmoi.os "linux") (hasKey $miseTools .) }}
 {{ index $miseTools . | quote }} = "latest"
-{{-     end }}
 {{-   end }}
 {{- end }}

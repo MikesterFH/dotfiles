@@ -76,14 +76,32 @@ Assert-FileExists "AppData\Local\nvim-data\site\spell\de.utf-8.sug"
 # Global mise tools (node, python for nvim's Mason), see
 # docs/adr/0011-nvim-toolchain.md
 Assert-FileExists ".config\mise\config.toml"
-# CLI tools come from mise on Linux only (docs/adr/0012-linux-cli-tools-via-mise.md);
-# Windows keeps them in the winget manifest.
+# The other CLI tools come from mise on Linux only
+# (docs/adr/0012-linux-cli-tools-via-mise.md); Windows keeps them in the
+# winget manifest.
 $miseConfigPath = Join-Path $Dest ".config\mise\config.toml"
-if ((Test-Path -Path $miseConfigPath -PathType Leaf) -and (Select-String -Path $miseConfigPath -Pattern "aqua:" -SimpleMatch -Quiet)) {
-    Write-Host "[FAIL] mise config: aqua CLI tools should be Linux-only"
+$unpinnedAqua = @()
+if (Test-Path -Path $miseConfigPath -PathType Leaf) {
+    $unpinnedAqua = @(Select-String -Path $miseConfigPath -Pattern '^"aqua:' |
+        Where-Object { $_.Line -notmatch '^"aqua:(neovim/neovim|tree-sitter/tree-sitter)"' })
+}
+if ($unpinnedAqua.Count -gt 0) {
+    Write-Host "[FAIL] mise config: aqua CLI tools besides neovim/tree-sitter should be Linux-only"
     $script:failed = $true
 } else {
-    Write-Host "[OK]   mise config: no aqua CLI tools"
+    Write-Host "[OK]   mise config: no aqua CLI tools besides neovim/tree-sitter"
+}
+# Neovim and the tree-sitter CLI come from mise on every OS, pinned to an
+# exact version so the shared lazy-lock.json fits, see
+# docs/adr/0013-neovim-pinned-via-mise.md
+foreach ($tool in @("neovim/neovim", "tree-sitter/tree-sitter")) {
+    $pattern = '^"aqua:' + [regex]::Escape($tool) + '" = "\d+\.\d+\.\d+"$'
+    if ((Test-Path -Path $miseConfigPath -PathType Leaf) -and (Select-String -Path $miseConfigPath -Pattern $pattern -Quiet)) {
+        Write-Host "[OK]   mise config: aqua:$tool pinned"
+    } else {
+        Write-Host "[FAIL] mise config: aqua:$tool missing or not pinned to an exact version"
+        $script:failed = $true
+    }
 }
 
 # PowerShell profile, Windows-only, unconditional across every profile
@@ -138,9 +156,9 @@ if (Test-Path -Path $wingetManifestPath -PathType Leaf) {
     # CLI tools on every profile (see docs/adr/0008-cli-tools-are-applications.md);
     # no tmux entry, psmux (a Bootstrap Package) stands in for it.
     $expectedIds = @(
-        "dandavison.delta", "Starship.Starship", "Neovim.Neovim", "junegunn.fzf",
+        "dandavison.delta", "Starship.Starship", "junegunn.fzf",
         "ajeetdsouza.zoxide", "sxyazi.yazi", "charmbracelet.glow", "sharkdp.bat",
-        "JesseDuffield.lazygit", "tree-sitter.tree-sitter-cli",
+        "JesseDuffield.lazygit",
         "BurntSushi.ripgrep.MSVC", "sharkdp.fd", "Kitware.CMake"
     )
     if ($MachineProfile -ne "dev-server") {
