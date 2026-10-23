@@ -5,7 +5,12 @@
        Bootstrap Package, stands in for it) are simply absent —
        same convention already used for GUI configs limited to one
        platform. Each app is assigned to exactly one winget package ID
-       here, decided when the app was added. Installed via
+       here, decided when the app was added. unzip has no entry (Windows
+       ships tar and Expand-Archive), and build-tools is not in this
+       manifest: the Visual Studio Build Tools need a workload override that
+       `winget import` can't pass, so
+       run_onchange_after_install-windows-applications.ps1.tmpl installs
+       them itself. Installed via
        run_onchange_after_install-windows-applications.ps1.tmpl.
        CreationDate is a fixed placeholder, not the actual render time, so
        this file doesn't change on every `chezmoi apply` just from a
@@ -20,10 +25,15 @@
       "glow" "charmbracelet.glow"
       "bat" "sharkdp.bat"
       "lazygit" "JesseDuffield.lazygit"
+      "tree-sitter-cli" "tree-sitter.tree-sitter-cli"
+      "ripgrep" "BurntSushi.ripgrep.MSVC"
+      "fd" "sharkdp.fd"
+      "cmake" "Kitware.CMake"
       "wezterm" "wez.wezterm"
       "vscode" "Microsoft.VisualStudioCode"
       "zed" "Zed.Zed"
       "windows-terminal" "Microsoft.WindowsTerminal"
+      "jetbrains-mono-nerd-font" "DEVCOM.JetBrainsMonoNerdFont"
 -}}
 {{- $packages := list -}}
 {{- range .applications -}}

@@ -102,6 +102,9 @@ fi
 # starship
 command -v starship &>/dev/null && eval "$(starship init bash)"
 
+# mise (node, python for nvim's Mason, see docs/adr/0011-nvim-toolchain.md)
+command -v mise &>/dev/null && eval "$(mise activate bash)"
+
 # cargo
 [ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
 # esp toolchain for rust

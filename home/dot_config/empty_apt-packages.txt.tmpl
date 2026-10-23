@@ -9,6 +9,8 @@
        glow, lazygit are missing from older ones) — the install script skips
        and reports those instead of failing, see
        docs/adr/0008-cli-tools-are-applications.md.
+       fd-find installs its binary as `fdfind`; Telescope and the Snacks
+       picker look for that name too.
        Installed via run_onchange_after_install-linux-applications.sh.tmpl.
        Debian/apt only — this file doesn't render on Fedora/Arch/other
        Linux distros, or on macOS/Windows, see .chezmoiignore. */ -}}
@@ -23,6 +25,12 @@
       "glow" "glow"
       "bat" "bat"
       "lazygit" "lazygit"
+      "tree-sitter-cli" "tree-sitter-cli"
+      "ripgrep" "ripgrep"
+      "fd" "fd-find"
+      "unzip" "unzip"
+      "cmake" "cmake"
+      "build-tools" "build-essential"
       "wezterm" "wezterm"
       "vscode" "code"
       "zed" "zed"

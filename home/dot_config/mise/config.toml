@@ -1,0 +1,7 @@
+# Global mise tools (see docs/adr/0011-nvim-toolchain.md). Language runtimes
+# Neovim's Mason needs to install its npm- and pypi-based servers and tools
+# (bashls, jsonls, prettier, pyright, ruff, ...). Installed by the
+# run_onchange_after_install-mise-tools scripts whenever this file changes.
+[tools]
+node = "lts"
+python = "3.13"

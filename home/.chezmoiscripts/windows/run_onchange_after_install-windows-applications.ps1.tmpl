@@ -32,5 +32,21 @@ Write-Host "[INFO]  Installing Windows Applications via winget import..."
 # --ignore-unavailable: a package ID winget can't find is reported and
 # skipped instead of aborting the rest of the import.
 winget import --import-file $manifest --ignore-unavailable --accept-package-agreements --accept-source-agreements
+{{- if has "build-tools" .applications }}
+
+# build-tools: the MSVC compiler nvim-treesitter's `tree-sitter build` needs
+# (the cc crate finds it through vswhere, no Developer Prompt required).
+# Not in the manifest because the bare package installs no workload; skip
+# when a VC toolset is already present so a rerun doesn't reconfigure VS.
+$vswhere = Join-Path ${env:ProgramFiles(x86)} "Microsoft Visual Studio\Installer\vswhere.exe"
+$hasVcTools = (Test-Path $vswhere) -and (& $vswhere -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath)
+if ($hasVcTools) {
+    Write-Host "[OK]    MSVC build tools already installed."
+} else {
+    Write-Host "[INFO]  Installing Visual Studio Build Tools (C++ workload)..."
+    winget install --id Microsoft.VisualStudio.2022.BuildTools -e --source winget --accept-package-agreements --accept-source-agreements `
+        --override "--quiet --wait --norestart --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended"
+}
+{{- end }}
 Write-Host "[OK]    Windows Applications installed."
 {{- end -}}

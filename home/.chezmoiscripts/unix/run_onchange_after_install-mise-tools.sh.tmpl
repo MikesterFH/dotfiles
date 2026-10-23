@@ -1,0 +1,39 @@
+{{- if ne .chezmoi.os "windows" -}}
+#!/usr/bin/env bash
+# =============================================================================
+# chezmoi run_onchange_after script: installs the global mise tools from
+# ~/.config/mise/config.toml (node, python for Neovim's Mason), see
+# docs/adr/0011-nvim-toolchain.md.
+#
+# `_after_` so the config is already written; mise itself is a Bootstrap
+# Package (run_once_before_install-packages.sh.tmpl). chezmoi runs each
+# script as its own process, so re-derive PATH for both ways Bootstrap may
+# have installed mise: Homebrew, or the mise.run installer's ~/.local/bin.
+#
+# Rerun trigger: hash of the config, so a changed tool list reruns this.
+# config sha256: {{ include "dot_config/mise/config.toml" | sha256sum }}
+# =============================================================================
+set -euo pipefail
+
+if [ -x /opt/homebrew/bin/brew ]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+elif [ -x /usr/local/bin/brew ]; then
+  eval "$(/usr/local/bin/brew shellenv)"
+fi
+export PATH="$HOME/.local/bin:$PATH"
+
+if ! command -v mise &>/dev/null; then
+  echo "[WARN]  mise not found; skipping global mise tools. Was the Bootstrap step skipped?" >&2
+  exit 0
+fi
+
+# A stale mise can misread newer runtime releases (an old mise picked the
+# freethreaded python-build-standalone archive and failed). self-update works
+# for the mise.run install; Homebrew/apt installs refuse it and stay on their
+# package manager's version.
+mise self-update --yes &>/dev/null || true
+echo "[INFO]  Installing global mise tools..."
+cd "$HOME"
+mise install --yes
+echo "[OK]    Global mise tools installed."
+{{- end -}}

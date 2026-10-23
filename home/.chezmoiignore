@@ -36,6 +36,7 @@ Library
 .zprofile
 .zsh_aliases
 .config/zed
+.local
 .config/homebrew
 .config/apt-packages.txt
 {{ else }}

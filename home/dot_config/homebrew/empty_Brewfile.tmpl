@@ -5,7 +5,10 @@
        packaging (e.g. windows-terminal) are simply absent — same convention
        already used for GUI configs limited to one platform. Each app is
        assigned to exactly one Homebrew identifier here, decided when the
-       app was added — no runtime fallback between formula/cask. Installed
+       app was added — no runtime fallback between formula/cask. unzip and
+       build-tools (cc, make) have no entry: macOS ships unzip, and the
+       Xcode Command Line Tools that Homebrew's own install requires bring
+       the compiler. Installed
        via run_onchange_after_install-macos-applications.sh.tmpl. */ -}}
 {{- $homebrewFormulae := dict
       "delta" "git-delta"
@@ -18,12 +21,17 @@
       "glow" "glow"
       "bat" "bat"
       "lazygit" "lazygit"
+      "tree-sitter-cli" "tree-sitter-cli"
+      "ripgrep" "ripgrep"
+      "fd" "fd"
+      "cmake" "cmake"
 -}}
 {{- $homebrewCasks := dict
       "wezterm" "wezterm"
       "vscode" "visual-studio-code"
       "zed" "zed"
       "iterm2" "iterm2"
+      "jetbrains-mono-nerd-font" "font-jetbrains-mono-nerd-font"
 -}}
 {{- $lines := list -}}
 {{- range .applications -}}

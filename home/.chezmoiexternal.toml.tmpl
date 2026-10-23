@@ -1,0 +1,30 @@
+{{- /* German spell files for Neovim (options.lua sets spelllang = de,en).
+       Neovim only fetches missing spell files through its spellfile plugin,
+       which needs netrw, and LazyVim disables netrw, so they are pulled in
+       here instead. See docs/adr/0010-nvim-spell-files-as-chezmoi-externals.md. */ -}}
+{{- if has "neovim" .applications }}
+{{-   $spellDir := ".local/share/nvim/site/spell" }}
+{{-   if eq .chezmoi.os "windows" }}{{ $spellDir = "AppData/Local/nvim-data/site/spell" }}{{ end }}
+{{-   range list "de.utf-8.spl" "de.utf-8.sug" }}
+
+["{{ $spellDir }}/{{ . }}"]
+    type = "file"
+    url = "https://ftp.nluug.nl/pub/vim/runtime/spell/{{ . }}"
+    refreshPeriod = "2160h"
+{{-   end }}
+{{- end }}
+
+{{- /* JetBrainsMono Nerd Font on Linux, the font wezterm, zed and the nvim
+       icons expect. macOS and Windows install it as an Application through
+       the Brewfile cask / winget manifest; apt has no Nerd Font package, so
+       it comes from the Nerd Fonts release here. fontconfig picks up the new
+       directory under ~/.local/share/fonts on its own. Not in devpod, which
+       has no display. See docs/adr/0011-nvim-toolchain.md. */ -}}
+{{- if and (eq .chezmoi.os "linux") (has "jetbrains-mono-nerd-font" .applications) (not .devpod) }}
+
+[".local/share/fonts/JetBrainsMonoNerdFont"]
+    type = "archive"
+    url = "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.tar.xz"
+    exact = true
+    refreshPeriod = "2160h"
+{{- end }}

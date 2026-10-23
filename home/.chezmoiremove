@@ -1,0 +1,8 @@
+{{- /* Targets whose source was deleted from the repo. chezmoi never removes
+       a deployed file on its own, so a file dropped from home/ lingers in
+       $HOME and keeps being loaded (e.g. an old nvim plugin spec). List it
+       here so the next apply deletes it. */ -}}
+.config/nvim/.neoconf.json
+.config/nvim/lua/plugins/example.lua
+.config/nvim/lua/plugins/lsp.lua
+.config/nvim/lua/plugins/nvim-cmp.lua

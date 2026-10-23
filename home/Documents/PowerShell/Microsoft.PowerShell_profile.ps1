@@ -14,6 +14,11 @@ if (Get-Command starship -ErrorAction SilentlyContinue) {
   Invoke-Expression (&starship init powershell)
 }
 
+# mise: node, python for nvim's Mason, see docs/adr/0011-nvim-toolchain.md
+if (Get-Command mise -ErrorAction SilentlyContinue) {
+  (&mise activate pwsh) | Out-String | Invoke-Expression
+}
+
 if ((Get-Module PSReadLine).Version -ge [version]"2.1.0" -and -not [Console]::IsOutputRedirected) {
   Set-PSReadLineOption -PredictionSource History
   Set-PSReadLineOption -PredictionViewStyle InlineView

@@ -1,0 +1,28 @@
+{{- if eq .chezmoi.os "windows" -}}
+# =============================================================================
+# chezmoi run_onchange_after script: installs the global mise tools from
+# ~/.config/mise/config.toml (node, python for Neovim's Mason), see
+# docs/adr/0011-nvim-toolchain.md. mise itself is a Bootstrap Package
+# (run_once_before_install-packages.ps1.tmpl).
+#
+# Rerun trigger: hash of the config, so a changed tool list reruns this.
+# config sha256: {{ include "dot_config/mise/config.toml" | sha256sum }}
+# =============================================================================
+$ErrorActionPreference = "Stop"
+
+# winget may have installed mise during this same apply; pick up its PATH.
+$env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [Environment]::GetEnvironmentVariable("Path", "User")
+
+if (-not (Get-Command mise -ErrorAction SilentlyContinue)) {
+    Write-Warning "mise not found; skipping global mise tools. Restart the terminal and run chezmoi apply again."
+    exit 0
+}
+
+# A stale mise can misread newer runtime releases; self-update is best effort
+# (a winget install refuses it and stays on winget's version).
+mise self-update --yes 2>&1 | Out-Null
+Write-Host "[INFO]  Installing global mise tools..."
+Set-Location $HOME
+mise install --yes
+Write-Host "[OK]    Global mise tools installed."
+{{- end -}}

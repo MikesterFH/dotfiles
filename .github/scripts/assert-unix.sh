@@ -49,6 +49,15 @@ assert_file ".zprofile"
 assert_file ".zsh_aliases"
 assert_file ".config/tmux/tmux.conf"
 
+# German spell files for nvim, pulled in by .chezmoiexternal.toml.tmpl, see
+# docs/adr/0010-nvim-spell-files-as-chezmoi-externals.md
+assert_file ".local/share/nvim/site/spell/de.utf-8.spl"
+assert_file ".local/share/nvim/site/spell/de.utf-8.sug"
+
+# Global mise tools (node, python for nvim's Mason), see
+# docs/adr/0011-nvim-toolchain.md
+assert_file ".config/mise/config.toml"
+
 # Windows-only paths must not appear on macOS/Linux
 assert_absent ".psmux.conf"
 assert_absent "Documents/PowerShell/Microsoft.PowerShell_profile.ps1"
@@ -105,7 +114,7 @@ fi
 if [ "$os" = "Darwin" ]; then
     brewfile="$dest/.config/homebrew/Brewfile"
     assert_file ".config/homebrew/Brewfile"
-    for formula in git-delta starship neovim tmux fzf zoxide yazi glow bat lazygit; do
+    for formula in git-delta starship neovim tmux fzf zoxide yazi glow bat lazygit tree-sitter-cli ripgrep fd cmake; do
         if [ -f "$brewfile" ] && grep -qE "^brew \"$formula\"\$" "$brewfile"; then
             ok "Brewfile: brew \"$formula\" present"
         else
@@ -119,7 +128,7 @@ if [ "$os" = "Darwin" ]; then
             ok "Brewfile has no cask entries for dev-server"
         fi
     else
-        for cask in wezterm visual-studio-code zed iterm2; do
+        for cask in wezterm visual-studio-code zed iterm2 font-jetbrains-mono-nerd-font; do
             if [ -f "$brewfile" ] && grep -qE "^cask \"$cask\"\$" "$brewfile"; then
                 ok "Brewfile: cask \"$cask\" present"
             else
@@ -143,7 +152,7 @@ fi
 if [ "$os" = "Linux" ]; then
     aptfile="$dest/.config/apt-packages.txt"
     assert_file ".config/apt-packages.txt"
-    for pkg in git-delta starship neovim tmux fzf zoxide yazi glow bat lazygit; do
+    for pkg in git-delta starship neovim tmux fzf zoxide yazi glow bat lazygit tree-sitter-cli ripgrep fd-find unzip cmake build-essential; do
         if [ -f "$aptfile" ] && grep -qxF "$pkg" "$aptfile"; then
             ok "apt-packages.txt: $pkg present"
         else
@@ -167,6 +176,13 @@ if [ "$os" = "Linux" ]; then
         if [ -f "$aptfile" ] && grep -qE 'iterm2|windows-terminal' "$aptfile"; then
             bad "apt-packages.txt: iterm2/windows-terminal should never appear (no Linux identifier)"
         fi
+    fi
+    # JetBrainsMono Nerd Font comes from a chezmoi external on Linux, GUI
+    # Profiles only, see docs/adr/0011-nvim-toolchain.md
+    if [ "$profile" = "dev-server" ]; then
+        assert_absent ".local/share/fonts/JetBrainsMonoNerdFont"
+    else
+        assert_file ".local/share/fonts/JetBrainsMonoNerdFont/JetBrainsMonoNerdFont-Regular.ttf"
     fi
 else
     assert_absent ".config/apt-packages.txt"

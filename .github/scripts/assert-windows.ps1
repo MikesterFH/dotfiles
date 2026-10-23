@@ -50,6 +50,7 @@ Assert-Absent ".bash_aliases"
 Assert-Absent ".zshrc"
 Assert-Absent ".zprofile"
 Assert-Absent ".zsh_aliases"
+Assert-Absent ".local"
 Assert-FileExists ".psmux.conf"
 
 $psmuxConfig = Get-Content -LiteralPath (Join-Path $Dest ".psmux.conf") -Raw -ErrorAction SilentlyContinue
@@ -66,6 +67,15 @@ if ($psmuxConfig -notmatch 'source-file ~/\.psmux\.conf' -or
 # psmux reads the same tmux.conf, see
 # docs/adr/0005-psmux-for-windows-tmux-parity.md
 Assert-FileExists ".config\tmux\tmux.conf"
+
+# German spell files for nvim, pulled in by .chezmoiexternal.toml.tmpl, see
+# docs/adr/0010-nvim-spell-files-as-chezmoi-externals.md
+Assert-FileExists "AppData\Local\nvim-data\site\spell\de.utf-8.spl"
+Assert-FileExists "AppData\Local\nvim-data\site\spell\de.utf-8.sug"
+
+# Global mise tools (node, python for nvim's Mason), see
+# docs/adr/0011-nvim-toolchain.md
+Assert-FileExists ".config\mise\config.toml"
 
 # PowerShell profile, Windows-only, unconditional across every profile
 Assert-FileExists "Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
@@ -121,10 +131,11 @@ if (Test-Path -Path $wingetManifestPath -PathType Leaf) {
     $expectedIds = @(
         "dandavison.delta", "Starship.Starship", "Neovim.Neovim", "junegunn.fzf",
         "ajeetdsouza.zoxide", "sxyazi.yazi", "charmbracelet.glow", "sharkdp.bat",
-        "JesseDuffield.lazygit"
+        "JesseDuffield.lazygit", "tree-sitter.tree-sitter-cli",
+        "BurntSushi.ripgrep.MSVC", "sharkdp.fd", "Kitware.CMake"
     )
     if ($MachineProfile -ne "dev-server") {
-        $expectedIds += @("wez.wezterm", "Microsoft.VisualStudioCode", "Zed.Zed", "Microsoft.WindowsTerminal")
+        $expectedIds += @("wez.wezterm", "Microsoft.VisualStudioCode", "Zed.Zed", "Microsoft.WindowsTerminal", "DEVCOM.JetBrainsMonoNerdFont")
     }
     foreach ($id in $expectedIds) {
         if ($packageIds -contains $id) {
