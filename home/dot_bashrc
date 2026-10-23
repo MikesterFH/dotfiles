@@ -99,11 +99,13 @@ if [ -f ~/.bash_aliases ]; then
   . "$HOME/.bash_aliases"
 fi
 
+# mise: node, python for nvim's Mason, and on Linux the CLI tools themselves
+# (docs/adr/0011-nvim-toolchain.md, docs/adr/0012-linux-cli-tools-via-mise.md),
+# so it must come before any tool init below.
+command -v mise &>/dev/null && eval "$(mise activate bash)"
+
 # starship
 command -v starship &>/dev/null && eval "$(starship init bash)"
-
-# mise (node, python for nvim's Mason, see docs/adr/0011-nvim-toolchain.md)
-command -v mise &>/dev/null && eval "$(mise activate bash)"
 
 # cargo
 [ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"

@@ -35,6 +35,8 @@ bindkey '^[[B' history-search-forward
 
 # -- tool integrations (interactive) -----------------------------------------
 
+# mise first: on Linux it provides zoxide, starship and the other CLI tools
+# (docs/adr/0012-linux-cli-tools-via-mise.md).
+command -v mise &>/dev/null && eval "$(mise activate zsh)"
 command -v zoxide &>/dev/null && eval "$(zoxide init zsh)"
 command -v starship &>/dev/null && eval "$(starship init zsh)"
-command -v mise &>/dev/null && eval "$(mise activate zsh)"
