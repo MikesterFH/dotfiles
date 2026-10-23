@@ -1,0 +1,17 @@
+#!/bin/sh
+# Runs the current repo's own hook of the given name, if it has one.
+#
+# core.hooksPath (set globally to this directory, see ../config) makes git
+# ignore every repo's .git/hooks. Each hook in this directory therefore ends
+# by calling this script, so per-repo hooks (pre-commit framework, husky
+# installs into .git/hooks, ...) keep running. Repos that set their own
+# core.hooksPath bypass this directory entirely.
+#
+# Usage: run-repo-hook <hook-name> [args...]
+name="$1"
+shift
+hook="$(git rev-parse --git-common-dir)/hooks/$name"
+if [ -x "$hook" ]; then
+  exec "$hook" "$@"
+fi
+exit 0

@@ -180,6 +180,11 @@ assert_absent ".config/winget"
 assert_file ".config/yazi/yazi.toml"
 assert_file ".config/yazi/package.toml"
 
+# Global git hooks (docs/adr/0009-global-git-hooks.md): agent-trailer
+# filter plus the pass-through to each repo's own hooks.
+assert_file ".config/git/hooks/commit-msg"
+assert_file ".config/git/hooks/run-repo-hook"
+
 # Rendered git config: autocrlf must be "input", never "true"
 gitconfig="$dest/.config/git/config"
 if [ -f "$gitconfig" ]; then

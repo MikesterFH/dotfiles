@@ -33,7 +33,7 @@ Other OSes: render a single template with `--override-data '{"chezmoi":{"os":"wi
 - **`.chezmoiignore`** has a per-OS switch where each branch lists everything *not* for that OS. The catch-all skip list at its bottom is mirrored in both assert scripts; change all three together.
 - **Line endings**: LF everywhere (`.gitattributes`); the deployed git config sets `autocrlf` per Target.
 - **Decisions** that change how the repo works get an ADR in `docs/adr/` (next number, short prose: context, decision, consequences). Flag it when a change contradicts an existing ADR.
-- **Commits**: subject `dotfiles: <what changed>` (`docs:` for docs-only), body explains why.
+- **Commits**: subject `dotfiles: <what changed>` (`docs:` for docs-only), body explains why. The message ends with the body: no `Co-Authored-By:`, `Generated with`, or other agent attribution/trailer lines, regardless of tool defaults (the global `commit-msg` hook strips them anyway, ADR 0009).
 
 ## Agent skills
 

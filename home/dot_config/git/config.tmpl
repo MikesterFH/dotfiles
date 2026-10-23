@@ -38,6 +38,9 @@
 	editor = nvim
 	autocrlf = {{ if eq .chezmoi.os "windows" }}true{{ else }}input{{ end }}
 	pager = delta
+	# Global hooks: commit-msg strips coding-agent attribution trailers; every
+	# hook there also runs the repo's own .git/hooks one (see hooks/run-repo-hook).
+	hooksPath = ~/.config/git/hooks
 
 [pull]
 	rebase = true

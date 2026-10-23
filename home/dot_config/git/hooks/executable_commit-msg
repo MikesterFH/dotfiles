@@ -1,0 +1,16 @@
+#!/bin/sh
+# Strips coding-agent attribution from every commit message: Co-Authored-By
+# trailers naming an AI agent, "Generated with <agent>" lines and session
+# trailers. A Co-Authored-By for a human co-author is kept. Then runs the
+# repo's own commit-msg hook, if any.
+msg="$1"
+tmp="$msg.agent-strip"
+
+agents='anthropic|claude|openai|codex|copilot|cursor|gemini|aider|windsurf|devin'
+grep -viE "^[[:space:]]*(co-authored-by:.*($agents)|claude-session:|.*generated (with|by) .*($agents))" "$msg" >"$tmp"
+
+# Drop the blank lines the removed trailers leave at the end.
+awk '{ lines[NR] = $0 } END { n = NR; while (n > 0 && lines[n] ~ /^[[:space:]]*$/) n--; for (i = 1; i <= n; i++) print lines[i] }' "$tmp" >"$msg"
+rm -f "$tmp"
+
+exec "$(dirname "$0")/run-repo-hook" commit-msg "$@"

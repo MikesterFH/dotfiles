@@ -147,6 +147,11 @@ Assert-FileExists ".config\yazi\yazi.toml"
 Assert-FileExists ".config\yazi\package.toml"
 Assert-Absent "AppData\Roaming\yazi"
 
+# Global git hooks (docs/adr/0009-global-git-hooks.md): agent-trailer
+# filter plus the pass-through to each repo's own hooks.
+Assert-FileExists ".config\git\hooks\commit-msg"
+Assert-FileExists ".config\git\hooks\run-repo-hook"
+
 # Rendered git config: autocrlf must be "true", never "input"
 $gitConfigPath = Join-Path $Dest ".config\git\config"
 if (Test-Path -Path $gitConfigPath -PathType Leaf) {

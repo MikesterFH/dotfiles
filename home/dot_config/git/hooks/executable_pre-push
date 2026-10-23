@@ -1,0 +1,3 @@
+#!/bin/sh
+# Pass-through: runs the repo's own pre-push hook, see run-repo-hook.
+exec "$(dirname "$0")/run-repo-hook" pre-push "$@"
