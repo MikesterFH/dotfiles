@@ -9,7 +9,8 @@
        tree-sitter-cli, starship, yazi, glow, lazygit, ...) come from mise on
        Linux instead, see dot_config/mise/config.toml.tmpl and
        docs/adr/0012-linux-cli-tools-via-mise.md; what stays here is system
-       packages and the GUI apps. A name missing from an older release is
+       packages, yazi's previewers and the GUI apps. ImageMagick is not
+       here either: apt ships 6.x, yazi needs 7's `magick`. A name missing from an older release is
        skipped and reported by the install script instead of failing, see
        docs/adr/0008-cli-tools-are-applications.md.
        Installed via run_onchange_after_install-linux-applications.sh.tmpl.
@@ -20,6 +21,12 @@
       "unzip" "unzip"
       "cmake" "cmake"
       "build-tools" "build-essential"
+      "zsh" "zsh"
+      "file" "file"
+      "7zip" "7zip"
+      "poppler" "poppler-utils"
+      "jq" "jq"
+      "ffmpeg" "ffmpeg"
       "wezterm" "wezterm"
       "vscode" "code"
       "zed" "zed"

@@ -5,10 +5,10 @@
        packaging (e.g. windows-terminal) are simply absent — same convention
        already used for GUI configs limited to one platform. Each app is
        assigned to exactly one Homebrew identifier here, decided when the
-       app was added — no runtime fallback between formula/cask. unzip and
-       build-tools (cc, make) have no entry: macOS ships unzip, and the
-       Xcode Command Line Tools that Homebrew's own install requires bring
-       the compiler. neovim and tree-sitter-cli have no entry either: they
+       app was added — no runtime fallback between formula/cask. unzip, zsh,
+       file and build-tools (cc, make) have no entry: macOS ships the first
+       three, and the Xcode Command Line Tools that Homebrew's own install
+       requires bring the compiler. neovim and tree-sitter-cli have no entry either: they
        come from mise, pinned, on every OS, see
        docs/adr/0013-neovim-pinned-via-mise.md. Installed
        via run_onchange_after_install-macos-applications.sh.tmpl. */ -}}
@@ -25,6 +25,13 @@
       "ripgrep" "ripgrep"
       "fd" "fd"
       "cmake" "cmake"
+      "eza" "eza"
+      "7zip" "sevenzip"
+      "imagemagick" "imagemagick"
+      "poppler" "poppler"
+      "resvg" "resvg"
+      "jq" "jq"
+      "ffmpeg" "ffmpeg"
 -}}
 {{- $homebrewCasks := dict
       "wezterm" "wezterm"

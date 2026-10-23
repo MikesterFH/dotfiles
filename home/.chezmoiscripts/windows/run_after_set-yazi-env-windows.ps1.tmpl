@@ -36,11 +36,36 @@ if (-not (Test-Path -LiteralPath (Join-Path $shellDir "sh.exe") -PathType Leaf))
     throw "Yazi's Piper plugin needs Git for Windows' bin\sh.exe. Repair your Git installation."
 }
 
-$userPath = [Environment]::GetEnvironmentVariable("Path", "User")
-if (($userPath -split ";" | ForEach-Object { $_.TrimEnd("\") }) -notcontains $shellDir.TrimEnd("\")) {
-    [Environment]::SetEnvironmentVariable("Path", ($userPath.TrimEnd(";") + ";" + $shellDir), "User")
+function Add-UserPath {
+    param([string]$Dir)
+    $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
+    if (($userPath -split ";" | ForEach-Object { $_.TrimEnd("\") }) -notcontains $Dir.TrimEnd("\")) {
+        [Environment]::SetEnvironmentVariable("Path", ($userPath.TrimEnd(";") + ";" + $Dir), "User")
+    }
+    if (($env:Path -split ";" | ForEach-Object { $_.TrimEnd("\") }) -notcontains $Dir.TrimEnd("\")) {
+        $env:Path += ";" + $Dir
+    }
 }
-if (($env:Path -split ";" | ForEach-Object { $_.TrimEnd("\") }) -notcontains $shellDir.TrimEnd("\")) {
-    $env:Path += ";" + $shellDir
+
+Add-UserPath $shellDir
+
+# Previewer tools whose installers don't reliably put them on the PATH (see
+# docs/adr/0014-yazi-previews-on-every-platform.md): the 7-Zip installer
+# never does, ImageMagick's only when its "add to path" task ran. Skipped
+# when the tool is already found or isn't installed at all.
+if (-not (Get-Command 7z -ErrorAction SilentlyContinue)) {
+    $sevenZipDir = Join-Path $env:ProgramFiles "7-Zip"
+    if (Test-Path -LiteralPath (Join-Path $sevenZipDir "7z.exe") -PathType Leaf) {
+        Add-UserPath $sevenZipDir
+    }
+}
+if (-not (Get-Command magick -ErrorAction SilentlyContinue)) {
+    $magickDir = Get-ChildItem -Path $env:ProgramFiles -Directory -Filter "ImageMagick-*" -ErrorAction SilentlyContinue |
+        Sort-Object Name -Descending |
+        Where-Object { Test-Path -LiteralPath (Join-Path $_.FullName "magick.exe") -PathType Leaf } |
+        Select-Object -First 1
+    if ($magickDir) {
+        Add-UserPath $magickDir.FullName
+    }
 }
 {{- end -}}

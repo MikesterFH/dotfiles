@@ -4,9 +4,11 @@ alias grep='grep --color=auto'
 alias fgrep='fgrep --color=auto'
 alias egrep='egrep --color=auto'
 
-alias cat=bat
+# Only alias when the tool is there, so cat and ls keep working on a machine
+# where an Application install was skipped.
+command -v bat &>/dev/null && alias cat=bat
 
-alias ls='eza --long --color=always --icons=always'
+command -v eza &>/dev/null && alias ls='eza --long --color=always --icons=always'
 alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'

@@ -28,3 +28,20 @@
     exact = true
     refreshPeriod = "2160h"
 {{- end }}
+
+{{- /* oh-my-zsh for .zshrc on macOS and Linux (no zsh on Windows), see
+       docs/adr/0015-default-shells.md. A git-repo external: chezmoi clones
+       it once and `git pull`s it every refreshPeriod, so an existing clone
+       and its custom/ dir stay as they are. oh-my-zsh's own updater is off
+       in .zshrc, since chezmoi does the pulling. */ -}}
+{{- if ne .chezmoi.os "windows" }}
+
+[".oh-my-zsh"]
+    type = "git-repo"
+    url = "https://github.com/ohmyzsh/ohmyzsh.git"
+    refreshPeriod = "168h"
+    [".oh-my-zsh".clone]
+        args = ["--depth", "1"]
+    [".oh-my-zsh".pull]
+        args = ["--ff-only"]
+{{- end }}

@@ -57,20 +57,28 @@ assert_file ".local/share/nvim/site/spell/de.utf-8.sug"
 # Global mise tools (node, python for nvim's Mason), see
 # docs/adr/0011-nvim-toolchain.md
 assert_file ".config/mise/config.toml"
+
+# oh-my-zsh, cloned by a chezmoi git-repo external, see
+# docs/adr/0015-default-shells.md
+assert_file ".oh-my-zsh/oh-my-zsh.sh"
 # On Linux the CLI tool Applications come from mise too (aqua backends),
 # not apt, see docs/adr/0012-linux-cli-tools-via-mise.md; macOS keeps them
 # in the Brewfile, so its mise config carries only the runtimes.
 misefile="$dest/.config/mise/config.toml"
-linux_mise_tools="dandavison/delta starship/starship junegunn/fzf ajeetdsouza/zoxide sxyazi/yazi charmbracelet/glow sharkdp/bat jesseduffield/lazygit BurntSushi/ripgrep sharkdp/fd"
+linux_mise_tools="aqua:dandavison/delta aqua:starship/starship aqua:junegunn/fzf aqua:ajeetdsouza/zoxide aqua:sxyazi/yazi aqua:charmbracelet/glow aqua:sharkdp/bat aqua:jesseduffield/lazygit aqua:BurntSushi/ripgrep aqua:sharkdp/fd aqua:eza-community/eza conda:imagemagick"
+# resvg ships Linux binaries for amd64 only (docs/adr/0014-yazi-previews-on-every-platform.md)
+if [ "$(uname -m)" = "x86_64" ]; then
+    linux_mise_tools="$linux_mise_tools aqua:linebender/resvg"
+fi
 for tool in $linux_mise_tools; do
     if [ "$os" = "Linux" ]; then
-        if [ -f "$misefile" ] && grep -qF "\"aqua:$tool\" = " "$misefile"; then
-            ok "mise config: aqua:$tool present"
+        if [ -f "$misefile" ] && grep -qF "\"$tool\" = " "$misefile"; then
+            ok "mise config: $tool present"
         else
-            bad "mise config: aqua:$tool missing"
+            bad "mise config: $tool missing"
         fi
-    elif [ -f "$misefile" ] && grep -qF "aqua:$tool" "$misefile"; then
-        bad "mise config: aqua:$tool should be Linux-only"
+    elif [ -f "$misefile" ] && grep -qF "\"$tool\"" "$misefile"; then
+        bad "mise config: $tool should be Linux-only"
     fi
 done
 # Neovim and the tree-sitter CLI come from mise on every OS, pinned to an
@@ -140,7 +148,7 @@ fi
 if [ "$os" = "Darwin" ]; then
     brewfile="$dest/.config/homebrew/Brewfile"
     assert_file ".config/homebrew/Brewfile"
-    for formula in git-delta starship tmux fzf zoxide yazi glow bat lazygit ripgrep fd cmake; do
+    for formula in git-delta starship tmux fzf zoxide yazi glow bat lazygit ripgrep fd cmake eza sevenzip imagemagick poppler resvg jq ffmpeg; do
         if [ -f "$brewfile" ] && grep -qE "^brew \"$formula\"\$" "$brewfile"; then
             ok "Brewfile: brew \"$formula\" present"
         else
@@ -183,7 +191,7 @@ fi
 if [ "$os" = "Linux" ]; then
     aptfile="$dest/.config/apt-packages.txt"
     assert_file ".config/apt-packages.txt"
-    for pkg in tmux unzip cmake build-essential; do
+    for pkg in tmux unzip cmake build-essential zsh file 7zip poppler-utils jq ffmpeg; do
         if [ -f "$aptfile" ] && grep -qxF "$pkg" "$aptfile"; then
             ok "apt-packages.txt: $pkg present"
         else
@@ -191,7 +199,7 @@ if [ "$os" = "Linux" ]; then
         fi
     done
     # CLI tools moved to mise must not be installed twice
-    for pkg in git-delta starship neovim fzf zoxide yazi glow bat lazygit tree-sitter-cli ripgrep fd-find; do
+    for pkg in git-delta starship neovim fzf zoxide yazi glow bat lazygit tree-sitter-cli ripgrep fd-find eza imagemagick; do
         if [ -f "$aptfile" ] && grep -qxF "$pkg" "$aptfile"; then
             bad "apt-packages.txt: $pkg should come from mise, not apt"
         fi
@@ -256,12 +264,13 @@ fi
 # SKIP_FILES/SKIP_DIRS (from .chezmoiignore) must not have leaked through.
 # Kept in sync by hand with the catch-all list at the bottom of
 # .chezmoiignore (and its assert-windows.ps1 counterpart) — update all three
-# together.
-skip_hits=$(find "$dest" \
+# together. .oh-my-zsh is a git-repo external (docs/adr/0015-default-shells.md),
+# a third-party clone rather than Source State, so it is left out.
+skip_hits=$(find "$dest" -path "$dest/.oh-my-zsh" -prune -o \
     \( -name 'README.md' -o -name 'readme.md' -o -name 'README' \
     -o -name 'LICENSE' -o -name 'CHANGELOG.md' -o -name 'HELP.md' \
     -o -name 'which-key.yaml' -o -name 'Thumbs.db' \
-    -o -name 'node_modules' -o -name '__pycache__' -o -name 'venv' \) \
+    -o -name 'node_modules' -o -name '__pycache__' -o -name 'venv' \) -print \
     2>/dev/null)
 if [ -z "$skip_hits" ]; then
     ok "no SKIP_FILES/SKIP_DIRS matches under $dest"

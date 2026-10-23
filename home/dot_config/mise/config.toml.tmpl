@@ -23,7 +23,17 @@
       "tree-sitter-cli" "aqua:tree-sitter/tree-sitter"
       "ripgrep" "aqua:BurntSushi/ripgrep"
       "fd" "aqua:sharkdp/fd"
+      "eza" "aqua:eza-community/eza"
+      "imagemagick" "conda:imagemagick"
+      "resvg" "aqua:linebender/resvg"
 -}}
+{{- /* imagemagick is the one conda (conda-forge) tool: apt only ships
+       ImageMagick 6 and aqua has no build, but yazi needs 7's `magick`.
+       resvg publishes Linux binaries for amd64 only; on other Linux
+       architectures it is left out, since one tool mise can't install
+       fails the whole `mise install`. See
+       docs/adr/0014-yazi-previews-on-every-platform.md. */ -}}
+{{- $linuxAmd64Only := list "resvg" -}}
 {{- /* Neovim and the tree-sitter CLI come from here on every OS, pinned:
        nvim/lazy-lock.json is shared between machines, and its plugin
        commits only fit one Neovim version. Bump these together with a
@@ -39,7 +49,7 @@ python = "3.13"
 {{- range .applications }}
 {{-   if hasKey $pinned . }}
 {{ index $miseTools . | quote }} = {{ index $pinned . | quote }}
-{{-   else if and (eq $.chezmoi.os "linux") (hasKey $miseTools .) }}
+{{-   else if and (eq $.chezmoi.os "linux") (hasKey $miseTools .) (or (not (has . $linuxAmd64Only)) (eq $.chezmoi.arch "amd64")) }}
 {{ index $miseTools . | quote }} = "latest"
 {{-   end }}
 {{- end }}

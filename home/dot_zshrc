@@ -8,10 +8,21 @@ if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
   . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
 fi
 
+# -- mise ---------------------------------------------------------------------
+
+# Before everything below: on Linux mise provides eza, bat, zoxide, starship
+# and the other CLI tools (docs/adr/0012-linux-cli-tools-via-mise.md), and
+# the aliases and tool inits only set themselves up when those are found.
+command -v mise &>/dev/null && eval "$(mise activate zsh)"
+
 # -- oh-my-zsh ----------------------------------------------------------------
 
+# Installed and updated by chezmoi (.chezmoiexternal.toml.tmpl), so its own
+# updater stays off. No theme: starship draws the prompt.
 plugins=(git)
 export ZSH="$HOME/.oh-my-zsh"
+ZSH_THEME=""
+zstyle ':omz:update' mode disabled
 [ -d "$ZSH" ] && source "$ZSH"/oh-my-zsh.sh
 
 # -- history ------------------------------------------------------------------
@@ -35,8 +46,5 @@ bindkey '^[[B' history-search-forward
 
 # -- tool integrations (interactive) -----------------------------------------
 
-# mise first: on Linux it provides zoxide, starship and the other CLI tools
-# (docs/adr/0012-linux-cli-tools-via-mise.md).
-command -v mise &>/dev/null && eval "$(mise activate zsh)"
 command -v zoxide &>/dev/null && eval "$(zoxide init zsh)"
 command -v starship &>/dev/null && eval "$(starship init zsh)"

@@ -6,7 +6,8 @@
        same convention already used for GUI configs limited to one
        platform. Each app is assigned to exactly one winget package ID
        here, decided when the app was added. unzip has no entry (Windows
-       ships tar and Expand-Archive), and build-tools is not in this
+       ships tar and Expand-Archive), nor do zsh and file (no zsh on this
+       Target; yazi uses Git for Windows' file.exe), and build-tools is not in this
        manifest: the Visual Studio Build Tools need a workload override that
        `winget import` can't pass, so
        run_onchange_after_install-windows-applications.ps1.tmpl installs
@@ -28,6 +29,13 @@
       "ripgrep" "BurntSushi.ripgrep.MSVC"
       "fd" "sharkdp.fd"
       "cmake" "Kitware.CMake"
+      "eza" "eza-community.eza"
+      "7zip" "7zip.7zip"
+      "imagemagick" "ImageMagick.ImageMagick"
+      "poppler" "oschwartz10612.Poppler"
+      "resvg" "linebender.resvg"
+      "jq" "jqlang.jq"
+      "ffmpeg" "Gyan.FFmpeg"
       "wezterm" "wez.wezterm"
       "vscode" "Microsoft.VisualStudioCode"
       "zed" "Zed.Zed"

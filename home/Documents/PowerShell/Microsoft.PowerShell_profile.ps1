@@ -1,7 +1,7 @@
 # Minimal PowerShell profile — aliases + starship prompt hook.
 # Windows Target only; mirrors the handful of shell aliases from
-# dot_bash_aliases/dot_zsh_aliases that don't depend on tools this repo
-# doesn't provision on Windows (eza).
+# dot_bash_aliases/dot_zsh_aliases that fit PowerShell; `ls` stays
+# Get-ChildItem rather than eza, since PowerShell scripts rely on its objects.
 
 Set-Alias vim nvim
 Set-Alias c clear

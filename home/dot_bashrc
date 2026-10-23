@@ -95,14 +95,15 @@ export XDG_RUNTIME_DIR="$HOME/.xdg_runtime"
 # start shell with tmux opened
 #[ -z "$TMUX" ] && { tmux attach || exec tmux new-session; }
 
+# mise: node, python for nvim's Mason, and on Linux the CLI tools themselves
+# (docs/adr/0011-nvim-toolchain.md, docs/adr/0012-linux-cli-tools-via-mise.md).
+# Before the aliases and tool inits below, which only set themselves up when
+# their tool is found.
+command -v mise &>/dev/null && eval "$(mise activate bash)"
+
 if [ -f ~/.bash_aliases ]; then
   . "$HOME/.bash_aliases"
 fi
-
-# mise: node, python for nvim's Mason, and on Linux the CLI tools themselves
-# (docs/adr/0011-nvim-toolchain.md, docs/adr/0012-linux-cli-tools-via-mise.md),
-# so it must come before any tool init below.
-command -v mise &>/dev/null && eval "$(mise activate bash)"
 
 # starship
 command -v starship &>/dev/null && eval "$(starship init bash)"

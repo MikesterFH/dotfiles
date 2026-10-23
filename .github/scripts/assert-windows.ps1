@@ -51,6 +51,7 @@ Assert-Absent ".zshrc"
 Assert-Absent ".zprofile"
 Assert-Absent ".zsh_aliases"
 Assert-Absent ".local"
+Assert-Absent ".oh-my-zsh"
 Assert-FileExists ".psmux.conf"
 
 $psmuxConfig = Get-Content -LiteralPath (Join-Path $Dest ".psmux.conf") -Raw -ErrorAction SilentlyContinue
@@ -159,7 +160,9 @@ if (Test-Path -Path $wingetManifestPath -PathType Leaf) {
         "dandavison.delta", "Starship.Starship", "junegunn.fzf",
         "ajeetdsouza.zoxide", "sxyazi.yazi", "charmbracelet.glow", "sharkdp.bat",
         "JesseDuffield.lazygit",
-        "BurntSushi.ripgrep.MSVC", "sharkdp.fd", "Kitware.CMake"
+        "BurntSushi.ripgrep.MSVC", "sharkdp.fd", "Kitware.CMake",
+        "eza-community.eza", "7zip.7zip", "ImageMagick.ImageMagick", "oschwartz10612.Poppler",
+        "linebender.resvg", "jqlang.jq", "Gyan.FFmpeg"
     )
     if ($MachineProfile -ne "dev-server") {
         $expectedIds += @("wez.wezterm", "Microsoft.VisualStudioCode", "Zed.Zed", "Microsoft.WindowsTerminal", "DEVCOM.JetBrainsMonoNerdFont")
