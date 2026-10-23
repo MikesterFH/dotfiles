@@ -5,8 +5,9 @@
 # docs/adr/0011-nvim-toolchain.md. mise itself is a Bootstrap Package
 # (run_once_before_install-packages.ps1.tmpl).
 #
-# Rerun trigger: hash of the config, so a changed tool list reruns this.
-# config sha256: {{ include "dot_config/mise/config.toml" | sha256sum }}
+# Rerun trigger: hash of the rendered config, so a changed tool list reruns
+# this.
+# config sha256: {{ includeTemplate "dot_config/mise/config.toml.tmpl" . | sha256sum }}
 # =============================================================================
 $ErrorActionPreference = "Stop"
 

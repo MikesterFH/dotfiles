@@ -1,0 +1,35 @@
+{{- /* Global mise tools, see docs/adr/0011-nvim-toolchain.md and
+       docs/adr/0012-linux-cli-tools-via-mise.md. Every OS gets the language
+       runtimes Neovim's Mason needs for its npm- and pypi-based servers and
+       tools (bashls, jsonls, prettier, pyright, ruff, ...). On Linux the CLI
+       tool Applications come from here as well instead of apt, whose
+       releases ship versions too old for this setup (Neovim 0.9.5 on Ubuntu
+       24.04, 0.7.2 on Debian 12) or lack them entirely; every entry is an
+       aqua backend, i.e. the project's own prebuilt GitHub release binary.
+       Each app is assigned to exactly one mise tool here, decided when the
+       app was added. Installed by the run_onchange_after_install-mise-tools
+       scripts whenever this file renders differently. */ -}}
+{{- $miseTools := dict
+      "delta" "aqua:dandavison/delta"
+      "starship" "aqua:starship/starship"
+      "neovim" "aqua:neovim/neovim"
+      "fzf" "aqua:junegunn/fzf"
+      "zoxide" "aqua:ajeetdsouza/zoxide"
+      "yazi" "aqua:sxyazi/yazi"
+      "glow" "aqua:charmbracelet/glow"
+      "bat" "aqua:sharkdp/bat"
+      "lazygit" "aqua:jesseduffield/lazygit"
+      "tree-sitter-cli" "aqua:tree-sitter/tree-sitter"
+      "ripgrep" "aqua:BurntSushi/ripgrep"
+      "fd" "aqua:sharkdp/fd"
+-}}
+[tools]
+node = "lts"
+python = "3.13"
+{{- if eq .chezmoi.os "linux" }}
+{{-   range .applications }}
+{{-     if hasKey $miseTools . }}
+{{ index $miseTools . | quote }} = "latest"
+{{-     end }}
+{{-   end }}
+{{- end }}

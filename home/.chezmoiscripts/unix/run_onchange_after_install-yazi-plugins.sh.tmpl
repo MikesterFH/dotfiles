@@ -8,8 +8,8 @@
 # installed on the next `chezmoi apply`.
 # package.toml sha256: {{ include "dot_config/yazi/package.toml" | sha256sum }}
 #
-# Sorts after the darwin/ and linux/ Application installs, so yazi (and its
-# `ya` CLI) is already installed by then. macOS/Linux only, and not on devpod
+# Sorts after the darwin/ and linux/ Application installs and the mise-tools
+# script, so yazi (and its `ya` CLI) is already installed by then. macOS/Linux only, and not on devpod
 # (no yazi config there, see .chezmoiignore); Windows has its own sibling.
 # =============================================================================
 set -euo pipefail
@@ -21,6 +21,9 @@ if [ -x /opt/homebrew/bin/brew ]; then
 elif [ -x /usr/local/bin/brew ]; then
   eval "$(/usr/local/bin/brew shellenv)"
 fi
+# On Linux yazi is a mise tool (docs/adr/0012-linux-cli-tools-via-mise.md),
+# installed by the mise-tools script, which sorts before this one.
+export PATH="$HOME/.local/share/mise/shims:$PATH"
 
 if ! command -v ya &>/dev/null; then
   echo "[WARN]  yazi (ya) not installed; skipping Yazi plugins."

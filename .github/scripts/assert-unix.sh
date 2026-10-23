@@ -57,6 +57,22 @@ assert_file ".local/share/nvim/site/spell/de.utf-8.sug"
 # Global mise tools (node, python for nvim's Mason), see
 # docs/adr/0011-nvim-toolchain.md
 assert_file ".config/mise/config.toml"
+# On Linux the CLI tool Applications come from mise too (aqua backends),
+# not apt, see docs/adr/0012-linux-cli-tools-via-mise.md; macOS keeps them
+# in the Brewfile, so its mise config carries only the runtimes.
+misefile="$dest/.config/mise/config.toml"
+linux_mise_tools="dandavison/delta starship/starship neovim/neovim junegunn/fzf ajeetdsouza/zoxide sxyazi/yazi charmbracelet/glow sharkdp/bat jesseduffield/lazygit tree-sitter/tree-sitter BurntSushi/ripgrep sharkdp/fd"
+for tool in $linux_mise_tools; do
+    if [ "$os" = "Linux" ]; then
+        if [ -f "$misefile" ] && grep -qF "\"aqua:$tool\" = " "$misefile"; then
+            ok "mise config: aqua:$tool present"
+        else
+            bad "mise config: aqua:$tool missing"
+        fi
+    elif [ -f "$misefile" ] && grep -qF "aqua:$tool" "$misefile"; then
+        bad "mise config: aqua:$tool should be Linux-only"
+    fi
+done
 
 # Windows-only paths must not appear on macOS/Linux
 assert_absent ".psmux.conf"
@@ -152,11 +168,17 @@ fi
 if [ "$os" = "Linux" ]; then
     aptfile="$dest/.config/apt-packages.txt"
     assert_file ".config/apt-packages.txt"
-    for pkg in git-delta starship neovim tmux fzf zoxide yazi glow bat lazygit tree-sitter-cli ripgrep fd-find unzip cmake build-essential; do
+    for pkg in tmux unzip cmake build-essential; do
         if [ -f "$aptfile" ] && grep -qxF "$pkg" "$aptfile"; then
             ok "apt-packages.txt: $pkg present"
         else
             bad "apt-packages.txt: $pkg missing"
+        fi
+    done
+    # CLI tools moved to mise must not be installed twice
+    for pkg in git-delta starship neovim fzf zoxide yazi glow bat lazygit tree-sitter-cli ripgrep fd-find; do
+        if [ -f "$aptfile" ] && grep -qxF "$pkg" "$aptfile"; then
+            bad "apt-packages.txt: $pkg should come from mise, not apt"
         fi
     done
     if [ "$profile" = "dev-server" ]; then

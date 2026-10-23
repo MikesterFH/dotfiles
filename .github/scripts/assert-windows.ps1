@@ -76,6 +76,15 @@ Assert-FileExists "AppData\Local\nvim-data\site\spell\de.utf-8.sug"
 # Global mise tools (node, python for nvim's Mason), see
 # docs/adr/0011-nvim-toolchain.md
 Assert-FileExists ".config\mise\config.toml"
+# CLI tools come from mise on Linux only (docs/adr/0012-linux-cli-tools-via-mise.md);
+# Windows keeps them in the winget manifest.
+$miseConfigPath = Join-Path $Dest ".config\mise\config.toml"
+if ((Test-Path -Path $miseConfigPath -PathType Leaf) -and (Select-String -Path $miseConfigPath -Pattern "aqua:" -SimpleMatch -Quiet)) {
+    Write-Host "[FAIL] mise config: aqua CLI tools should be Linux-only"
+    $script:failed = $true
+} else {
+    Write-Host "[OK]   mise config: no aqua CLI tools"
+}
 
 # PowerShell profile, Windows-only, unconditional across every profile
 Assert-FileExists "Documents\PowerShell\Microsoft.PowerShell_profile.ps1"

@@ -8,3 +8,5 @@
 - `jetbrains-mono-nerd-font` is a GUI Application (not on dev-server): a Homebrew cask, a winget package, and on Linux, where apt has no Nerd Font, a chezmoi external that unpacks the Nerd Fonts release into `~/.local/share/fonts` (not in devpod).
 
 **Consequences:** a fresh macOS, Debian/Ubuntu or Windows machine gets a Neovim that installs its parsers and Mason packages without manual steps. The Visual Studio Build Tools add several GB and a long first apply on Windows. apt names `fd-find`, whose binary is `fdfind`; LazyVim and Snacks look for both names. Fedora/Arch still get no Application manifest, and Debian/Ubuntu's `tree-sitter-cli` can be older than nvim-treesitter's `main` branch needs; both are left open. The CI asserts check the new manifest entries, the mise config and the Linux font, not the installs themselves.
+
+**Update:** on Linux, ripgrep, fd and tree-sitter-cli now come from mise instead of apt (ADR 0012), which closes the `fdfind` naming and the outdated apt `tree-sitter-cli` noted above.

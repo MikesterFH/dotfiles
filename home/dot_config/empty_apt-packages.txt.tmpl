@@ -5,29 +5,18 @@
        windows-terminal) are simply absent — same convention already used
        for GUI configs limited to one platform. Each app is assigned to
        exactly one apt package name here, decided when the app was added.
-       Not every name exists in every Debian/Ubuntu release (starship, yazi,
-       glow, lazygit are missing from older ones) — the install script skips
-       and reports those instead of failing, see
+       The CLI tools whose apt versions are too old or missing (neovim,
+       tree-sitter-cli, starship, yazi, glow, lazygit, ...) come from mise on
+       Linux instead, see dot_config/mise/config.toml.tmpl and
+       docs/adr/0012-linux-cli-tools-via-mise.md; what stays here is system
+       packages and the GUI apps. A name missing from an older release is
+       skipped and reported by the install script instead of failing, see
        docs/adr/0008-cli-tools-are-applications.md.
-       fd-find installs its binary as `fdfind`; Telescope and the Snacks
-       picker look for that name too.
        Installed via run_onchange_after_install-linux-applications.sh.tmpl.
        Debian/apt only — this file doesn't render on Fedora/Arch/other
        Linux distros, or on macOS/Windows, see .chezmoiignore. */ -}}
 {{- $aptPackages := dict
-      "delta" "git-delta"
-      "starship" "starship"
-      "neovim" "neovim"
       "tmux" "tmux"
-      "fzf" "fzf"
-      "zoxide" "zoxide"
-      "yazi" "yazi"
-      "glow" "glow"
-      "bat" "bat"
-      "lazygit" "lazygit"
-      "tree-sitter-cli" "tree-sitter-cli"
-      "ripgrep" "ripgrep"
-      "fd" "fd-find"
       "unzip" "unzip"
       "cmake" "cmake"
       "build-tools" "build-essential"
