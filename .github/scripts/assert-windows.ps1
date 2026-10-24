@@ -53,6 +53,7 @@ Assert-Absent ".zsh_aliases"
 Assert-Absent ".local"
 Assert-Absent ".oh-my-zsh"
 Assert-Absent ".config\aerospace"
+Assert-Absent ".config\cheatsheet"
 Assert-FileExists ".psmux.conf"
 
 $psmuxConfig = Get-Content -LiteralPath (Join-Path $Dest ".psmux.conf") -Raw -ErrorAction SilentlyContinue

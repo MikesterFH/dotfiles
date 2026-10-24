@@ -1,0 +1,22 @@
+== Neovim (own mappings, on top of LazyVim; leader = Space)
+  ⌃h / ⌃j / ⌃k / ⌃l     pane left/down/up/right (Neovim + tmux)
+  ⌃\                    last active pane
+  ⌃Space                next pane
+  ⌥h / ⌥j / ⌥k / ⌥l     resize split / tmux pane
+  jj                    insert mode -> normal mode
+  ss / sv               vertical / horizontal split
+  te                    new tab (:tabedit)
+  Tab / ⇧Tab            next / previous tab
+  ⌃/                    terminal in project root
+  Space g G             git graph (float, q closes)
+  Space c p             Markdown preview in browser
+  Space x x             diagnostics (Trouble)
+  Space u m             toggle Markdown rendering
+  H / J / K / L         move selection left/down/up/right (visual)
+  Tab                   accept completion / next snippet field
+  Space d o / d O       debugger step over / step out
+  Space o w             Overseer task list
+  Space o o             Overseer run task
+  Space o q / o t       Overseer action on recent task / task action
+  Space o b / o i       Overseer task builder / info
+  Space o c             Overseer clear cache

@@ -25,6 +25,7 @@ Documents
 {{ else if eq .chezmoi.os "linux" }}
 .psmux.conf
 .config/aerospace
+.config/cheatsheet
 Library
 AppData
 Documents
@@ -33,6 +34,7 @@ Documents
 {{ else if eq .chezmoi.os "windows" }}
 Library
 .config/aerospace
+.config/cheatsheet
 .config/Code
 .bashrc
 .bash_aliases
@@ -47,6 +49,7 @@ Library
 {{ else }}
 .psmux.conf
 .config/aerospace
+.config/cheatsheet
 Library
 .config/Code
 AppData
@@ -106,6 +109,7 @@ AppData/Local/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe
 {{ end }}
 {{ if not (has "aerospace" .applications) }}
 .config/aerospace
+.config/cheatsheet
 {{ end }}
 {{ if not (has "iterm2" .applications) }}
 Library/Application Support/iTerm2

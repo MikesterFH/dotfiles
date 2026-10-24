@@ -132,6 +132,7 @@ if [ "$profile" = "dev-server" ]; then
         assert_absent "Library/Application Support/Code"
         assert_absent "Library/Application Support/iTerm2"
         assert_absent ".config/aerospace"
+        assert_absent ".config/cheatsheet"
     else
         assert_absent ".config/Code"
     fi
@@ -148,9 +149,11 @@ else
         assert_file "Library/Application Support/iTerm2/DynamicProfiles/Nvim_Tmux_Term.json"
         assert_file ".config/aerospace/aerospace.toml"
         assert_file ".config/aerospace/keys.sh"
+        assert_file ".config/cheatsheet/raycast/shortcuts.sh"
     else
         assert_file ".config/Code/User/settings.json"
         assert_absent ".config/aerospace"
+        assert_absent ".config/cheatsheet"
     fi
 fi
 

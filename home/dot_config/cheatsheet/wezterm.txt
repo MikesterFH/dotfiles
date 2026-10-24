@@ -1,0 +1,29 @@
+== WezTerm (leader = ⌃f, like tmux)
+  ⌃h / ⌃j / ⌃k / ⌃l     pane left/down/up/right (Neovim-aware)
+  ⌃d / ⌃u               previous / next tab
+  ⌃Tab / ⌃⇧Tab          next / previous tab
+  ⇧F1 … ⇧F9             go to tab 1 … 9
+  ⌥Enter                fullscreen
+  ⌘t / ⌘w / ⌘n          new tab / close tab / new window
+  ⌃⇧p                   command palette
+  ⌃⇧f                   search
+  ⌃⇧Space               quick select
+  ⌃⇧u                   character picker
+  ⌃⇧z                   zoom pane
+  ⌃⇧k                   clear scrollback
+  leader - / leader |   split below / right
+  leader h/j/k/l        resize pane (then h/j/k/l repeat)
+  leader m              zoom pane
+  leader x              close pane
+  leader n              new tab
+  leader ,              rename tab
+  leader v / leader c   copy mode
+  leader s              search
+  leader r              reload config
+  leader ⇧w             pick workspace
+  leader ⇧n             create or switch workspace
+  leader [ / leader ]   previous / next workspace
+  leader w              window mode
+  leader f              font mode
+  leader p              pick mode (colorscheme, font)
+  leader ⇧/ (?)         help

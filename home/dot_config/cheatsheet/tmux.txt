@@ -1,0 +1,12 @@
+== tmux (prefix = ⌃f)
+  prefix -              split below
+  prefix |              split right
+  prefix h/j/k/l        resize pane (repeatable)
+  prefix m              zoom pane
+  prefix v              copy mode (v select, y copy)
+  prefix r              reload config
+  prefix n              new session (prompt)
+  prefix s              session picker (sessionx)
+  prefix Space          which-key menu
+  ⌃d / ⌃u               previous / next window (no prefix)
+  ⌃h / ⌃j / ⌃k / ⌃l     pane left/down/up/right (Neovim-aware)
