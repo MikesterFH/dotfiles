@@ -6,7 +6,8 @@
 # - on the Swiss German layout ⌥ types characters (⌥G = @, ⌥5/⌥6 = [ ],
 #   ⌥7 = |, ⌥8/⌥9 = { }), which bare alt bindings would swallow
 # - Neovim uses <M-h/j/k/l> to resize splits and tmux panes
-# Rectangle keeps ⌃⌥N / ⌃⌥B for its todo feature, so those stay unbound.
+# Left unbound for other apps: ⌃⌥Space opens Raycast, and Rectangle keeps
+# ⌃⌥N / ⌃⌥B for its todo feature.
 #
 # Keys are named by their US-qwerty position (AeroSpace's key-mapping
 # preset), so only letters, digits and tab are used: those sit in the same
