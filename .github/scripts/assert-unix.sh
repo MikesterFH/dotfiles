@@ -147,6 +147,7 @@ else
         assert_file "Library/Application Support/Code/User/settings.json"
         assert_file "Library/Application Support/iTerm2/DynamicProfiles/Nvim_Tmux_Term.json"
         assert_file ".config/aerospace/aerospace.toml"
+        assert_file ".config/aerospace/keys.sh"
     else
         assert_file ".config/Code/User/settings.json"
         assert_absent ".config/aerospace"

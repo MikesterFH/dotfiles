@@ -29,3 +29,6 @@ alias gg=lazygit
 
 # Claude Code with separate work config
 alias claude-work='CLAUDE_CONFIG_DIR=$HOME/.claude-work claude'
+
+# AeroSpace bindings, read from the running config (macOS only)
+command -v aerospace >/dev/null && alias aerokeys="$HOME/.config/aerospace/keys.sh"

@@ -27,3 +27,6 @@ alias ga='git add .'
 alias gc='git commit -m'
 alias gs='git status -s'
 alias gg=lazygit
+
+# AeroSpace bindings, read from the running config (macOS only)
+command -v aerospace >/dev/null && alias aerokeys="$HOME/.config/aerospace/keys.sh"
