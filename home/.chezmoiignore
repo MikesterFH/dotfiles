@@ -1,7 +1,8 @@
 # Per-OS paths, one switch on .chezmoi.os for everything that differs by
 # Target: vscode's settings live at a different real path per OS (macOS:
 # Library/, Linux: .config/Code, Windows: AppData); the iTerm2 Dynamic
-# Profile (Library/) and PowerShell profile (Documents/) are single-OS only;
+# Profile (Library/), AeroSpace (.config/aerospace) and PowerShell profile
+# (Documents/) are single-OS only;
 # zed and helix live at .config/<app> everywhere except Windows
 # (AppData/Roaming/Zed, AppData/Roaming/helix);
 # the macOS Application manifest (.config/homebrew), the Linux Application
@@ -23,6 +24,7 @@ Documents
 .config/winget
 {{ else if eq .chezmoi.os "linux" }}
 .psmux.conf
+.config/aerospace
 Library
 AppData
 Documents
@@ -30,6 +32,7 @@ Documents
 .config/winget
 {{ else if eq .chezmoi.os "windows" }}
 Library
+.config/aerospace
 .config/Code
 .bashrc
 .bash_aliases
@@ -43,6 +46,7 @@ Library
 .config/apt-packages.txt
 {{ else }}
 .psmux.conf
+.config/aerospace
 Library
 .config/Code
 AppData
@@ -99,6 +103,9 @@ AppData/Local/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe
 {{ end }}
 {{ if not (has "zen" .applications) }}
 .config/zen-profile
+{{ end }}
+{{ if not (has "aerospace" .applications) }}
+.config/aerospace
 {{ end }}
 {{ if not (has "iterm2" .applications) }}
 Library/Application Support/iTerm2

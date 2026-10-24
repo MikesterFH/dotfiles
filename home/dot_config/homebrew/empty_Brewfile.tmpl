@@ -43,8 +43,21 @@
       "iterm2" "iterm2"
       "jetbrains-mono-nerd-font" "font-jetbrains-mono-nerd-font"
       "zen" "zen"
+      "aerospace" "nikitabobko/tap/aerospace"
+-}}
+{{- /* Third-party taps, trusted for exactly the casks the Brewfile pulls
+       from them (Homebrew refuses to load untrusted tap content), see
+       docs/adr/0018-aerospace-and-trusted-taps.md. */ -}}
+{{- $homebrewTaps := dict
+      "aerospace" (list "nikitabobko/tap" "aerospace")
 -}}
 {{- $lines := list -}}
+{{- range .applications -}}
+{{- if hasKey $homebrewTaps . -}}
+{{- $tap := index $homebrewTaps . -}}
+{{- $lines = append $lines (printf "tap %q, trusted: { casks: [%q] }" (index $tap 0) (index $tap 1)) -}}
+{{- end -}}
+{{- end -}}
 {{- range .applications -}}
 {{- if hasKey $homebrewFormulae . -}}
 {{- $lines = append $lines (printf "brew %q" (index $homebrewFormulae .)) -}}

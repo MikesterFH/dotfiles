@@ -131,6 +131,7 @@ if [ "$profile" = "dev-server" ]; then
     if [ "$os" = "Darwin" ]; then
         assert_absent "Library/Application Support/Code"
         assert_absent "Library/Application Support/iTerm2"
+        assert_absent ".config/aerospace"
     else
         assert_absent ".config/Code"
     fi
@@ -145,8 +146,10 @@ else
     if [ "$os" = "Darwin" ]; then
         assert_file "Library/Application Support/Code/User/settings.json"
         assert_file "Library/Application Support/iTerm2/DynamicProfiles/Nvim_Tmux_Term.json"
+        assert_file ".config/aerospace/aerospace.toml"
     else
         assert_file ".config/Code/User/settings.json"
+        assert_absent ".config/aerospace"
     fi
 fi
 
@@ -174,17 +177,25 @@ if [ "$os" = "Darwin" ]; then
     if [ "$profile" = "dev-server" ]; then
         if [ -f "$brewfile" ] && grep -q '^cask ' "$brewfile"; then
             bad "Brewfile should have no cask entries for dev-server, has some"
+        elif [ -f "$brewfile" ] && grep -q '^tap ' "$brewfile"; then
+            bad "Brewfile should have no tap entries for dev-server, has some"
         else
-            ok "Brewfile has no cask entries for dev-server"
+            ok "Brewfile has no cask or tap entries for dev-server"
         fi
     else
-        for cask in wezterm visual-studio-code zed iterm2 font-jetbrains-mono-nerd-font zen; do
+        for cask in wezterm visual-studio-code zed iterm2 font-jetbrains-mono-nerd-font zen nikitabobko/tap/aerospace; do
             if [ -f "$brewfile" ] && grep -qE "^cask \"$cask\"\$" "$brewfile"; then
                 ok "Brewfile: cask \"$cask\" present"
             else
                 bad "Brewfile: cask \"$cask\" missing"
             fi
         done
+        # Third-party tap trusted for its one cask only (ADR 0018)
+        if [ -f "$brewfile" ] && grep -qxF 'tap "nikitabobko/tap", trusted: { casks: ["aerospace"] }' "$brewfile"; then
+            ok "Brewfile: nikitabobko/tap trusted for aerospace only"
+        else
+            bad "Brewfile: nikitabobko/tap line missing or trusted too broadly"
+        fi
         if [ -f "$brewfile" ] && grep -q 'windows-terminal' "$brewfile"; then
             bad "Brewfile: windows-terminal should never appear (no macOS identifier)"
         fi
