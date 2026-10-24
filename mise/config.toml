@@ -1,0 +1,37 @@
+# mise-en-place Konfiguration
+# Dokumentation: https://mise.jdx.dev/configuration.html
+
+[settings]
+# Experimentelle Features aktivieren
+experimental = false
+
+# Automatisch fehlende Tools installieren
+auto_install = true
+
+# Shims verwenden (empfohlen fuer Windows/Git Bash)
+# Shims sind stabiler als die shell-Integration
+shims_dir = "~/.local/share/mise/shims"
+
+# Statusmeldungen
+status = { missing_tools = "always", show_env = false }
+
+# Legacy-Versionen von anderen Tools unterstuetzen (.nvmrc, .node-version, etc.)
+legacy_version_file = true
+
+# Plugins
+[plugins]
+# nodejs = "https://github.com/asdf-vm/asdf-nodejs"
+# python = "https://github.com/asdf-community/asdf-python"
+
+# Globale Tools (optional)
+[tools]
+# Beispiele:
+# node = "lts"
+# python = "3.12"
+# go = "latest"
+# rust = "stable"
+
+# Task-Definitionen (optional)
+# [tasks.build]
+# run = "npm run build"
+# description = "Build the project"
