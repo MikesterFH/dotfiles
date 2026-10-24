@@ -84,13 +84,21 @@ $miseConfigPath = Join-Path $Dest ".config\mise\config.toml"
 $unpinnedAqua = @()
 if (Test-Path -Path $miseConfigPath -PathType Leaf) {
     $unpinnedAqua = @(Select-String -Path $miseConfigPath -Pattern '^"aqua:' |
-        Where-Object { $_.Line -notmatch '^"aqua:(neovim/neovim|tree-sitter/tree-sitter)"' })
+        Where-Object { $_.Line -notmatch '^"aqua:(neovim/neovim|tree-sitter/tree-sitter|modem-dev/hunk)"' })
 }
 if ($unpinnedAqua.Count -gt 0) {
-    Write-Host "[FAIL] mise config: aqua CLI tools besides neovim/tree-sitter should be Linux-only"
+    Write-Host "[FAIL] mise config: aqua CLI tools besides neovim/tree-sitter/hunk should be Linux-only"
     $script:failed = $true
 } else {
-    Write-Host "[OK]   mise config: no aqua CLI tools besides neovim/tree-sitter"
+    Write-Host "[OK]   mise config: no aqua CLI tools besides neovim/tree-sitter/hunk"
+}
+# hunk has no winget package and comes from mise on Windows, see
+# docs/adr/0017-windows-cli-tools-without-winget-via-mise.md
+if ((Test-Path -Path $miseConfigPath -PathType Leaf) -and (Select-String -Path $miseConfigPath -Pattern '^"aqua:modem-dev/hunk" = ' -Quiet)) {
+    Write-Host "[OK]   mise config: aqua:modem-dev/hunk present"
+} else {
+    Write-Host "[FAIL] mise config: aqua:modem-dev/hunk missing"
+    $script:failed = $true
 }
 # Neovim and the tree-sitter CLI come from mise on every OS, pinned to an
 # exact version so the shared lazy-lock.json fits, see
@@ -104,6 +112,13 @@ foreach ($tool in @("neovim/neovim", "tree-sitter/tree-sitter")) {
         $script:failed = $true
     }
 }
+
+# helix reads AppData\Roaming\helix on Windows; hunk reads ~/.config/hunk
+# on every OS
+Assert-FileExists "AppData\Roaming\helix\config.toml"
+Assert-FileExists "AppData\Roaming\helix\languages.toml"
+Assert-Absent ".config\helix"
+Assert-FileExists ".config\hunk\config.toml"
 
 # PowerShell profile, Windows-only, unconditional across every profile
 Assert-FileExists "Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
@@ -165,7 +180,7 @@ if (Test-Path -Path $wingetManifestPath -PathType Leaf) {
         "JesseDuffield.lazygit",
         "BurntSushi.ripgrep.MSVC", "sharkdp.fd", "Kitware.CMake",
         "eza-community.eza", "7zip.7zip", "ImageMagick.ImageMagick", "oschwartz10612.Poppler",
-        "linebender.resvg", "jqlang.jq", "Gyan.FFmpeg"
+        "linebender.resvg", "jqlang.jq", "Gyan.FFmpeg", "astral-sh.uv", "Helix.Helix"
     )
     if ($MachineProfile -ne "dev-server") {
         $expectedIds += @("wez.wezterm", "Microsoft.VisualStudioCode", "Zed.Zed", "Microsoft.WindowsTerminal", "DEVCOM.JetBrainsMonoNerdFont", "Zen-Team.Zen-Browser")

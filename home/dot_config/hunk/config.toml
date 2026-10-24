@@ -1,0 +1,7 @@
+# hunk (terminal diff viewer) user config. Same path on every OS, Windows
+# included: hunk reads $HOME/.config/hunk/config.toml there too. Reference:
+# https://hunk.dev/docs/reference/config/
+
+# Follow the terminal's palette, like the rest of the setup does through
+# WezTerm, instead of hunk's own github-dark-default.
+theme = "terminal"

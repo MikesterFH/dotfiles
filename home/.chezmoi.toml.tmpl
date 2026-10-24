@@ -32,7 +32,7 @@
        same on every Profile, dev-server included, see
        docs/adr/0008-cli-tools-are-applications.md. GUI apps vary by
        Profile. */ -}}
-{{- $cliTools := list "delta" "starship" "neovim" "tmux" "fzf" "zoxide" "yazi" "glow" "bat" "lazygit" "tree-sitter-cli" "ripgrep" "fd" "unzip" "cmake" "build-tools" "eza" "zsh" "file" "7zip" "imagemagick" "poppler" "resvg" "jq" "ffmpeg" -}}
+{{- $cliTools := list "delta" "starship" "neovim" "tmux" "fzf" "zoxide" "yazi" "glow" "bat" "lazygit" "tree-sitter-cli" "ripgrep" "fd" "unzip" "cmake" "build-tools" "eza" "zsh" "file" "7zip" "imagemagick" "poppler" "resvg" "jq" "ffmpeg" "uv" "helix" "hunk" -}}
 {{- $guiApps := list "wezterm" "vscode" "zed" "windows-terminal" "iterm2" "jetbrains-mono-nerd-font" "zen" -}}
 {{- $applicationsByProfile := dict
       "personal" (concat $cliTools $guiApps)

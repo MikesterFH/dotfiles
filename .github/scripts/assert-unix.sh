@@ -65,7 +65,7 @@ assert_file ".oh-my-zsh/oh-my-zsh.sh"
 # not apt, see docs/adr/0012-linux-cli-tools-via-mise.md; macOS keeps them
 # in the Brewfile, so its mise config carries only the runtimes.
 misefile="$dest/.config/mise/config.toml"
-linux_mise_tools="aqua:dandavison/delta aqua:starship/starship aqua:junegunn/fzf aqua:ajeetdsouza/zoxide aqua:sxyazi/yazi aqua:charmbracelet/glow aqua:sharkdp/bat aqua:jesseduffield/lazygit aqua:BurntSushi/ripgrep aqua:sharkdp/fd aqua:eza-community/eza conda:imagemagick"
+linux_mise_tools="aqua:dandavison/delta aqua:starship/starship aqua:junegunn/fzf aqua:ajeetdsouza/zoxide aqua:sxyazi/yazi aqua:charmbracelet/glow aqua:sharkdp/bat aqua:jesseduffield/lazygit aqua:BurntSushi/ripgrep aqua:sharkdp/fd aqua:eza-community/eza conda:imagemagick aqua:astral-sh/uv aqua:helix-editor/helix aqua:modem-dev/hunk"
 # resvg ships Linux binaries for amd64 only (docs/adr/0014-yazi-previews-on-every-platform.md)
 if [ "$(uname -m)" = "x86_64" ]; then
     linux_mise_tools="$linux_mise_tools aqua:linebender/resvg"
@@ -91,6 +91,12 @@ for tool in neovim/neovim tree-sitter/tree-sitter; do
         bad "mise config: aqua:$tool missing or not pinned to an exact version"
     fi
 done
+
+# helix and hunk configs, CLI tools so on every Profile; helix's lives in
+# AppData on Windows, hunk's in ~/.config everywhere
+assert_file ".config/helix/config.toml"
+assert_file ".config/helix/languages.toml"
+assert_file ".config/hunk/config.toml"
 
 # Windows-only paths must not appear on macOS/Linux
 assert_absent ".psmux.conf"
@@ -153,7 +159,7 @@ fi
 if [ "$os" = "Darwin" ]; then
     brewfile="$dest/.config/homebrew/Brewfile"
     assert_file ".config/homebrew/Brewfile"
-    for formula in git-delta starship tmux fzf zoxide yazi glow bat lazygit ripgrep fd cmake eza sevenzip imagemagick poppler resvg jq ffmpeg; do
+    for formula in git-delta starship tmux fzf zoxide yazi glow bat lazygit ripgrep fd cmake eza sevenzip imagemagick poppler resvg jq ffmpeg uv helix hunk; do
         if [ -f "$brewfile" ] && grep -qE "^brew \"$formula\"\$" "$brewfile"; then
             ok "Brewfile: brew \"$formula\" present"
         else
