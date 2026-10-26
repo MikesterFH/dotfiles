@@ -55,10 +55,10 @@ end
 if fs.platform().is_mac then
   Config.default_prog = { "/bin/zsh", "-l" }
 elseif fs.platform().is_win then
-  -- PowerShell 7 (pwsh, a Bootstrap Package): the only Windows shell whose
-  -- profile (Documents\PowerShell) sets up mise, starship and the aliases.
-  -- Windows PowerShell 5.1 reads Documents\WindowsPowerShell and would start
-  -- without nvim on the PATH. See docs/adr/0015-default-shells.md.
+  -- PowerShell 7 (pwsh, a Bootstrap Package): the default Windows shell. Its
+  -- profile stub dot-sources ~\.config\powershell\profile.ps1 (mise, starship,
+  -- aliases). Windows PowerShell 5.1 gets the same stub but lacks mise's chpwd
+  -- hook. See docs/adr/0015-default-shells.md and 0020.
   Config.default_prog = { "pwsh.exe", "-NoLogo" }
 
   Config.launch_menu = {

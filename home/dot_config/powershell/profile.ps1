@@ -19,6 +19,8 @@ if (Get-Command starship -ErrorAction SilentlyContinue) {
 
 # mise: node, python for nvim's Mason, see docs/adr/0011-nvim-toolchain.md
 if (Get-Command mise -ErrorAction SilentlyContinue) {
+  # chpwd hook needs pwsh 7; 5.1 still gets the PATH from activate
+  if ($PSVersionTable.PSVersion.Major -lt 7) { $env:MISE_PWSH_CHPWD_WARNING = 0 }
   (&mise activate pwsh) | Out-String | Invoke-Expression
 }
 

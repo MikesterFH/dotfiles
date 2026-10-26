@@ -2,9 +2,9 @@
 # =============================================================================
 # chezmoi run_once_before script: installs prerequisite Bootstrap Packages
 # (PowerShell 7, git, mise, psmux) via winget before any managed dotfiles are
-# applied. PowerShell 7 (pwsh) is included because the deployed profile
-# (Documents/PowerShell/Microsoft.PowerShell_profile.ps1) is the pwsh
-# profile path — Windows PowerShell 5.1 ships by default but never reads it.
+# applied. PowerShell 7 (pwsh) is included because it is the default shell;
+# its profile stub dot-sources .config/powershell/profile.ps1 (ADR 0020).
+# Windows PowerShell 5.1 gets the same stub but lacks mise's chpwd hook.
 # psmux (github.com/psmux/psmux) gives native Windows a tmux-compatible
 # multiplexer that reads the same tmux.conf as macOS/Linux — see
 # docs/adr/0005-psmux-for-windows-tmux-parity.md. Like the other Bootstrap

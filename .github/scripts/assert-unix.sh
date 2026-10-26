@@ -108,7 +108,7 @@ assert_file ".config/hunk/config.toml"
 
 # Windows-only paths must not appear on macOS/Linux
 assert_absent ".psmux.conf"
-assert_absent "Documents/PowerShell/Microsoft.PowerShell_profile.ps1"
+assert_absent ".config/powershell/profile.ps1"
 assert_absent "AppData"
 assert_absent "AppData/Local/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json"
 

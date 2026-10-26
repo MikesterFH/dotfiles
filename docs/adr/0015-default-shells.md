@@ -8,3 +8,5 @@
 - Git for Windows (`Git.Git`) stays a Bootstrap Package. It ships Git Bash, but it is needed regardless: for `git` itself, and for the `file.exe` and `sh.exe` yazi runs (ADR 0014). Git Bash simply isn't offered as a shell any more.
 
 **Consequences:** every terminal on every Target starts a shell that activates mise and finds Neovim. Changing the login shell to zsh on Linux (`chsh`) stays a manual step, because it needs the user's password. Git Bash is still installed on Windows and can be unhidden in Windows Terminal; nothing in the repo depends on it as a shell. Windows PowerShell 5.1 remains available but unmanaged.
+
+**Update (ADR 0020):** the profile now lives at `~\.config\powershell\profile.ps1`; both `Documents\PowerShell` and `Documents\WindowsPowerShell` get a stub that dot-sources it, so 5.1 also activates mise (without the chpwd hook).

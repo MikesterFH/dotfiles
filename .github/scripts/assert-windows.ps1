@@ -131,7 +131,7 @@ Assert-Absent ".config\helix"
 Assert-FileExists ".config\hunk\config.toml"
 
 # PowerShell profile, Windows-only, unconditional across every profile
-Assert-FileExists "Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
+Assert-FileExists ".config\powershell\profile.ps1"
 
 # Git identity: which config.local.* files exist depends on profile (see
 # docs/adr/0004-machine-profiles.md) — personal -> personal+work,
@@ -193,7 +193,7 @@ if (Test-Path -Path $wingetManifestPath -PathType Leaf) {
         "linebender.resvg", "jqlang.jq", "Gyan.FFmpeg", "astral-sh.uv", "Helix.Helix"
     )
     if ($MachineProfile -ne "dev-server") {
-        $expectedIds += @("wez.wezterm", "Microsoft.VisualStudioCode", "Zed.Zed", "Microsoft.WindowsTerminal", "DEVCOM.JetBrainsMonoNerdFont", "Zen-Team.Zen-Browser")
+        $expectedIds += @("wez.wezterm", "Microsoft.VisualStudioCode", "ZedIndustries.Zed", "Microsoft.WindowsTerminal", "DEVCOM.JetBrainsMonoNerdFont", "Zen-Team.Zen-Browser")
     }
     foreach ($id in $expectedIds) {
         if ($packageIds -contains $id) {

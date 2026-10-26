@@ -2,7 +2,8 @@
 # Target: vscode's settings live at a different real path per OS (macOS:
 # Library/, Linux: .config/Code, Windows: AppData); the iTerm2 Dynamic
 # Profile (Library/), AeroSpace (.config/aerospace) and PowerShell profile
-# (Documents/) are single-OS only;
+# (.config/powershell, stubbed into Documents/ by a run_after script) are
+# single-OS only;
 # zed and helix live at .config/<app> everywhere except Windows
 # (AppData/Roaming/Zed, AppData/Roaming/helix);
 # the macOS Application manifest (.config/homebrew), the Linux Application
@@ -20,6 +21,7 @@
 .config/Code
 AppData
 Documents
+.config/powershell
 .config/apt-packages.txt
 .config/winget
 {{ else if eq .chezmoi.os "linux" }}
@@ -29,6 +31,7 @@ Documents
 Library
 AppData
 Documents
+.config/powershell
 .config/homebrew
 .config/winget
 {{ else if eq .chezmoi.os "windows" }}
@@ -54,6 +57,7 @@ Library
 .config/Code
 AppData
 Documents
+.config/powershell
 .config/homebrew
 .config/apt-packages.txt
 .config/winget

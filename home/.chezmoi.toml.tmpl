@@ -47,6 +47,13 @@
        already points into home/ (.chezmoiroot), while chezmoi needs the repo
        root to find .chezmoiroot again. */}}
 sourceDir = {{ .chezmoi.workingTree | quote }}
+{{ if eq .chezmoi.os "windows" }}
+{{- /* chezmoi runs .ps1 scripts via powershell.exe, which would otherwise
+       load the user's profile (mise, starship) into every script. */}}
+[interpreters.ps1]
+    command = "powershell"
+    args = ["-NoLogo", "-NoProfile"]
+{{ end }}
 
 [data]
     profile = {{ $profile | quote }}

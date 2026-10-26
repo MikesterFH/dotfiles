@@ -1,0 +1,19 @@
+{{- if eq .chezmoi.os "windows" -}}
+# =============================================================================
+# chezmoi deploys the real profile to ~\.config\powershell\profile.ps1 (fixed
+# path). PowerShell only reads its profile from the real Documents folder,
+# which OneDrive folder redirection can move (e.g. ~\OneDrive - <Org>\Documents).
+# This writes a one-line stub into the resolved Documents folder for both
+# PowerShell 7 and Windows PowerShell 5.1 that dot-sources the managed profile.
+# =============================================================================
+$profilePath = Join-Path $HOME ".config\powershell\profile.ps1"
+$stub = ". `"$profilePath`""
+$documents = [Environment]::GetFolderPath("MyDocuments")
+
+foreach ($dir in @("PowerShell", "WindowsPowerShell")) {
+    $dest = Join-Path $documents "$dir\Microsoft.PowerShell_profile.ps1"
+    if ((Test-Path $dest) -and ((Get-Content -Raw $dest).Trim() -eq $stub)) { continue }
+    New-Item -ItemType Directory -Force -Path (Split-Path $dest) | Out-Null
+    Set-Content -Path $dest -Value $stub -Encoding UTF8
+}
+{{- end -}}

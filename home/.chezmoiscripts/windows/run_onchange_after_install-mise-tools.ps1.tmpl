@@ -25,5 +25,9 @@ mise self-update --yes 2>&1 | Out-Null
 Write-Host "[INFO]  Installing global mise tools..."
 Set-Location $HOME
 mise install --yes
-Write-Host "[OK]    Global mise tools installed."
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "[WARN]  Some global mise tools failed to install (see above); retry with: mise install"
+} else {
+    Write-Host "[OK]    Global mise tools installed."
+}
 {{- end -}}

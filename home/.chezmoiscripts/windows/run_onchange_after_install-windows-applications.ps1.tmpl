@@ -32,6 +32,7 @@ Write-Host "[INFO]  Installing Windows Applications via winget import..."
 # --ignore-unavailable: a package ID winget can't find is reported and
 # skipped instead of aborting the rest of the import.
 winget import --import-file $manifest --ignore-unavailable --accept-package-agreements --accept-source-agreements
+$failed = $LASTEXITCODE -ne 0
 {{- if has "build-tools" .applications }}
 
 # build-tools: the MSVC compiler nvim-treesitter's `tree-sitter build` needs
@@ -46,7 +47,12 @@ if ($hasVcTools) {
     Write-Host "[INFO]  Installing Visual Studio Build Tools (C++ workload)..."
     winget install --id Microsoft.VisualStudio.2022.BuildTools -e --source winget --accept-package-agreements --accept-source-agreements `
         --override "--quiet --wait --norestart --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended"
+    if ($LASTEXITCODE -ne 0) { $failed = $true }
 }
 {{- end }}
-Write-Host "[OK]    Windows Applications installed."
+if ($failed) {
+    Write-Host "[WARN]  Some Windows Applications failed to install (see above)."
+} else {
+    Write-Host "[OK]    Windows Applications installed."
+}
 {{- end -}}
