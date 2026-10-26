@@ -5,13 +5,21 @@
 local keymap = vim.keymap
 local opts = { noremap = true, silent = true }
 
--- navigation between Tmux and Neovim
-keymap.set("n", "<C-h>", "<Cmd>NvimTmuxNavigateLeft<CR>", { silent = true })
-keymap.set("n", "<C-j>", "<Cmd>NvimTmuxNavigateDown<CR>", { silent = true })
-keymap.set("n", "<C-k>", "<Cmd>NvimTmuxNavigateUp<CR>", { silent = true })
-keymap.set("n", "<C-l>", "<Cmd>NvimTmuxNavigateRight<CR>", { silent = true })
-keymap.set("n", "<C-\\>", "<Cmd>NvimTmuxNavigateLastActive<CR>", { silent = true })
-keymap.set("n", "<C-Space>", "<Cmd>NvimTmuxNavigateNavigateNext<CR>", { silent = true })
+-- Set navigation here, after LazyVim's default window mappings.
+if vim.env.TMUX then
+  keymap.set("n", "<C-h>", "<Cmd>NvimTmuxNavigateLeft<CR>", { silent = true })
+  keymap.set("n", "<C-j>", "<Cmd>NvimTmuxNavigateDown<CR>", { silent = true })
+  keymap.set("n", "<C-k>", "<Cmd>NvimTmuxNavigateUp<CR>", { silent = true })
+  keymap.set("n", "<C-l>", "<Cmd>NvimTmuxNavigateRight<CR>", { silent = true })
+  keymap.set("n", "<C-\\>", "<Cmd>NvimTmuxNavigateLastActive<CR>", { silent = true })
+  keymap.set("n", "<C-Space>", "<Cmd>NvimTmuxNavigateNavigateNext<CR>", { silent = true })
+else
+  local splits = require("smart-splits")
+  keymap.set("n", "<C-h>", splits.move_cursor_left, { desc = "Go to left window", silent = true })
+  keymap.set("n", "<C-j>", splits.move_cursor_down, { desc = "Go to lower window", silent = true })
+  keymap.set("n", "<C-k>", splits.move_cursor_up, { desc = "Go to upper window", silent = true })
+  keymap.set("n", "<C-l>", splits.move_cursor_right, { desc = "Go to right window", silent = true })
+end
 
 -- escape alternative
 keymap.set({ "i" }, "jj", "<Esc>", { silent = true })

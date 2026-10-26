@@ -10,6 +10,9 @@ Config.webgpu_power_preference = (battery and battery.state_of_charge < 0.35)
     and "LowPower"
   or "HighPerformance"
 
-Config.webgpu_preferred_adapter = require("utils.gpu"):pick_best()
+---wezterm.gui only exists in the GUI process; the mux server loads this config too
+if require("wezterm").gui then
+  Config.webgpu_preferred_adapter = require("utils.gpu"):pick_best()
+end
 
 return Config

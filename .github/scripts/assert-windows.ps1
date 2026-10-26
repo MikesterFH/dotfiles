@@ -102,6 +102,14 @@ if ((Test-Path -Path $miseConfigPath -PathType Leaf) -and (Select-String -Path $
     Write-Host "[FAIL] mise config: aqua:modem-dev/hunk missing"
     $script:failed = $true
 }
+# mermaid-cli comes from mise's npm backend on every OS, see
+# docs/adr/0019-mermaid-cli-via-mise-on-every-os.md
+if ((Test-Path -Path $miseConfigPath -PathType Leaf) -and (Select-String -Path $miseConfigPath -Pattern '^"npm:@mermaid-js/mermaid-cli" = ' -Quiet)) {
+    Write-Host "[OK]   mise config: npm:@mermaid-js/mermaid-cli present"
+} else {
+    Write-Host "[FAIL] mise config: npm:@mermaid-js/mermaid-cli missing"
+    $script:failed = $true
+}
 # Neovim and the tree-sitter CLI come from mise on every OS, pinned to an
 # exact version so the shared lazy-lock.json fits, see
 # docs/adr/0013-neovim-pinned-via-mise.md

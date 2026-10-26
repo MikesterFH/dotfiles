@@ -132,5 +132,25 @@
       "ensure_final_newline_on_save": true,
       "show_copilot_suggestions": true
     }
-  }
+  },
+  // merged from local Windows machine
+  "diff_view_style": "split",
+  "which_key": {
+    "enabled": true
+  },
+  "session": {
+    "trust_all_worktrees": true
+  },
+  "base_keymap": "VSCode",
+  "sticky_scroll": {
+    "enabled": false
+  },
+  "vertical_scroll_margin": 8.0,
+  "gutter": {
+    "line_numbers": true
+  },
+  "minimap": {
+    "show": "always"
+  },
+  "colorize_brackets": true,
 }

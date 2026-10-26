@@ -92,6 +92,14 @@ for tool in neovim/neovim tree-sitter/tree-sitter; do
     fi
 done
 
+# mermaid-cli comes from mise's npm backend on every OS, see
+# docs/adr/0019-mermaid-cli-via-mise-on-every-os.md
+if [ -f "$misefile" ] && grep -qF '"npm:@mermaid-js/mermaid-cli" = ' "$misefile"; then
+    ok "mise config: npm:@mermaid-js/mermaid-cli present"
+else
+    bad "mise config: npm:@mermaid-js/mermaid-cli missing"
+fi
+
 # helix and hunk configs, CLI tools so on every Profile; helix's lives in
 # AppData on Windows, hunk's in ~/.config everywhere
 assert_file ".config/helix/config.toml"

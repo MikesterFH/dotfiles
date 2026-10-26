@@ -2,7 +2,7 @@ return {
   {
     "folke/snacks.nvim",
     opts = {
-      image = { enabled = false },
+      image = { enabled = true },
       input = { enabled = true },
       picker = { ui_select = true },
     },

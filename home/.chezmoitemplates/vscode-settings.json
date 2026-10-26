@@ -1555,5 +1555,39 @@
   "hexeditor.inspectorType": "aside",
   "jenkins.pipeline.linter.connector.user": "mfehlmann",
   "jenkins.pipeline.linter.connector.url": "https://jenkins-pcm.seb.com/jenkins/pipeline-model-converter/validate",
-  "jenkins.pipeline.linter.connector.token": "1139541b3847ce4222567b138878a51ef0",
+  // === Windows machine (merged from local) ===
+  "terminal.integrated.env.windows": {
+    "PATH": "${env:USERPROFILE}\\.cargo\\bin;${env:LOCALAPPDATA}\\Programs\\Git\\cmd;${env:LOCALAPPDATA}\\Microsoft\\WinGet\\Packages\\JesseDuffield.lazygit_Microsoft.Winget.Source_8wekyb3d8bbwe;${env:PATH}"
+  },
+  "workbench.colorTheme": "GitHub Dark Default",
+  "security.allowedUNCHosts": [
+    "wsl.localhost"
+  ],
+  "terminal.integrated.profiles.windows": {
+    "PowerShell": {
+      "path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
+    },
+    "Command Prompt": {
+      "path": [
+        "${env:windir}\\Sysnative\\cmd.exe",
+        "${env:windir}\\System32\\cmd.exe"
+      ],
+      "args": [],
+      "icon": "terminal-cmd"
+    },
+    "Git Bash": {
+      "source": "Git Bash",
+      "icon": "terminal-git-bash"
+    },
+    "Ubuntu-24.04 (WSL)": {
+      "path": "C:\\WINDOWS\\System32\\wsl.exe",
+      "args": [
+        "-d",
+        "Ubuntu-24.04"
+      ]
+    }
+  },
+  "diffEditor.renderSideBySide": false,
+  "adoProductivity.github.enabled": false,
+  "github.copilot.chat.githubMcpServer.enabled": true,
 }

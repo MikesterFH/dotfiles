@@ -29,6 +29,7 @@
       "uv" "aqua:astral-sh/uv"
       "helix" "aqua:helix-editor/helix"
       "hunk" "aqua:modem-dev/hunk"
+      "mermaid-cli" "npm:@mermaid-js/mermaid-cli"
 -}}
 {{- /* imagemagick is the one conda (conda-forge) tool: apt only ships
        ImageMagick 6 and aqua has no build, but yazi needs 7's `magick`.
@@ -42,6 +43,11 @@
        out rather than fail the whole `mise install`), see
        docs/adr/0017-windows-cli-tools-without-winget-via-mise.md. */ -}}
 {{- $windowsViaMise := list "hunk" -}}
+{{- /* mermaid-cli (mmdc, renders Mermaid diagrams for snacks.nvim's image
+       viewer) is an npm package, so it comes from mise's npm backend on
+       every OS, on top of the node runtime above, see
+       docs/adr/0019-mermaid-cli-via-mise-on-every-os.md. */ -}}
+{{- $everywhereViaMise := list "mermaid-cli" -}}
 {{- /* Neovim and the tree-sitter CLI come from here on every OS, pinned:
        nvim/lazy-lock.json is shared between machines, and its plugin
        commits only fit one Neovim version. Bump these together with a
@@ -57,6 +63,8 @@ python = "3.13"
 {{- range .applications }}
 {{-   if hasKey $pinned . }}
 {{ index $miseTools . | quote }} = {{ index $pinned . | quote }}
+{{-   else if has . $everywhereViaMise }}
+{{ index $miseTools . | quote }} = "latest"
 {{-   else if and (eq $.chezmoi.os "windows") (has . $windowsViaMise) (eq $.chezmoi.arch "amd64") }}
 {{ index $miseTools . | quote }} = "latest"
 {{-   else if and (eq $.chezmoi.os "linux") (hasKey $miseTools .) (or (not (has . $linuxAmd64Only)) (eq $.chezmoi.arch "amd64")) }}

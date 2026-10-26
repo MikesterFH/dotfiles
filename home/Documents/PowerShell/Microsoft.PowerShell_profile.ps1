@@ -5,6 +5,9 @@
 
 Set-Alias vim nvim
 Set-Alias c clear
+Set-Alias gg lazygit
+
+function python { uv run python @args }
 
 function ga { git add . }
 function gc { param($m) git commit -m $m }

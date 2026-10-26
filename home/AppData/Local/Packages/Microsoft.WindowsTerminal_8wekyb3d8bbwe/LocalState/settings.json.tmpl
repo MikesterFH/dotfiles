@@ -1,0 +1,186 @@
+{
+    "$help": "https://aka.ms/terminal-documentation",
+    "$schema": "https://aka.ms/terminal-profiles-schema",
+    "actions": 
+    [
+        {
+            "command": 
+            {
+                "action": "sendInput",
+                "input": "\u001b\r"
+            },
+            "id": "User.sendInput.8F63D3A9"
+        },
+        {
+            "command": 
+            {
+                "action": "sendInput",
+                "input": "\u001b"
+            },
+            "id": "User.sendInput.38DC36AC"
+        }
+    ],
+    "alwaysShowTabs": false,
+    "centerOnLaunch": true,
+    "copyFormatting": "none",
+    "copyOnSelect": false,
+    "defaultProfile": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
+    "keybindings": 
+    [
+        {
+            "id": "Terminal.DuplicatePaneAuto",
+            "keys": "alt+shift+d"
+        },
+        {
+            "id": "User.sendInput.8F63D3A9",
+            "keys": "shift+enter"
+        },
+        {
+            "id": "User.sendInput.38DC36AC",
+            "keys": "ctrl+backspace"
+        },
+        {
+            "id": "Terminal.CopyToClipboard",
+            "keys": "ctrl+c"
+        },
+        {
+            "id": "Terminal.PasteFromClipboard",
+            "keys": "ctrl+v"
+        }
+    ],
+    "newTabMenu": 
+    [
+        {
+            "type": "remainingProfiles"
+        }
+    ],
+    "profiles": 
+    {
+        "defaults": 
+        {
+            "colorScheme": "Nvim_Tmux_Term",
+            "font": 
+            {
+                "face": "JetBrainsMono Nerd Font Mono",
+                "size": 11
+            },
+            "opacity": 75,
+            "useAcrylic": true
+        },
+        "list": 
+        [
+            {
+                "guid": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
+                "hidden": false,
+                "name": "PowerShell",
+                "source": "Windows.Terminal.PowershellCore"
+            },
+            {
+                "commandline": "%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -NoLogo",
+                "font": 
+                {
+                    "size": 11
+                },
+                "guid": "{61c54bbd-c2c6-5271-96e7-009a87ff44bf}",
+                "hidden": false,
+                "name": "Windows PowerShell"
+            },
+            {
+                "commandline": "%SystemRoot%\\System32\\cmd.exe",
+                "guid": "{0caa0dad-35be-5f56-a8ff-afceeeaa6101}",
+                "hidden": false,
+                "name": "Command Prompt"
+            },
+            {
+                "guid": "{b453ae62-4e3d-5e58-b989-0a998ec441b8}",
+                "hidden": false,
+                "name": "Azure Cloud Shell",
+                "source": "Windows.Terminal.Azure"
+            },
+            {
+                "guid": "{69f1a1d2-e407-5da0-bfd0-8851301cfc32}",
+                "hidden": false,
+                "name": "Developer Command Prompt for VS 18",
+                "source": "Windows.Terminal.VisualStudio"
+            },
+            {
+                "guid": "{823ddbc0-c17b-53ec-ae10-134fe4fa1bfe}",
+                "hidden": false,
+                "name": "Developer PowerShell for VS 18",
+                "source": "Windows.Terminal.VisualStudio"
+            },
+            {
+                "guid": "{32395b5f-e9a3-58d8-9606-de8f05fddb2f}",
+                "hidden": true,
+                "name": "Developer Command Prompt for VS 2022",
+                "source": "Windows.Terminal.VisualStudio"
+            },
+            {
+                "guid": "{c51dd9e3-4d7b-55b3-81e5-26853a144e0d}",
+                "hidden": true,
+                "name": "Developer PowerShell for VS 2022",
+                "source": "Windows.Terminal.VisualStudio"
+            },
+{{- /* Git Bash from wherever git.exe resolves at apply time (per-user
+       install under LOCALAPPDATA, or Program Files); omitted without git. */}}
+{{- $git := lookPath "git.exe" }}
+{{- if $git }}
+{{- $gitRoot := osDir (osDir $git) }}
+            {
+                "commandline": {{ joinPath $gitRoot "bin" "bash.exe" | toJson }},
+                "guid": "{e05f836c-5309-43f1-9970-93b53465acfc}",
+                "hidden": false,
+                "icon": {{ joinPath $gitRoot "mingw64" "share" "git" "git-for-windows.ico" | toJson }},
+                "name": "Git Bash"
+            },
+{{- end }}
+            {
+                "guid": "{16208362-94fc-5b1f-a491-5b2624d5ab56}",
+                "hidden": true,
+                "name": "Visual Studio Debug Console",
+                "source": "VSDebugConsole"
+            },
+            {
+                "guid": "{d645cfc8-ebcf-585a-8c3b-e81f09532910}",
+                "hidden": false,
+                "name": "Ubuntu-24.04",
+                "source": "Microsoft.WSL"
+            },
+            {
+                "guid": "{d3ba7951-6ead-5c01-bfef-a07927fefa1a}",
+                "hidden": false,
+                "name": "NixOS",
+                "source": "Microsoft.WSL"
+            }
+        ]
+    },
+    "schemes": 
+    [
+        {
+            "background": "#010C17",
+            "black": "#0B3B61",
+            "blue": "#1376F9",
+            "brightBlack": "#62686D",
+            "brightBlue": "#378DFF",
+            "brightCyan": "#FF6AD7",
+            "brightGreen": "#73FFD8",
+            "brightPurple": "#AE81FF",
+            "brightRed": "#FF54B1",
+            "brightWhite": "#60FCBF",
+            "brightYellow": "#FCF5AE",
+            "cursorColor": "#38FF9D",
+            "cyan": "#FF5ED4",
+            "foreground": "#ECDEF5",
+            "green": "#52FFD0",
+            "name": "Nvim_Tmux_Term",
+            "purple": "#C792EA",
+            "red": "#FF3A3A",
+            "selectionBackground": "#38FF9C",
+            "white": "#15FCA2",
+            "yellow": "#FFF383"
+        }
+    ],
+    "showTabsInTitlebar": false,
+    "themes": [],
+    "useAcrylicInTabRow": true
+}
