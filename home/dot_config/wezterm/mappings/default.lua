@@ -40,8 +40,6 @@ local mappings = {
   { "<S-CR>", act.SendString "\x1b[13;2u", "newline in Copilot" },
   { "<C-Tab>", act.ActivateTabRelative(1), "next tab" },
   { "<C-S-Tab>", act.ActivateTabRelative(-1), "prev tab" },
-  { "<C-d>", act.ActivateTabRelative(-1), "prev tab" },
-  { "<C-u>", act.ActivateTabRelative(1), "next tab" },
   { "<C-h>", nav("h", "Left"), "pane left" },
   { "<C-j>", nav("j", "Down"), "pane down" },
   { "<C-k>", nav("k", "Up"), "pane up" },
