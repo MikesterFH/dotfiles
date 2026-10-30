@@ -87,7 +87,7 @@ fi
 export LANG=de_CH.UTF-8
 
 # Brew
-eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+[ -x /home/linuxbrew/.linuxbrew/bin/brew ] && eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
 # export
 export XDG_RUNTIME_DIR="$HOME/.xdg_runtime"
@@ -111,7 +111,7 @@ command -v starship &>/dev/null && eval "$(starship init bash)"
 # cargo
 [ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
 # esp toolchain for rust
-. "$HOME/export-esp.sh"
+[ -f "$HOME/export-esp.sh" ] && . "$HOME/export-esp.sh"
 
 # nvm (Node Version Manager)
 export NVM_DIR="$HOME/.nvm"
