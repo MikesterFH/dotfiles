@@ -19,9 +19,11 @@ $env:YAZI_CONFIG_HOME = Join-Path $HOME ".config\yazi"
 $env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" +
     [Environment]::GetEnvironmentVariable("Path", "User")
 
+# Fail rather than skip: a run_onchange script that exits 0 is recorded as
+# done and never reruns until package.toml changes.
 if (-not (Get-Command ya -ErrorAction SilentlyContinue)) {
-    Write-Host "[WARN]  yazi (ya) not installed; skipping Yazi plugins."
-    exit 0
+    Write-Error "yazi (ya) not installed; cannot install Yazi plugins."
+    exit 1
 }
 
 Write-Host "[INFO]  Installing Yazi plugins..."

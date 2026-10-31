@@ -25,9 +25,12 @@ fi
 # installed by the mise-tools script, which sorts before this one.
 export PATH="$HOME/.local/share/mise/shims:$PATH"
 
+# Fail rather than skip: a run_onchange script that exits 0 is recorded as
+# done and never reruns until package.toml changes, leaving init.lua's
+# require("git") without its plugin.
 if ! command -v ya &>/dev/null; then
-  echo "[WARN]  yazi (ya) not installed; skipping Yazi plugins."
-  exit 0
+  echo "[ERROR] yazi (ya) not installed; cannot install Yazi plugins." >&2
+  exit 1
 fi
 
 echo "[INFO]  Installing Yazi plugins..."
