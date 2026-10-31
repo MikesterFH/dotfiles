@@ -309,6 +309,11 @@ end -- }}}
 ---@param window wt.Window Wezterm's window object
 ---@param pane   wt.Pane   Wezterm's pane object
 wt.on("update-status", function(window, pane)
+  -- During startup the GUI may fire this before the mux knows the pane.
+  if not pcall(pane.get_dimensions, pane) then
+    return
+  end
+
   local Config, Overrides = window:effective_config(), window:get_config_overrides() or {}
   e.theme = Config.color_schemes[Overrides.color_scheme or Config.color_scheme]
   e.bg, e.fg = e.theme.background, e.theme.ansi[5]

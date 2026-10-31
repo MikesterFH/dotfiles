@@ -95,6 +95,14 @@ export XDG_RUNTIME_DIR="$HOME/.xdg_runtime"
 # start shell with tmux opened
 #[ -z "$TMUX" ] && { tmux attach || exec tmux new-session; }
 
+# ~/.local/bin (mise, chezmoi) and ~/.opencode/bin are normally added by
+# ~/.profile, which bash skips once an installer creates ~/.bash_profile.
+for dir in "$HOME/.local/bin" "$HOME/.opencode/bin"; do
+  [ -d "$dir" ] && case ":$PATH:" in *":$dir:"*) ;; *) PATH="$dir:$PATH" ;; esac
+done
+unset dir
+export PATH
+
 # mise: node, python for nvim's Mason, and on Linux the CLI tools themselves
 # (docs/adr/0011-nvim-toolchain.md, docs/adr/0012-linux-cli-tools-via-mise.md).
 # Before the aliases and tool inits below, which only set themselves up when
@@ -117,3 +125,7 @@ command -v starship &>/dev/null && eval "$(starship init bash)"
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"                   # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" # This loads nvm bash_completion
+
+# report cwd to the terminal (OSC 7) so WezTerm splits open in the same dir
+__osc7_cwd() { printf '\e]7;file://%s%s\e\\' "$HOSTNAME" "$PWD"; }
+[[ "$PROMPT_COMMAND" == *__osc7_cwd* ]] || PROMPT_COMMAND="__osc7_cwd${PROMPT_COMMAND:+; $PROMPT_COMMAND}"

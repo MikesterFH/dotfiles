@@ -122,7 +122,7 @@ local key_tables = {
     { "<C-S-n>", act.SpawnWindow, "new window" },
     { "<C-S-p>", act.ActivateCommandPalette, "command palette" },
     { "<C-S-r>", act.ReloadConfiguration, "reload config" },
-    { "<C-S-t>", act.SpawnTab "CurrentPaneDomain", "new pane" },
+    { "<C-S-t>", split.tab, "new pane" },
     {
       "<C-S-u>",
       act.CharSelect {

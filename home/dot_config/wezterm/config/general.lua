@@ -34,6 +34,17 @@ local function find_git_bash()
   end
 end
 
+local function find_in_path(exe)
+  for dir in (os.getenv "PATH" or ""):gmatch "[^;]+" do
+    local file = io.open(dir:gsub("[\\/]$", "") .. "\\" .. exe, "rb")
+    if file then
+      file:close()
+      return true
+    end
+  end
+  return false
+end
+
 local function get_wsl_domains()
   local domains = wt.default_wsl_domains()
   local preferred = os.getenv "WEZTERM_WSL_DISTRO"
@@ -58,13 +69,15 @@ elseif fs.platform().is_win then
   -- PowerShell 7 (pwsh, a Bootstrap Package): the default Windows shell. Its
   -- profile stub dot-sources ~\.config\powershell\profile.ps1 (mise, starship,
   -- aliases). Windows PowerShell 5.1 gets the same stub but lacks mise's chpwd
-  -- hook. See docs/adr/0015-default-shells.md and 0020.
-  Config.default_prog = { "pwsh.exe", "-NoLogo" }
+  -- hook. See docs/adr/0015-default-shells.md, 0020 and 0022.
+  -- Fall back to Windows PowerShell 5.1 when pwsh is not installed.
+  local shell = find_in_path "pwsh.exe" and "pwsh.exe" or "powershell.exe"
+  Config.default_prog = { shell, "-NoLogo" }
 
   Config.launch_menu = {
     {
-      label = Icons.Progs["pwsh.exe"] .. " PowerShell",
-      args = { "pwsh.exe", "-NoLogo" },
+      label = Icons.Progs[shell] .. " PowerShell",
+      args = { shell, "-NoLogo" },
       cwd = "~",
     },
   }
@@ -80,6 +93,19 @@ elseif fs.platform().is_win then
   end
 
   Config.wsl_domains = get_wsl_domains()
+
+  -- Prefer WSL as default shell; fall back to PowerShell when no WSL
+  -- distribution is installed. wsl.exe is launched as a local program because
+  -- the mux server (default_gui_startup_args) only knows the local domain.
+  local wsl_domain = Config.wsl_domains[1]
+  if wsl_domain then
+    local wsl_args = { "wsl.exe", "-d", wsl_domain.distribution, "--cd", "~" }
+    Config.default_prog = wsl_args
+    Config.launch_menu[#Config.launch_menu + 1] = {
+      label = Icons.Progs["bash"] .. " WSL (" .. wsl_domain.distribution .. ")",
+      args = wsl_args,
+    }
+  end
 end
 
 Config.default_cwd = fs.home()

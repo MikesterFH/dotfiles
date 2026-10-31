@@ -243,6 +243,7 @@ M.Progs = {
   ["psql"] = nf.dev_postgresql,
   ["pwsh"] = nf.md_console,
   ["pwsh.exe"] = nf.md_console,
+  ["powershell.exe"] = nf.md_console,
   ["python"] = nf.seti_python,
   ["ruby"] = nf.cod_ruby,
   ["sudo"] = nf.fa_hashtag,

@@ -10,3 +10,5 @@
 **Consequences:** every terminal on every Target starts a shell that activates mise and finds Neovim. Changing the login shell to zsh on Linux (`chsh`) stays a manual step, because it needs the user's password. Git Bash is still installed on Windows and can be unhidden in Windows Terminal; nothing in the repo depends on it as a shell. Windows PowerShell 5.1 remains available but unmanaged.
 
 **Update (ADR 0020):** the profile now lives at `~\.config\powershell\profile.ps1`; both `Documents\PowerShell` and `Documents\WindowsPowerShell` get a stub that dot-sources it, so 5.1 also activates mise (without the chpwd hook).
+
+**Update (ADR 0022):** WezTerm now defaults to WSL when a distribution exists; PowerShell 7 (then 5.1) is the fallback.

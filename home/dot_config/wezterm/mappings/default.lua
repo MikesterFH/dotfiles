@@ -53,7 +53,7 @@ local mappings = {
   { "<C-S-n>", act.SpawnWindow, "new window" },
   { "<C-S-p>", act.ActivateCommandPalette, "command palette" },
   { "<C-S-r>", act.ReloadConfiguration, "reload config" },
-  { "<C-S-t>", act.SpawnTab "CurrentPaneDomain", "new pane" },
+  { "<C-S-t>", split.tab, "new pane" },
   {
     "<C-S-u>",
     act.CharSelect {
@@ -70,12 +70,12 @@ local mappings = {
   { "<C-Insert>", act.CopyTo "PrimarySelection", "" },
   { "<C-S-Space>", act.QuickSelect, "quick select" },
   {
-    "<S-M-t>",
+    "<leader>t",
     act.ShowLauncherArgs {
       title = "  Search:",
       flags = "FUZZY|LAUNCH_MENU_ITEMS|DOMAINS",
     },
-    "new window",
+    "shell launcher",
   },
 
   ---macOS standard shortcuts
@@ -83,7 +83,7 @@ local mappings = {
   { "<W-c>", act.CopyTo "Clipboard", "copy" },
   { "<W-v>", act.PasteFrom "Clipboard", "paste" },
   { "<W-n>", act.SpawnWindow, "new window" },
-  { "<W-t>", act.SpawnTab "CurrentPaneDomain", "new tab" },
+  { "<W-t>", split.tab, "new tab" },
   { "<W-w>", act.CloseCurrentTab { confirm = true }, "close tab" },
   { "<W-m>", act.Hide, "minimize" },
   { "<W-h>", act.HideApplication, "hide app" },
@@ -106,7 +106,7 @@ local mappings = {
   { "<leader>k", resize "Up", "resize up (repeat h/j/k/l)" },
   { "<leader>l", resize "Right", "resize right (repeat h/j/k/l)" },
   { "<leader>m", act.TogglePaneZoomState, "toggle zoom" },
-  { "<leader>n", act.SpawnTab "CurrentPaneDomain", "new tab" },
+  { "<leader>n", split.tab, "new tab" },
   {
     "<leader>,",
     act.PromptInputLine {
