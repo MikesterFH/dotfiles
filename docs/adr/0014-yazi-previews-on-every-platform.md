@@ -10,3 +10,5 @@
 The `ls`/`cat` aliases are set only when eza/bat exist.
 
 **Consequences:** archive, image, SVG, PDF, font, JSON and video previews work on macOS, Debian/Ubuntu and Windows. ffmpeg and ImageMagick are heavy (several hundred MB together), and they install on dev-server too, since CLI tools are the same on every Profile. On Linux arm64 SVGs get no preview. The conda backend is newer in mise than aqua; if it breaks, the ImageMagick preview is the only thing affected.
+
+**Update:** ADR 0023 moves the previewer tools with a mise backend to mise wherever mise has a build for the platform. On Windows that is eza (Windows on ARM keeps winget); 7-Zip, ImageMagick, Poppler, resvg, jq and FFmpeg stay on winget.

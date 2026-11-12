@@ -48,7 +48,6 @@ name      = "delta"
 kind      = "cli"
 profiles  = ["personal", "dev", "dev-server"]
 mise      = "aqua:dandavison/delta"
-mise_os   = ["linux", "darwin"]
 mise_arch = { darwin = ["arm64"] }
 brew      = "git-delta"
 winget    = "dandavison.delta"
@@ -58,7 +57,6 @@ name     = "starship"
 kind     = "cli"
 profiles = ["personal", "dev", "dev-server"]
 mise     = "aqua:starship/starship"
-mise_os  = ["linux", "darwin"]
 brew     = "starship"
 winget   = "Starship.Starship"
 
@@ -83,7 +81,6 @@ name     = "fzf"
 kind     = "cli"
 profiles = ["personal", "dev", "dev-server"]
 mise     = "aqua:junegunn/fzf"
-mise_os  = ["linux", "darwin"]
 brew     = "fzf"
 winget   = "junegunn.fzf"
 
@@ -92,7 +89,6 @@ name     = "zoxide"
 kind     = "cli"
 profiles = ["personal", "dev", "dev-server"]
 mise     = "aqua:ajeetdsouza/zoxide"
-mise_os  = ["linux", "darwin"]
 brew     = "zoxide"
 winget   = "ajeetdsouza.zoxide"
 
@@ -101,7 +97,6 @@ name     = "yazi"
 kind     = "cli"
 profiles = ["personal", "dev", "dev-server"]
 mise     = "aqua:sxyazi/yazi"
-mise_os  = ["linux", "darwin"]
 brew     = "yazi"
 winget   = "sxyazi.yazi"
 
@@ -110,7 +105,6 @@ name     = "glow"
 kind     = "cli"
 profiles = ["personal", "dev", "dev-server"]
 mise     = "aqua:charmbracelet/glow"
-mise_os  = ["linux", "darwin"]
 brew     = "glow"
 winget   = "charmbracelet.glow"
 
@@ -119,7 +113,6 @@ name     = "bat"
 kind     = "cli"
 profiles = ["personal", "dev", "dev-server"]
 mise     = "aqua:sharkdp/bat"
-mise_os  = ["linux", "darwin"]
 brew     = "bat"
 winget   = "sharkdp.bat"
 
@@ -128,7 +121,6 @@ name     = "lazygit"
 kind     = "cli"
 profiles = ["personal", "dev", "dev-server"]
 mise     = "aqua:jesseduffield/lazygit"
-mise_os  = ["linux", "darwin"]
 brew     = "lazygit"
 winget   = "JesseDuffield.lazygit"
 
@@ -145,7 +137,6 @@ name     = "ripgrep"
 kind     = "cli"
 profiles = ["personal", "dev", "dev-server"]
 mise     = "aqua:BurntSushi/ripgrep"
-mise_os  = ["linux", "darwin"]
 brew     = "ripgrep"
 winget   = "BurntSushi.ripgrep.MSVC"
 
@@ -154,7 +145,6 @@ name     = "fd"
 kind     = "cli"
 profiles = ["personal", "dev", "dev-server"]
 mise     = "aqua:sharkdp/fd"
-mise_os  = ["linux", "darwin"]
 brew     = "fd"
 winget   = "sharkdp.fd"
 
@@ -183,14 +173,15 @@ kind     = "system"
 profiles = ["personal", "dev", "dev-server"]
 apt      = "build-essential"
 
+# No windows-arm64 build: Windows on ARM keeps it on winget.
 [[application]]
-name     = "eza"
-kind     = "cli"
-profiles = ["personal", "dev", "dev-server"]
-mise     = "aqua:eza-community/eza"
-mise_os  = ["linux", "darwin"]
-brew     = "eza"
-winget   = "eza-community.eza"
+name      = "eza"
+kind      = "cli"
+profiles  = ["personal", "dev", "dev-server"]
+mise      = "aqua:eza-community/eza"
+mise_arch = { windows = ["amd64"] }
+brew      = "eza"
+winget    = "eza-community.eza"
 
 # macOS ships zsh; no zsh on the Windows Target.
 [[application]]
@@ -215,7 +206,8 @@ apt      = "7zip"
 winget   = "7zip.7zip"
 
 # conda backend: apt only ships ImageMagick 6, yazi needs 7's `magick`
-# (docs/adr/0014-yazi-previews-on-every-platform.md).
+# (docs/adr/0014-yazi-previews-on-every-platform.md). Windows keeps winget:
+# the conda build there is lockable but has never been run.
 [[application]]
 name     = "imagemagick"
 kind     = "cli"
@@ -233,8 +225,9 @@ brew     = "poppler"
 apt      = "poppler-utils"
 winget   = "oschwartz10612.Poppler"
 
-# Linux binaries for amd64 only; one tool mise can't install fails the whole
-# `mise install`, so other Linux architectures leave it out.
+# Linux binaries for amd64 only and none for Windows; one tool mise can't
+# install fails the whole `mise install`, so those platforms use the native
+# manager or go without.
 [[application]]
 name      = "resvg"
 kind      = "cli"
@@ -266,7 +259,6 @@ name     = "uv"
 kind     = "cli"
 profiles = ["personal", "dev", "dev-server"]
 mise     = "aqua:astral-sh/uv"
-mise_os  = ["linux", "darwin"]
 brew     = "uv"
 winget   = "astral-sh.uv"
 
@@ -275,11 +267,10 @@ name     = "helix"
 kind     = "cli"
 profiles = ["personal", "dev", "dev-server"]
 mise     = "aqua:helix-editor/helix"
-mise_os  = ["linux", "darwin"]
 brew     = "helix"
 winget   = "Helix.Helix"
 
-# No winget package: mise on Windows too, amd64 only (ADR 0017).
+# No winget package, so Windows on ARM goes without it (ADR 0017).
 [[application]]
 name      = "hunk"
 kind      = "cli"

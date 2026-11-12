@@ -133,13 +133,26 @@ foreach ($tool in Get-MiseTools -Installed $false) {
         $script:failed = $true
     }
 }
-# Spot check independent of the data file: the CLI tools come from winget,
-# not mise, on Windows.
-if ($miseConfig | Where-Object { $_.StartsWith('"aqua:dandavison/delta"') }) {
-    Write-Host "[FAIL] mise config (spot check): aqua:dandavison/delta should come from winget on Windows"
-    $script:failed = $true
-} else {
-    Write-Host "[OK]   mise config (spot check): no aqua:dandavison/delta on Windows"
+# Spot checks independent of the data file: the CLI tools come from mise on
+# Windows too (ADR 0023); tmux has no Windows build (psmux stands in) and
+# hunk none for Windows on ARM.
+foreach ($tool in @("aqua:sxyazi/yazi", "aqua:BurntSushi/ripgrep", "aqua:dandavison/delta")) {
+    if ($miseConfig | Where-Object { $_.StartsWith("""$tool"" = ") }) {
+        Write-Host "[OK]   mise config (spot check): $tool present"
+    } else {
+        Write-Host "[FAIL] mise config (spot check): $tool missing"
+        $script:failed = $true
+    }
+}
+$absentTools = @("tmux")
+if ($arch -eq "arm64") { $absentTools += "hunk" }
+foreach ($tool in $absentTools) {
+    if ($miseConfig | Where-Object { $_ -match "^""[^""]*[:/]$tool""" }) {
+        Write-Host "[FAIL] mise config (spot check): $tool should not be installed by mise on windows/$arch"
+        $script:failed = $true
+    } else {
+        Write-Host "[OK]   mise config (spot check): no $tool on windows/$arch"
+    }
 }
 # mermaid-cli was removed (ADR 0019 update, issue #34): its npm install
 # fails mise's trust policy and with it the whole `mise install`
@@ -222,8 +235,9 @@ if (Test-Path -Path $wingetManifestPath -PathType Leaf) {
     $wingetManifest = Get-Content -Path $wingetManifestPath -Raw | ConvertFrom-Json
     $packageIds = @($wingetManifest.Sources[0].Packages | ForEach-Object { $_.PackageIdentifier })
     $expectedIds = @($apps | Where-Object { $_.winget -and -not (Test-ViaMise $_) } | ForEach-Object { $_.winget })
-    # Spot checks independent of the data file
-    $spotIds = @("dandavison.delta")
+    # Spot checks independent of the data file: ImageMagick stays on winget
+    # (conda build unverified on Windows), the mise tools are gone from it
+    $spotIds = @("ImageMagick.ImageMagick")
     if ($MachineProfile -ne "dev-server") { $spotIds += "Microsoft.WindowsTerminal" }
     foreach ($id in $spotIds) {
         if ($packageIds -contains $id) {
@@ -231,6 +245,14 @@ if (Test-Path -Path $wingetManifestPath -PathType Leaf) {
         } else {
             Write-Host "[FAIL] winget manifest (spot check): $id missing"
             $script:failed = $true
+        }
+    }
+    foreach ($id in @("sxyazi.yazi", "BurntSushi.ripgrep.MSVC", "dandavison.delta")) {
+        if ($packageIds -contains $id) {
+            Write-Host "[FAIL] winget manifest (spot check): $id should come from mise"
+            $script:failed = $true
+        } else {
+            Write-Host "[OK]   winget manifest (spot check): no $id"
         }
     }
     if ($MachineProfile -eq "dev-server" -and ($packageIds -contains "Microsoft.WindowsTerminal")) {
