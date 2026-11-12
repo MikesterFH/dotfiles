@@ -5,3 +5,5 @@
 **Decision:** a CLI tool with no winget package but an aqua-installable Windows release is listed in `$windowsViaMise` in `dot_config/mise/config.toml.tmpl` and installed by mise on Windows, at latest. hunk is the first. macOS keeps it in the Brewfile and Linux in the mise config like every other CLI tool. The Windows assert allows these aqua entries next to the pinned ones and checks each is present.
 
 **Consequences:** such a tool updates with `mise upgrade`, not `winget upgrade`. If it later gets a winget package, it moves into the winget manifest and out of `$windowsViaMise`. On Windows on ARM, hunk is left out of the mise config, since its release has no windows/arm64 build and one tool mise can't install fails the whole `mise install`.
+
+**Update:** superseded by ADR 0023: on Windows every CLI tool with a mise backend comes from mise, not only those without a winget package; `$windowsViaMise` becomes OS/arch data in `applications.toml`.
