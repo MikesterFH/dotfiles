@@ -7,3 +7,5 @@
 **Consequences:** mermaid-cli updates with `mise upgrade`. Its install pulls a headless Chromium through puppeteer, so the first `mise install` is larger and needs access to Google's Chrome download host; behind a restrictive proxy, `PUPPETEER_SKIP_DOWNLOAD` plus a system browser is the fallback. Inline rendering still depends on the terminal (kitty graphics protocol: kitty, Ghostty, WezTerm; WezTerm only as floats).
 
 **Update:** superseded, mermaid-cli is removed (issue #34). mise's npm backend now refuses it under its trust policy (a puppeteer dependency, chromium-bidi, lost its trusted-publisher evidence), and one failed tool fails the whole `mise install`. Mermaid blocks in snacks.nvim stay plain code; no npm tool is installed anymore.
+
+**Update:** see also ADR 0023: no npm backend tool is installed anymore.

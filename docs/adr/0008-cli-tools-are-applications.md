@@ -7,3 +7,5 @@ Two `run_onchange_after_` scripts take care of the plugin layers on top: `instal
 **Consequences:** the apt manifest now names packages that older Debian/Ubuntu releases don't ship (starship, yazi, glow, lazygit at least) — rather than drop them from Linux entirely, the Linux install script checks each package with `apt-cache show`, installs those that exist and prints the rest as a warning, so one missing name no longer fails the whole apply. `winget import` gets `--ignore-unavailable` for the same reason. Configs that call these tools still guard their calls (`command -v starship`, `Get-Command starship`), so a machine where an install was skipped stays usable. dev-server's Application list is no longer empty; its GUI configs stay excluded because `.chezmoiignore` keys them on the individual GUI app names.
 
 **Update:** for Linux, ADR 0012 moves the CLI tools to mise; apt keeps system packages and GUI apps.
+
+**Update:** superseded for the installation path by ADR 0023: CLI tools come from mise on every chezmoi Target, Homebrew/apt/winget keep GUI apps and what mise cannot install. CLI tools stay Applications.

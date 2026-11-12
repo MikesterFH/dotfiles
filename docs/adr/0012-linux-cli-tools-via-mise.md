@@ -7,3 +7,5 @@
 **Consequences:** a Debian/Ubuntu machine, a devpod, and any other Linux distro get current tool versions without sudo; the binaries live under `~/.local/share/mise` and reach the PATH through `mise activate` in `.bashrc`/`.zshrc` and the shims in `.zprofile`. chezmoi scripts that call those tools, like the yazi plugin install, put the mise shims on their PATH themselves. `mise install` resolves `latest` through the GitHub API, which allows 60 unauthenticated requests per hour; a machine or CI job that installs often needs a `GITHUB_TOKEN` in its environment. Updates come with `mise upgrade`, not `apt upgrade`. A machine provisioned earlier keeps its apt copies of the moved tools until they are removed by hand; mise's come first on the PATH.
 
 **Update:** neovim and tree-sitter-cli now come from mise on every OS, pinned (ADR 0013); on Linux they are no longer at `latest`.
+
+**Update:** superseded by ADR 0023, which extends mise for CLI tools to macOS and Windows and moves tmux, cmake, 7zip and jq from apt to mise.

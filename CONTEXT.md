@@ -25,7 +25,7 @@ A prerequisite tool — `git`, `mise`, and the platform's own package manager wh
 _Avoid_: dependency, tool install, Application (see below)
 
 **Application**:
-Software a machine needs beyond the Bootstrap Package minimum — CLI tools the configs rely on (delta, starship, tmux, yazi, …; the same on every Profile) and GUI apps (e.g. wezterm, VS Code, Zed; per Profile) alike — installed via a package-manager-native manifest (`Brewfile`, `apt-packages.txt`, a winget manifest, on Linux the global mise config for the CLI tools, and Flatpak for Zen; one file per platform, each carrying its own package identifier per app) rendered from the machine's Profile. Manifests run via `run_onchange_`, so editing the app list reaches already-provisioned machines on their next `chezmoi apply`. See `docs/adr/0006-application-category-and-profile-manifests.md` and `docs/adr/0008-cli-tools-are-applications.md` and `docs/adr/0012-linux-cli-tools-via-mise.md`.
+Software a machine needs beyond the Bootstrap Package minimum — CLI tools the configs rely on (delta, starship, tmux, yazi, …), GUI apps (e.g. wezterm, VS Code, Zed), system packages and the language runtimes alike. Each is declared once, with the Profiles that get it and where it comes from on each platform; every installation path derives from that one declaration. On a chezmoi Target, a CLI tool comes from mise wherever mise can install it, everything else from the platform's own package manager; on a NixOS host, from nixpkgs. See `docs/adr/0006-application-category-and-profile-manifests.md`, `docs/adr/0008-cli-tools-are-applications.md` and `docs/adr/0023-applications-from-one-data-file.md`.
 _Avoid_: package, tool (when meaning this specifically), Bootstrap Package (see above)
 
 **Profile**:
