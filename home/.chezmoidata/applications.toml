@@ -42,21 +42,23 @@ version  = "3.13"
 
 # -- CLI tools the configs rely on, every Profile (ADR 0008) -----------------
 
+# No macos-x64 build: Intel Macs keep it on Homebrew.
 [[application]]
-name     = "delta"
-kind     = "cli"
-profiles = ["personal", "dev", "dev-server"]
-mise     = "aqua:dandavison/delta"
-mise_os  = ["linux"]
-brew     = "git-delta"
-winget   = "dandavison.delta"
+name      = "delta"
+kind      = "cli"
+profiles  = ["personal", "dev", "dev-server"]
+mise      = "aqua:dandavison/delta"
+mise_os   = ["linux", "darwin"]
+mise_arch = { darwin = ["arm64"] }
+brew      = "git-delta"
+winget    = "dandavison.delta"
 
 [[application]]
 name     = "starship"
 kind     = "cli"
 profiles = ["personal", "dev", "dev-server"]
 mise     = "aqua:starship/starship"
-mise_os  = ["linux"]
+mise_os  = ["linux", "darwin"]
 brew     = "starship"
 winget   = "Starship.Starship"
 
@@ -81,7 +83,7 @@ name     = "fzf"
 kind     = "cli"
 profiles = ["personal", "dev", "dev-server"]
 mise     = "aqua:junegunn/fzf"
-mise_os  = ["linux"]
+mise_os  = ["linux", "darwin"]
 brew     = "fzf"
 winget   = "junegunn.fzf"
 
@@ -90,7 +92,7 @@ name     = "zoxide"
 kind     = "cli"
 profiles = ["personal", "dev", "dev-server"]
 mise     = "aqua:ajeetdsouza/zoxide"
-mise_os  = ["linux"]
+mise_os  = ["linux", "darwin"]
 brew     = "zoxide"
 winget   = "ajeetdsouza.zoxide"
 
@@ -99,7 +101,7 @@ name     = "yazi"
 kind     = "cli"
 profiles = ["personal", "dev", "dev-server"]
 mise     = "aqua:sxyazi/yazi"
-mise_os  = ["linux"]
+mise_os  = ["linux", "darwin"]
 brew     = "yazi"
 winget   = "sxyazi.yazi"
 
@@ -108,7 +110,7 @@ name     = "glow"
 kind     = "cli"
 profiles = ["personal", "dev", "dev-server"]
 mise     = "aqua:charmbracelet/glow"
-mise_os  = ["linux"]
+mise_os  = ["linux", "darwin"]
 brew     = "glow"
 winget   = "charmbracelet.glow"
 
@@ -117,7 +119,7 @@ name     = "bat"
 kind     = "cli"
 profiles = ["personal", "dev", "dev-server"]
 mise     = "aqua:sharkdp/bat"
-mise_os  = ["linux"]
+mise_os  = ["linux", "darwin"]
 brew     = "bat"
 winget   = "sharkdp.bat"
 
@@ -126,7 +128,7 @@ name     = "lazygit"
 kind     = "cli"
 profiles = ["personal", "dev", "dev-server"]
 mise     = "aqua:jesseduffield/lazygit"
-mise_os  = ["linux"]
+mise_os  = ["linux", "darwin"]
 brew     = "lazygit"
 winget   = "JesseDuffield.lazygit"
 
@@ -143,7 +145,7 @@ name     = "ripgrep"
 kind     = "cli"
 profiles = ["personal", "dev", "dev-server"]
 mise     = "aqua:BurntSushi/ripgrep"
-mise_os  = ["linux"]
+mise_os  = ["linux", "darwin"]
 brew     = "ripgrep"
 winget   = "BurntSushi.ripgrep.MSVC"
 
@@ -152,7 +154,7 @@ name     = "fd"
 kind     = "cli"
 profiles = ["personal", "dev", "dev-server"]
 mise     = "aqua:sharkdp/fd"
-mise_os  = ["linux"]
+mise_os  = ["linux", "darwin"]
 brew     = "fd"
 winget   = "sharkdp.fd"
 
@@ -186,7 +188,7 @@ name     = "eza"
 kind     = "cli"
 profiles = ["personal", "dev", "dev-server"]
 mise     = "aqua:eza-community/eza"
-mise_os  = ["linux"]
+mise_os  = ["linux", "darwin"]
 brew     = "eza"
 winget   = "eza-community.eza"
 
@@ -219,7 +221,7 @@ name     = "imagemagick"
 kind     = "cli"
 profiles = ["personal", "dev", "dev-server"]
 mise     = "conda:imagemagick"
-mise_os  = ["linux"]
+mise_os  = ["linux", "darwin"]
 brew     = "imagemagick"
 winget   = "ImageMagick.ImageMagick"
 
@@ -238,7 +240,7 @@ name      = "resvg"
 kind      = "cli"
 profiles  = ["personal", "dev", "dev-server"]
 mise      = "aqua:linebender/resvg"
-mise_os   = ["linux"]
+mise_os   = ["linux", "darwin"]
 mise_arch = { linux = ["amd64"] }
 brew      = "resvg"
 winget    = "linebender.resvg"
@@ -264,7 +266,7 @@ name     = "uv"
 kind     = "cli"
 profiles = ["personal", "dev", "dev-server"]
 mise     = "aqua:astral-sh/uv"
-mise_os  = ["linux"]
+mise_os  = ["linux", "darwin"]
 brew     = "uv"
 winget   = "astral-sh.uv"
 
@@ -273,7 +275,7 @@ name     = "helix"
 kind     = "cli"
 profiles = ["personal", "dev", "dev-server"]
 mise     = "aqua:helix-editor/helix"
-mise_os  = ["linux"]
+mise_os  = ["linux", "darwin"]
 brew     = "helix"
 winget   = "Helix.Helix"
 
@@ -283,7 +285,6 @@ name      = "hunk"
 kind      = "cli"
 profiles  = ["personal", "dev", "dev-server"]
 mise      = "aqua:modem-dev/hunk"
-mise_os   = ["linux", "windows"]
 mise_arch = { windows = ["amd64"] }
 brew      = "hunk"
 

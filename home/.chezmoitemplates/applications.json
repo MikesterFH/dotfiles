@@ -1,11 +1,19 @@
 {{- /* The current Profile's Applications from .chezmoidata/applications.toml,
-       in file order, as JSON. Use:
+       in file order, as JSON. Each entry gets `via_mise`: true when mise
+       installs it on this OS and architecture (it has a `mise` field, this
+       OS is in its `mise_os` or that is absent, this architecture in its
+       `mise_arch` for the OS or that is absent). A native identifier (brew,
+       apt, winget) only applies where `via_mise` is false. Use:
          {{- $apps := includeTemplate "applications.json" . | fromJson -}}
        See docs/adr/0023-applications-from-one-data-file.md. */ -}}
+{{- $os := .chezmoi.os -}}
+{{- $arch := .chezmoi.arch -}}
 {{- $apps := list -}}
 {{- range .application -}}
 {{-   if has $.profile .profiles -}}
-{{-     $apps = append $apps . -}}
+{{-     $osOk := or (not (hasKey . "mise_os")) (has $os .mise_os) -}}
+{{-     $archOk := or (not (hasKey . "mise_arch")) (not (hasKey .mise_arch $os)) (has $arch (index .mise_arch $os)) -}}
+{{-     $apps = append $apps (merge (dict "via_mise" (and (hasKey . "mise") $osOk $archOk)) .) -}}
 {{-   end -}}
 {{- end -}}
 {{- $apps | toJson -}}

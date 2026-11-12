@@ -10,7 +10,7 @@
        on macOS/Windows, see .chezmoiignore. */ -}}
 {{- $lines := list -}}
 {{- range includeTemplate "applications.json" . | fromJson -}}
-{{-   if hasKey . "apt" -}}
+{{-   if and (hasKey . "apt") (not .via_mise) -}}
 {{-     $lines = append $lines .apt -}}
 {{-   end -}}
 {{- end -}}

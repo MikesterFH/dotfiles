@@ -103,8 +103,8 @@ done
 unset dir
 export PATH
 
-# mise: node, python for nvim's Mason, and on Linux the CLI tools themselves
-# (docs/adr/0011-nvim-toolchain.md, docs/adr/0012-linux-cli-tools-via-mise.md).
+# mise: node, python for nvim's Mason, and on Linux and macOS the CLI tools
+# themselves (docs/adr/0011-nvim-toolchain.md, docs/adr/0023-applications-from-one-data-file.md).
 # Before the aliases and tool inits below, which only set themselves up when
 # their tool is found.
 command -v mise &>/dev/null && eval "$(mise activate bash)"

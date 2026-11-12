@@ -1,9 +1,9 @@
 {{- /* Global mise tools, rendered from .chezmoidata/applications.toml (see
        docs/adr/0023-applications-from-one-data-file.md). Every Application
-       of this Profile with a `mise` field lands here when this OS is in its
-       `mise_os` (absent = every OS) and this architecture in its
-       `mise_arch` for the OS (absent = every architecture): one tool mise
-       can't install fails the whole `mise install`. The runtimes (node,
+       of this Profile that mise installs on this OS and architecture
+       (`via_mise`, computed in .chezmoitemplates/applications.json from
+       `mise_os`/`mise_arch`) lands here: one tool mise can't install fails
+       the whole `mise install`. The runtimes (node,
        python for Neovim's Mason, docs/adr/0011-nvim-toolchain.md) come
        first, as bare tool names; everything else is a backend:name key.
        `version` pins a tool (neovim and tree-sitter-cli, ADR 0013); without
@@ -11,8 +11,6 @@
        run_onchange_after_install-mise-tools scripts whenever this file
        renders differently. */ -}}
 {{- $apps := includeTemplate "applications.json" . | fromJson -}}
-{{- $os := .chezmoi.os -}}
-{{- $arch := .chezmoi.arch -}}
 [tools]
 {{- range $apps }}
 {{-   if eq .kind "runtime" }}
@@ -20,11 +18,7 @@
 {{-   end }}
 {{- end }}
 {{- range $apps }}
-{{-   if and (hasKey . "mise") (ne .kind "runtime") }}
-{{-     $osOk := or (not (hasKey . "mise_os")) (has $os .mise_os) }}
-{{-     $archOk := or (not (hasKey . "mise_arch")) (not (hasKey .mise_arch $os)) (has $arch (index .mise_arch $os)) }}
-{{-     if and $osOk $archOk }}
+{{-   if and .via_mise (ne .kind "runtime") }}
 {{ .mise | quote }} = {{ get . "version" | default "latest" | quote }}
-{{-     end }}
 {{-   end }}
 {{- end }}

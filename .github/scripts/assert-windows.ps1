@@ -38,14 +38,20 @@ $arch = switch ([System.Runtime.InteropServices.RuntimeInformation]::OSArchitect
     "Arm64" { "arm64" }
     default { "amd64" }
 }
-# Mise keys mise installs on Windows/$arch (In) or skips there (Out)
+# True when mise installs the Application on Windows/$arch
+function Test-ViaMise {
+    param($App)
+    if (-not $App.mise) { return $false }
+    $osOk = (-not $App.mise_os) -or ($App.mise_os -contains "windows")
+    $archOk = (-not $App.mise_arch) -or (-not $App.mise_arch.windows) -or ($App.mise_arch.windows -contains $arch)
+    return ($osOk -and $archOk)
+}
+# Mise keys mise installs on Windows/$arch (Installed) or skips there
 function Get-MiseTools {
     param([bool]$Installed)
     foreach ($app in $apps) {
         if (-not $app.mise -or $app.kind -eq "runtime") { continue }
-        $osOk = (-not $app.mise_os) -or ($app.mise_os -contains "windows")
-        $archOk = (-not $app.mise_arch) -or (-not $app.mise_arch.windows) -or ($app.mise_arch.windows -contains $arch)
-        if (($osOk -and $archOk) -eq $Installed) { $app.mise }
+        if ((Test-ViaMise $app) -eq $Installed) { $app.mise }
     }
 }
 
@@ -215,7 +221,7 @@ Assert-FileExists ".config\winget\packages.json"
 if (Test-Path -Path $wingetManifestPath -PathType Leaf) {
     $wingetManifest = Get-Content -Path $wingetManifestPath -Raw | ConvertFrom-Json
     $packageIds = @($wingetManifest.Sources[0].Packages | ForEach-Object { $_.PackageIdentifier })
-    $expectedIds = @($apps | Where-Object { $_.winget } | ForEach-Object { $_.winget })
+    $expectedIds = @($apps | Where-Object { $_.winget -and -not (Test-ViaMise $_) } | ForEach-Object { $_.winget })
     # Spot checks independent of the data file
     $spotIds = @("dandavison.delta")
     if ($MachineProfile -ne "dev-server") { $spotIds += "Microsoft.WindowsTerminal" }
