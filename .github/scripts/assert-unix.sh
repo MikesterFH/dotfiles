@@ -93,9 +93,10 @@ assert_file ".config/tmux/tmux.conf"
 assert_file ".local/share/nvim/site/spell/de.utf-8.spl"
 assert_file ".local/share/nvim/site/spell/de.utf-8.sug"
 
-# Global mise tools (node, python for nvim's Mason), see
-# docs/adr/0011-nvim-toolchain.md
+# Global mise tools and their lockfile, see
+# docs/adr/0023-applications-from-one-data-file.md
 assert_file ".config/mise/config.toml"
+assert_file ".config/mise/mise.lock"
 
 # oh-my-zsh, cloned by a chezmoi git-repo external, see
 # docs/adr/0015-default-shells.md

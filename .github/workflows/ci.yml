@@ -85,3 +85,21 @@ jobs:
             .github\scripts\assert-windows.ps1 -Dest $dest -MachineProfile $machineProfile
             Write-Host "::endgroup::"
           }
+
+  # mise.lock must list exactly the data file's mise Applications, for every
+  # platform each is installed on, or `mise install --locked` fails on the
+  # Targets (docs/adr/0023-applications-from-one-data-file.md). Needs no
+  # mise: it only compares the committed lockfile with applications.toml.
+  mise-lock:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo (chezmoi Source Dir)
+        uses: actions/checkout@v4
+
+      - name: Install chezmoi
+        run: |
+          sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Check mise.lock against applications.toml
+        run: .github/scripts/mise-lock.sh --check
