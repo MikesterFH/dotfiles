@@ -183,12 +183,13 @@ kind     = "system"
 profiles = ["personal", "dev", "dev-server"]
 apt      = "build-essential"
 
+# No macOS builds upstream: Macs keep it on Homebrew.
 [[application]]
 name     = "eza"
 kind     = "cli"
 profiles = ["personal", "dev", "dev-server"]
 mise     = "aqua:eza-community/eza"
-mise_os  = ["linux", "darwin"]
+mise_os  = ["linux"]
 brew     = "eza"
 winget   = "eza-community.eza"
 
