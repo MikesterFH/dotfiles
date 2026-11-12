@@ -1,0 +1,8 @@
+{{- /* Names of the current Profile's Applications, as a JSON list, for
+       `has "<name>" $appNames` checks. Use:
+         {{- $appNames := includeTemplate "application-names.json" . | fromJson -}} */ -}}
+{{- $names := list -}}
+{{- range includeTemplate "applications.json" . | fromJson -}}
+{{-   $names = append $names .name -}}
+{{- end -}}
+{{- $names | toJson -}}

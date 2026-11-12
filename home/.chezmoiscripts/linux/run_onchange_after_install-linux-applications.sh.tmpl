@@ -1,3 +1,4 @@
+{{- $appNames := includeTemplate "application-names.json" . | fromJson -}}
 {{- $debianLikeIDs := list "debian" "ubuntu" "pop" "linuxmint" "elementary" -}}
 {{- if and (eq .chezmoi.os "linux") (has .chezmoi.osRelease.id $debianLikeIDs) (not .devpod) -}}
 #!/usr/bin/env bash
@@ -59,7 +60,7 @@ fi
 if [ "${#missing[@]}" -gt 0 ]; then
   echo "[WARN]  Not available via apt on this release, install by hand: ${missing[*]}"
 fi
-{{- if has "zen" .applications }}
+{{- if has "zen" $appNames }}
 
 # zen: no apt package; Zen's official Linux build is the Flathub app.
 # Installed per user, so it needs no sudo beyond installing flatpak itself.

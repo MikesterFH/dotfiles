@@ -21,25 +21,10 @@
 {{-   $clientEmail = promptStringOnce . "git.client.email" "Client git user.email" -}}
 {{- end -}}
 
-{{- /* Application list: per-Profile, platform-agnostic (see
-       docs/adr/0006-application-category-and-profile-manifests.md).
-       Replaces the five per-app GUI config opt-out prompts from ADR-0004 —
-       Profile alone decides the app set now, no per-machine override. A
-       machine needing a different set needs a distinct Profile, not a
-       prompt answered differently here. */ -}}
-{{- /* CLI tools the deployed configs rely on (git's delta pager, the
-       starship prompt, tmux plugins' fzf, yazi's previewers, ...) — the
-       same on every Profile, dev-server included, see
-       docs/adr/0008-cli-tools-are-applications.md. GUI apps vary by
-       Profile. */ -}}
-{{- $cliTools := list "delta" "starship" "neovim" "tmux" "fzf" "zoxide" "yazi" "glow" "bat" "lazygit" "tree-sitter-cli" "ripgrep" "fd" "unzip" "cmake" "build-tools" "eza" "zsh" "file" "7zip" "imagemagick" "poppler" "resvg" "jq" "ffmpeg" "uv" "helix" "hunk" -}}
-{{- $guiApps := list "wezterm" "vscode" "zed" "windows-terminal" "iterm2" "jetbrains-mono-nerd-font" "zen" "aerospace" -}}
-{{- $applicationsByProfile := dict
-      "personal" (concat $cliTools $guiApps)
-      "dev" (concat $cliTools $guiApps)
-      "dev-server" $cliTools
--}}
-{{- $applications := index $applicationsByProfile $profile -}}
+{{- /* No Application list here: the Applications and the Profiles that
+       get them live in .chezmoidata/applications.toml, which this config
+       template cannot read; every consumer filters by .profile itself (see
+       docs/adr/0023-applications-from-one-data-file.md). */ -}}
 
 {{- /* Remember where this repo was cloned, so every later chezmoi command
        (apply, update, cd, edit) uses that one working tree instead of the
@@ -58,7 +43,6 @@ sourceDir = {{ .chezmoi.workingTree | quote }}
 [data]
     profile = {{ $profile | quote }}
     devpod = {{ $devpod }}
-    applications = [{{ range $i, $app := $applications }}{{ if $i }}, {{ end }}{{ $app | quote }}{{ end }}]
 
 [data.git.work]
     name = {{ $workName | quote }}

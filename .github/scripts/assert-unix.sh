@@ -39,6 +39,40 @@ assert_absent() {
     fi
 }
 
+# Expected identifiers come from the Application data file
+# (home/.chezmoidata/applications.toml, docs/adr/0023-applications-from-one-data-file.md),
+# read through `chezmoi data` and filtered here with jq, independently of the
+# templates' own filtering. Fixed spot checks below guard against a wrong
+# entry in the data file passing silently.
+repo="$(cd "$(dirname "$0")/../.." && pwd)"
+empty_cfg="$(mktemp)"
+apps_json="$(chezmoi --source "$repo" --config "$empty_cfg" --config-format toml data --format json |
+    jq -c --arg p "$profile" '[.application[] | select(.profiles | index($p))]')"
+rm -f "$empty_cfg"
+if [ -z "$apps_json" ] || [ "$apps_json" = "[]" ]; then
+    echo "[FAIL] could not read Applications for profile $profile from applications.toml" >&2
+    exit 1
+fi
+case "$(uname -m)" in
+x86_64 | amd64) arch=amd64 ;;
+arm64 | aarch64) arch=arm64 ;;
+*) arch="$(uname -m)" ;;
+esac
+case "$os" in
+Darwin) chezmoi_os=darwin ;;
+*) chezmoi_os=linux ;;
+esac
+# app_ids <field>: that field of every Application of this Profile that has it
+app_ids() { jq -r --arg f "$1" '.[] | select(has($f)) | .[$f]' <<<"$apps_json"; }
+# mise_tools <os> <arch> <in|out>: mise keys mise installs (in) or skips (out) there
+mise_tools() {
+    jq -r --arg os "$1" --arg arch "$2" --arg want "$3" '
+        .[] | select(has("mise") and .kind != "runtime")
+        | ((has("mise_os") | not) or (.mise_os | index($os) != null)) as $os_ok
+        | ((has("mise_arch") | not) or (.mise_arch[$os] == null) or (.mise_arch[$os] | index($arch) != null)) as $arch_ok
+        | select(($os_ok and $arch_ok) == ($want == "in")) | .mise' <<<"$apps_json"
+}
+
 echo "--- profile=$profile os=$os ---"
 
 # Shells + tmux — core tooling, unconditional across every profile
@@ -61,26 +95,37 @@ assert_file ".config/mise/config.toml"
 # oh-my-zsh, cloned by a chezmoi git-repo external, see
 # docs/adr/0015-default-shells.md
 assert_file ".oh-my-zsh/oh-my-zsh.sh"
-# On Linux the CLI tool Applications come from mise too (aqua backends),
-# not apt, see docs/adr/0012-linux-cli-tools-via-mise.md; macOS keeps them
-# in the Brewfile, so its mise config carries only the runtimes.
+# mise config: every Application mise installs on this OS/arch is present,
+# every one it skips here is absent (docs/adr/0012-linux-cli-tools-via-mise.md,
+# docs/adr/0023-applications-from-one-data-file.md).
 misefile="$dest/.config/mise/config.toml"
-linux_mise_tools="aqua:dandavison/delta aqua:starship/starship aqua:junegunn/fzf aqua:ajeetdsouza/zoxide aqua:sxyazi/yazi aqua:charmbracelet/glow aqua:sharkdp/bat aqua:jesseduffield/lazygit aqua:BurntSushi/ripgrep aqua:sharkdp/fd aqua:eza-community/eza conda:imagemagick aqua:astral-sh/uv aqua:helix-editor/helix aqua:modem-dev/hunk"
-# resvg ships Linux binaries for amd64 only (docs/adr/0014-yazi-previews-on-every-platform.md)
-if [ "$(uname -m)" = "x86_64" ]; then
-    linux_mise_tools="$linux_mise_tools aqua:linebender/resvg"
-fi
-for tool in $linux_mise_tools; do
-    if [ "$os" = "Linux" ]; then
-        if [ -f "$misefile" ] && grep -qF "\"$tool\" = " "$misefile"; then
-            ok "mise config: $tool present"
-        else
-            bad "mise config: $tool missing"
-        fi
-    elif [ -f "$misefile" ] && grep -qF "\"$tool\"" "$misefile"; then
-        bad "mise config: $tool should be Linux-only"
+while IFS= read -r tool; do
+    [ -n "$tool" ] || continue
+    if [ -f "$misefile" ] && grep -qF "\"$tool\" = " "$misefile"; then
+        ok "mise config: $tool present"
+    else
+        bad "mise config: $tool missing"
     fi
-done
+done < <(mise_tools "$chezmoi_os" "$arch" in)
+while IFS= read -r tool; do
+    [ -n "$tool" ] || continue
+    if [ -f "$misefile" ] && grep -qF "\"$tool\"" "$misefile"; then
+        bad "mise config: $tool should not be installed by mise on $chezmoi_os/$arch"
+    fi
+done < <(mise_tools "$chezmoi_os" "$arch" out)
+# Spot checks independent of the data file: Linux gets the CLI tools from
+# mise, macOS from Homebrew.
+if [ "$os" = "Linux" ]; then
+    for tool in aqua:dandavison/delta aqua:sxyazi/yazi; do
+        if [ -f "$misefile" ] && grep -qF "\"$tool\" = " "$misefile"; then
+            ok "mise config (spot check): $tool present on Linux"
+        else
+            bad "mise config (spot check): $tool missing on Linux"
+        fi
+    done
+elif [ -f "$misefile" ] && grep -qF '"aqua:dandavison/delta"' "$misefile"; then
+    bad "mise config (spot check): aqua:dandavison/delta should come from Homebrew on macOS"
+fi
 # Neovim and the tree-sitter CLI come from mise on every OS, pinned to an
 # exact version so the shared lazy-lock.json fits, see
 # docs/adr/0013-neovim-pinned-via-mise.md
@@ -174,13 +219,23 @@ fi
 if [ "$os" = "Darwin" ]; then
     brewfile="$dest/.config/homebrew/Brewfile"
     assert_file ".config/homebrew/Brewfile"
-    for formula in git-delta starship tmux fzf zoxide yazi glow bat lazygit ripgrep fd cmake eza sevenzip imagemagick poppler resvg jq ffmpeg uv helix hunk; do
-        if [ -f "$brewfile" ] && grep -qE "^brew \"$formula\"\$" "$brewfile"; then
-            ok "Brewfile: brew \"$formula\" present"
+    while IFS= read -r id; do
+        case "$id" in
+        cask:*) line="cask \"${id#cask:}\"" ;;
+        *) line="brew \"$id\"" ;;
+        esac
+        if [ -f "$brewfile" ] && grep -qxF "$line" "$brewfile"; then
+            ok "Brewfile: $line present"
         else
-            bad "Brewfile: brew \"$formula\" missing"
+            bad "Brewfile: $line missing"
         fi
-    done
+    done < <(app_ids brew)
+    # Spot check independent of the data file
+    if [ -f "$brewfile" ] && grep -qxF 'brew "git-delta"' "$brewfile"; then
+        ok "Brewfile (spot check): git-delta present"
+    else
+        bad "Brewfile (spot check): git-delta missing"
+    fi
     for formula in neovim tree-sitter-cli; do
         if [ -f "$brewfile" ] && grep -qE "^brew \"$formula\"\$" "$brewfile"; then
             bad "Brewfile: $formula should come from mise (ADR 0013), not Homebrew"
@@ -195,13 +250,11 @@ if [ "$os" = "Darwin" ]; then
             ok "Brewfile has no cask or tap entries for dev-server"
         fi
     else
-        for cask in wezterm visual-studio-code zed iterm2 font-jetbrains-mono-nerd-font zen nikitabobko/tap/aerospace; do
-            if [ -f "$brewfile" ] && grep -qE "^cask \"$cask\"\$" "$brewfile"; then
-                ok "Brewfile: cask \"$cask\" present"
-            else
-                bad "Brewfile: cask \"$cask\" missing"
-            fi
-        done
+        if [ -f "$brewfile" ] && grep -qxF 'cask "wezterm"' "$brewfile"; then
+            ok "Brewfile (spot check): cask wezterm present"
+        else
+            bad "Brewfile (spot check): cask wezterm missing"
+        fi
         # Third-party tap trusted for its one cask only (ADR 0018)
         if [ -f "$brewfile" ] && grep -qxF 'tap "nikitabobko/tap", trusted: { casks: ["aerospace"] }' "$brewfile"; then
             ok "Brewfile: nikitabobko/tap trusted for aerospace only"
@@ -225,13 +278,13 @@ fi
 if [ "$os" = "Linux" ]; then
     aptfile="$dest/.config/apt-packages.txt"
     assert_file ".config/apt-packages.txt"
-    for pkg in tmux unzip cmake build-essential zsh file 7zip poppler-utils jq ffmpeg; do
+    while IFS= read -r pkg; do
         if [ -f "$aptfile" ] && grep -qxF "$pkg" "$aptfile"; then
             ok "apt-packages.txt: $pkg present"
         else
             bad "apt-packages.txt: $pkg missing"
         fi
-    done
+    done < <(app_ids apt)
     # CLI tools moved to mise must not be installed twice
     for pkg in git-delta starship neovim fzf zoxide yazi glow bat lazygit tree-sitter-cli ripgrep fd-find eza imagemagick; do
         if [ -f "$aptfile" ] && grep -qxF "$pkg" "$aptfile"; then
@@ -245,13 +298,11 @@ if [ "$os" = "Linux" ]; then
             ok "apt-packages.txt has no GUI apps for dev-server"
         fi
     else
-        for pkg in wezterm code zed; do
-            if [ -f "$aptfile" ] && grep -qxF "$pkg" "$aptfile"; then
-                ok "apt-packages.txt: $pkg present"
-            else
-                bad "apt-packages.txt: $pkg missing"
-            fi
-        done
+        if [ -f "$aptfile" ] && grep -qxF "code" "$aptfile"; then
+            ok "apt-packages.txt (spot check): code present"
+        else
+            bad "apt-packages.txt (spot check): code missing"
+        fi
         if [ -f "$aptfile" ] && grep -qE 'iterm2|windows-terminal' "$aptfile"; then
             bad "apt-packages.txt: iterm2/windows-terminal should never appear (no Linux identifier)"
         fi
