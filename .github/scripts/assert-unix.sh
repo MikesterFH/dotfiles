@@ -92,12 +92,12 @@ for tool in neovim/neovim tree-sitter/tree-sitter; do
     fi
 done
 
-# mermaid-cli comes from mise's npm backend on every OS, see
-# docs/adr/0019-mermaid-cli-via-mise-on-every-os.md
-if [ -f "$misefile" ] && grep -qF '"npm:@mermaid-js/mermaid-cli" = ' "$misefile"; then
-    ok "mise config: npm:@mermaid-js/mermaid-cli present"
+# mermaid-cli was removed (ADR 0019 update, issue #34): its npm install
+# fails mise's trust policy and with it the whole `mise install`
+if [ -f "$misefile" ] && grep -q '^"npm:' "$misefile"; then
+    bad "mise config: npm: entry present (mermaid-cli was removed)"
 else
-    bad "mise config: npm:@mermaid-js/mermaid-cli missing"
+    ok "mise config: no npm: entries"
 fi
 
 # helix and hunk configs, CLI tools so on every Profile; helix's lives in

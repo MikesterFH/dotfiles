@@ -75,7 +75,7 @@ in {
     home.packages = with pkgs; [
       delta starship tmux fzf zoxide glow bat lazygit tree-sitter ripgrep fd
       unzip cmake gnumake gcc eza zsh file p7zip imagemagick poppler-utils resvg
-      jq ffmpeg uv helix mermaid-cli git
+      jq ffmpeg uv helix git
       python313
     ] ++ [
       cfg.nodejs
