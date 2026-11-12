@@ -1,3 +1,4 @@
+{{- $appNames := includeTemplate "application-names.json" . | fromJson -}}
 # Per-OS paths, one switch on .chezmoi.os for everything that differs by
 # Target: vscode's settings live at a different real path per OS (macOS:
 # Library/, Linux: .config/Code, Windows: AppData); the iTerm2 Dynamic
@@ -86,36 +87,36 @@ Documents
 .config/git/config.local.client
 {{ end }}
 
-# GUI-app configs (per-Profile Application list, see .chezmoi.toml.tmpl and
-# docs/adr/0006-application-category-and-profile-manifests.md): each app's
-# config is excluded exactly when that app isn't in .applications. dev-server
+# GUI-app configs (per-Profile Application list, see .chezmoidata/applications.toml
+# and docs/adr/0006-application-category-and-profile-manifests.md): each app's
+# config is excluded exactly when that app isn't in $appNames. dev-server
 # naturally excludes every GUI app this way, since its Application list
 # holds only CLI tools — no separate dev-server branch needed. All three OS-specific paths
 # are listed for vscode/zed since personal/dev can be any OS — the OS switch
 # above already drops whichever two don't apply to the current Target.
-{{ if not (has "wezterm" .applications) }}
+{{ if not (has "wezterm" $appNames) }}
 .config/wezterm
 {{ end }}
-{{ if not (has "vscode" .applications) }}
+{{ if not (has "vscode" $appNames) }}
 .config/Code
 Library/Application Support/Code
 AppData/Roaming/Code
 {{ end }}
-{{ if not (has "zed" .applications) }}
+{{ if not (has "zed" $appNames) }}
 .config/zed
 AppData/Roaming/Zed
 {{ end }}
-{{ if not (has "windows-terminal" .applications) }}
+{{ if not (has "windows-terminal" $appNames) }}
 AppData/Local/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe
 {{ end }}
-{{ if not (has "zen" .applications) }}
+{{ if not (has "zen" $appNames) }}
 .config/zen-profile
 {{ end }}
-{{ if not (has "aerospace" .applications) }}
+{{ if not (has "aerospace" $appNames) }}
 .config/aerospace
 .config/cheatsheet
 {{ end }}
-{{ if not (has "iterm2" .applications) }}
+{{ if not (has "iterm2" $appNames) }}
 Library/Application Support/iTerm2
 {{ end }}
 

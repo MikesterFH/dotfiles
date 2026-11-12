@@ -1,55 +1,19 @@
-{{- /* winget import manifest for the current Profile's Application list
-       (see docs/adr/0006-application-category-and-profile-manifests.md).
-       One package entry per app in .applications that has a winget package
-       ID; apps with no Windows packaging (e.g. iterm2, and tmux — psmux, a
-       Bootstrap Package, stands in for it) are simply absent —
-       same convention already used for GUI configs limited to one
-       platform. Each app is assigned to exactly one winget package ID
-       here, decided when the app was added. unzip has no entry (Windows
-       ships tar and Expand-Archive), nor do zsh and file (no zsh on this
-       Target; yazi uses Git for Windows' file.exe), and build-tools is not in this
-       manifest: the Visual Studio Build Tools need a workload override that
-       `winget import` can't pass, so
-       run_onchange_after_install-windows-applications.ps1.tmpl installs
-       them itself. neovim and tree-sitter-cli come from mise, pinned, on
-       every OS (docs/adr/0013-neovim-pinned-via-mise.md). Installed via
-       run_onchange_after_install-windows-applications.ps1.tmpl.
+{{- /* winget import manifest for the current Profile, rendered from
+       .chezmoidata/applications.toml (docs/adr/0006-application-category-and-profile-manifests.md,
+       docs/adr/0023-applications-from-one-data-file.md): one package entry
+       per Application with a `winget` field, in file order. Why an
+       Application has none (psmux stands in for tmux, the VS Build Tools are
+       installed by run_onchange_after_install-windows-applications.ps1.tmpl
+       itself, mise installs it) is noted next to it in the data file.
+       Installed via run_onchange_after_install-windows-applications.ps1.tmpl.
        CreationDate is a fixed placeholder, not the actual render time, so
        this file doesn't change on every `chezmoi apply` just from a
        timestamp — only the Application list changing should touch it. */ -}}
-{{- $wingetPackages := dict
-      "delta" "dandavison.delta"
-      "starship" "Starship.Starship"
-      "fzf" "junegunn.fzf"
-      "zoxide" "ajeetdsouza.zoxide"
-      "yazi" "sxyazi.yazi"
-      "glow" "charmbracelet.glow"
-      "bat" "sharkdp.bat"
-      "lazygit" "JesseDuffield.lazygit"
-      "ripgrep" "BurntSushi.ripgrep.MSVC"
-      "fd" "sharkdp.fd"
-      "cmake" "Kitware.CMake"
-      "eza" "eza-community.eza"
-      "7zip" "7zip.7zip"
-      "imagemagick" "ImageMagick.ImageMagick"
-      "poppler" "oschwartz10612.Poppler"
-      "resvg" "linebender.resvg"
-      "jq" "jqlang.jq"
-      "ffmpeg" "Gyan.FFmpeg"
-      "uv" "astral-sh.uv"
-      "helix" "Helix.Helix"
-      "wezterm" "wez.wezterm"
-      "vscode" "Microsoft.VisualStudioCode"
-      "zed" "ZedIndustries.Zed"
-      "windows-terminal" "Microsoft.WindowsTerminal"
-      "jetbrains-mono-nerd-font" "DEVCOM.JetBrainsMonoNerdFont"
-      "zen" "Zen-Team.Zen-Browser"
--}}
 {{- $packages := list -}}
-{{- range .applications -}}
-{{- if hasKey $wingetPackages . -}}
-{{- $packages = append $packages (dict "PackageIdentifier" (index $wingetPackages .)) -}}
-{{- end -}}
+{{- range includeTemplate "applications.json" . | fromJson -}}
+{{-   if hasKey . "winget" -}}
+{{-     $packages = append $packages (dict "PackageIdentifier" .winget) -}}
+{{-   end -}}
 {{- end -}}
 {{- $manifest := dict
       "$schema" "https://aka.ms/winget-packages.schema.2.0.json"

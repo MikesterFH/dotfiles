@@ -1,65 +1,30 @@
-{{- /* Global mise tools, see docs/adr/0011-nvim-toolchain.md,
-       docs/adr/0012-linux-cli-tools-via-mise.md and
-       docs/adr/0013-neovim-pinned-via-mise.md. Every OS gets the language
-       runtimes Neovim's Mason needs for its npm- and pypi-based servers and
-       tools (bashls, jsonls, prettier, pyright, ruff, ...). On Linux the CLI
-       tool Applications come from here as well instead of apt, whose
-       releases ship versions too old for this setup (Neovim 0.9.5 on Ubuntu
-       24.04, 0.7.2 on Debian 12) or lack them entirely; every entry is an
-       aqua backend, i.e. the project's own prebuilt GitHub release binary.
-       Each app is assigned to exactly one mise tool here, decided when the
-       app was added. Installed by the run_onchange_after_install-mise-tools
-       scripts whenever this file renders differently. */ -}}
-{{- $miseTools := dict
-      "delta" "aqua:dandavison/delta"
-      "starship" "aqua:starship/starship"
-      "neovim" "aqua:neovim/neovim"
-      "fzf" "aqua:junegunn/fzf"
-      "zoxide" "aqua:ajeetdsouza/zoxide"
-      "yazi" "aqua:sxyazi/yazi"
-      "glow" "aqua:charmbracelet/glow"
-      "bat" "aqua:sharkdp/bat"
-      "lazygit" "aqua:jesseduffield/lazygit"
-      "tree-sitter-cli" "aqua:tree-sitter/tree-sitter"
-      "ripgrep" "aqua:BurntSushi/ripgrep"
-      "fd" "aqua:sharkdp/fd"
-      "eza" "aqua:eza-community/eza"
-      "imagemagick" "conda:imagemagick"
-      "resvg" "aqua:linebender/resvg"
-      "uv" "aqua:astral-sh/uv"
-      "helix" "aqua:helix-editor/helix"
-      "hunk" "aqua:modem-dev/hunk"
--}}
-{{- /* imagemagick is the one conda (conda-forge) tool: apt only ships
-       ImageMagick 6 and aqua has no build, but yazi needs 7's `magick`.
-       resvg publishes Linux binaries for amd64 only; on other Linux
-       architectures it is left out, since one tool mise can't install
-       fails the whole `mise install`. See
-       docs/adr/0014-yazi-previews-on-every-platform.md. */ -}}
-{{- $linuxAmd64Only := list "resvg" -}}
-{{- /* hunk has no winget package, so on Windows it comes from mise too
-       (its release ships windows/amd64 only, so arm64 Windows leaves it
-       out rather than fail the whole `mise install`), see
-       docs/adr/0017-windows-cli-tools-without-winget-via-mise.md. */ -}}
-{{- $windowsViaMise := list "hunk" -}}
-{{- /* Neovim and the tree-sitter CLI come from here on every OS, pinned:
-       nvim/lazy-lock.json is shared between machines, and its plugin
-       commits only fit one Neovim version. Bump these together with a
-       :Lazy update and commit both, see ADR 0013. Everything else floats
-       at latest. */ -}}
-{{- $pinned := dict
-      "neovim" "0.12.6"
-      "tree-sitter-cli" "0.27.1"
--}}
+{{- /* Global mise tools, rendered from .chezmoidata/applications.toml (see
+       docs/adr/0023-applications-from-one-data-file.md). Every Application
+       of this Profile with a `mise` field lands here when this OS is in its
+       `mise_os` (absent = every OS) and this architecture in its
+       `mise_arch` for the OS (absent = every architecture): one tool mise
+       can't install fails the whole `mise install`. The runtimes (node,
+       python for Neovim's Mason, docs/adr/0011-nvim-toolchain.md) come
+       first, as bare tool names; everything else is a backend:name key.
+       `version` pins a tool (neovim and tree-sitter-cli, ADR 0013); without
+       it the tool floats at latest. Installed by the
+       run_onchange_after_install-mise-tools scripts whenever this file
+       renders differently. */ -}}
+{{- $apps := includeTemplate "applications.json" . | fromJson -}}
+{{- $os := .chezmoi.os -}}
+{{- $arch := .chezmoi.arch -}}
 [tools]
-node = "lts"
-python = "3.13"
-{{- range .applications }}
-{{-   if hasKey $pinned . }}
-{{ index $miseTools . | quote }} = {{ index $pinned . | quote }}
-{{-   else if and (eq $.chezmoi.os "windows") (has . $windowsViaMise) (eq $.chezmoi.arch "amd64") }}
-{{ index $miseTools . | quote }} = "latest"
-{{-   else if and (eq $.chezmoi.os "linux") (hasKey $miseTools .) (or (not (has . $linuxAmd64Only)) (eq $.chezmoi.arch "amd64")) }}
-{{ index $miseTools . | quote }} = "latest"
+{{- range $apps }}
+{{-   if eq .kind "runtime" }}
+{{ .mise }} = {{ .version | quote }}
+{{-   end }}
+{{- end }}
+{{- range $apps }}
+{{-   if and (hasKey . "mise") (ne .kind "runtime") }}
+{{-     $osOk := or (not (hasKey . "mise_os")) (has $os .mise_os) }}
+{{-     $archOk := or (not (hasKey . "mise_arch")) (not (hasKey .mise_arch $os)) (has $arch (index .mise_arch $os)) }}
+{{-     if and $osOk $archOk }}
+{{ .mise | quote }} = {{ get . "version" | default "latest" | quote }}
+{{-     end }}
 {{-   end }}
 {{- end }}

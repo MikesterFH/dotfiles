@@ -4,8 +4,8 @@
 # with the data `chezmoi init` would produce for the Profile. chezmoi never runs on
 # the host.
 #
-# Keep the package list below in sync with `$cliTools` in home/.chezmoi.toml.tmpl
-# and the node/python runtimes in home/dot_config/mise/config.toml.tmpl.
+# Keep the package list below in sync with home/.chezmoidata/applications.toml
+# (it reads that file itself once issue #31 lands).
 { self, hunk, yazi-plugins, nixpkgs-unstable }:
 { config, lib, pkgs, ... }:
 let
@@ -27,13 +27,12 @@ let
     };
   };
 
-  # Mirrors .chezmoi.toml.tmpl. `applications` is only read by templates this
-  # module does not render, so it stays empty.
+  # Mirrors .chezmoi.toml.tmpl. The Application list is not part of it: it
+  # lives in home/.chezmoidata/applications.toml, which chezmoi reads itself.
   chezmoiConfig = pkgs.writeText "chezmoi.json" (builtins.toJSON {
     data = {
       inherit (cfg) profile;
-      devpod       = false;
-      applications = [ ];
+      devpod = false;
       git = { inherit (cfg.git) work personal; };
     };
   });

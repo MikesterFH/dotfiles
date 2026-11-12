@@ -20,6 +20,35 @@ param(
 
 $script:failed = $false
 
+# Expected identifiers come from the Application data file
+# (home/.chezmoidata/applications.toml, docs/adr/0023-applications-from-one-data-file.md),
+# read through `chezmoi data` and filtered here, independently of the
+# templates' own filtering. Fixed spot checks below guard against a wrong
+# entry in the data file passing silently.
+$repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
+$emptyConfig = New-TemporaryFile
+$chezmoiData = chezmoi --source $repoRoot --config $emptyConfig.FullName --config-format toml data --format json | ConvertFrom-Json
+Remove-Item $emptyConfig
+$apps = @($chezmoiData.application | Where-Object { $_.profiles -contains $MachineProfile })
+if ($apps.Count -eq 0) {
+    Write-Error "could not read Applications for profile $MachineProfile from applications.toml"
+    exit 1
+}
+$arch = switch ([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture) {
+    "Arm64" { "arm64" }
+    default { "amd64" }
+}
+# Mise keys mise installs on Windows/$arch (In) or skips there (Out)
+function Get-MiseTools {
+    param([bool]$Installed)
+    foreach ($app in $apps) {
+        if (-not $app.mise -or $app.kind -eq "runtime") { continue }
+        $osOk = (-not $app.mise_os) -or ($app.mise_os -contains "windows")
+        $archOk = (-not $app.mise_arch) -or (-not $app.mise_arch.windows) -or ($app.mise_arch.windows -contains $arch)
+        if (($osOk -and $archOk) -eq $Installed) { $app.mise }
+    }
+}
+
 function Assert-FileExists {
     param([string]$RelativePath)
     $path = Join-Path $Dest $RelativePath
@@ -79,28 +108,32 @@ Assert-FileExists "AppData\Local\nvim-data\site\spell\de.utf-8.sug"
 # Global mise tools (node, python for nvim's Mason), see
 # docs/adr/0011-nvim-toolchain.md
 Assert-FileExists ".config\mise\config.toml"
-# The other CLI tools come from mise on Linux only
-# (docs/adr/0012-linux-cli-tools-via-mise.md); Windows keeps them in the
-# winget manifest.
 $miseConfigPath = Join-Path $Dest ".config\mise\config.toml"
-$unpinnedAqua = @()
-if (Test-Path -Path $miseConfigPath -PathType Leaf) {
-    $unpinnedAqua = @(Select-String -Path $miseConfigPath -Pattern '^"aqua:' |
-        Where-Object { $_.Line -notmatch '^"aqua:(neovim/neovim|tree-sitter/tree-sitter|modem-dev/hunk)"' })
+$miseConfig = if (Test-Path -Path $miseConfigPath -PathType Leaf) { Get-Content -Path $miseConfigPath } else { @() }
+# Every Application mise installs on Windows/$arch is present, every one it
+# skips here is absent (docs/adr/0017-windows-cli-tools-without-winget-via-mise.md,
+# docs/adr/0023-applications-from-one-data-file.md).
+foreach ($tool in Get-MiseTools -Installed $true) {
+    if ($miseConfig | Where-Object { $_.StartsWith("""$tool"" = ") }) {
+        Write-Host "[OK]   mise config: $tool present"
+    } else {
+        Write-Host "[FAIL] mise config: $tool missing"
+        $script:failed = $true
+    }
 }
-if ($unpinnedAqua.Count -gt 0) {
-    Write-Host "[FAIL] mise config: aqua CLI tools besides neovim/tree-sitter/hunk should be Linux-only"
+foreach ($tool in Get-MiseTools -Installed $false) {
+    if ($miseConfig | Where-Object { $_.StartsWith("""$tool""") }) {
+        Write-Host "[FAIL] mise config: $tool should not be installed by mise on windows/$arch"
+        $script:failed = $true
+    }
+}
+# Spot check independent of the data file: the CLI tools come from winget,
+# not mise, on Windows.
+if ($miseConfig | Where-Object { $_.StartsWith('"aqua:dandavison/delta"') }) {
+    Write-Host "[FAIL] mise config (spot check): aqua:dandavison/delta should come from winget on Windows"
     $script:failed = $true
 } else {
-    Write-Host "[OK]   mise config: no aqua CLI tools besides neovim/tree-sitter/hunk"
-}
-# hunk has no winget package and comes from mise on Windows, see
-# docs/adr/0017-windows-cli-tools-without-winget-via-mise.md
-if ((Test-Path -Path $miseConfigPath -PathType Leaf) -and (Select-String -Path $miseConfigPath -Pattern '^"aqua:modem-dev/hunk" = ' -Quiet)) {
-    Write-Host "[OK]   mise config: aqua:modem-dev/hunk present"
-} else {
-    Write-Host "[FAIL] mise config: aqua:modem-dev/hunk missing"
-    $script:failed = $true
+    Write-Host "[OK]   mise config (spot check): no aqua:dandavison/delta on Windows"
 }
 # mermaid-cli was removed (ADR 0019 update, issue #34): its npm install
 # fails mise's trust policy and with it the whole `mise install`
@@ -182,18 +215,21 @@ Assert-FileExists ".config\winget\packages.json"
 if (Test-Path -Path $wingetManifestPath -PathType Leaf) {
     $wingetManifest = Get-Content -Path $wingetManifestPath -Raw | ConvertFrom-Json
     $packageIds = @($wingetManifest.Sources[0].Packages | ForEach-Object { $_.PackageIdentifier })
-    # CLI tools on every profile (see docs/adr/0008-cli-tools-are-applications.md);
-    # no tmux entry, psmux (a Bootstrap Package) stands in for it.
-    $expectedIds = @(
-        "dandavison.delta", "Starship.Starship", "junegunn.fzf",
-        "ajeetdsouza.zoxide", "sxyazi.yazi", "charmbracelet.glow", "sharkdp.bat",
-        "JesseDuffield.lazygit",
-        "BurntSushi.ripgrep.MSVC", "sharkdp.fd", "Kitware.CMake",
-        "eza-community.eza", "7zip.7zip", "ImageMagick.ImageMagick", "oschwartz10612.Poppler",
-        "linebender.resvg", "jqlang.jq", "Gyan.FFmpeg", "astral-sh.uv", "Helix.Helix"
-    )
-    if ($MachineProfile -ne "dev-server") {
-        $expectedIds += @("wez.wezterm", "Microsoft.VisualStudioCode", "ZedIndustries.Zed", "Microsoft.WindowsTerminal", "DEVCOM.JetBrainsMonoNerdFont", "Zen-Team.Zen-Browser")
+    $expectedIds = @($apps | Where-Object { $_.winget } | ForEach-Object { $_.winget })
+    # Spot checks independent of the data file
+    $spotIds = @("dandavison.delta")
+    if ($MachineProfile -ne "dev-server") { $spotIds += "Microsoft.WindowsTerminal" }
+    foreach ($id in $spotIds) {
+        if ($packageIds -contains $id) {
+            Write-Host "[OK]   winget manifest (spot check): $id present"
+        } else {
+            Write-Host "[FAIL] winget manifest (spot check): $id missing"
+            $script:failed = $true
+        }
+    }
+    if ($MachineProfile -eq "dev-server" -and ($packageIds -contains "Microsoft.WindowsTerminal")) {
+        Write-Host "[FAIL] winget manifest (spot check): no GUI apps expected for dev-server"
+        $script:failed = $true
     }
     foreach ($id in $expectedIds) {
         if ($packageIds -contains $id) {

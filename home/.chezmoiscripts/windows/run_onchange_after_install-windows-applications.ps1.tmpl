@@ -1,3 +1,4 @@
+{{- $appNames := includeTemplate "application-names.json" . | fromJson -}}
 {{- if eq .chezmoi.os "windows" -}}
 # =============================================================================
 # chezmoi run_onchange_after script: installs the current Profile's Windows
@@ -33,7 +34,7 @@ Write-Host "[INFO]  Installing Windows Applications via winget import..."
 # skipped instead of aborting the rest of the import.
 winget import --import-file $manifest --ignore-unavailable --accept-package-agreements --accept-source-agreements
 $failed = $LASTEXITCODE -ne 0
-{{- if has "build-tools" .applications }}
+{{- if has "build-tools" $appNames }}
 
 # build-tools: the MSVC compiler nvim-treesitter's `tree-sitter build` needs
 # (the cc crate finds it through vswhere, no Developer Prompt required).

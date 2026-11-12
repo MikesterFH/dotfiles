@@ -1,0 +1,349 @@
+# Every Application, declared once (docs/adr/0023-applications-from-one-data-file.md).
+# Read by the manifest templates (Brewfile, apt, winget), the global mise
+# config, .chezmoiignore, .chezmoiexternal, the install scripts and the CI
+# asserts; each filters by Profile, OS and architecture itself. The chezmoi
+# config template cannot read this file, so it holds no Application list.
+#
+# Order matters: manifests list their entries in this order.
+#
+# Fields
+#   name       Application name, referenced by templates (`has "zen" $apps`)
+#   kind       cli | gui | system | runtime (docs and asserts only)
+#   profiles   Profiles that get it
+#   mise       mise backend:name. Installed by mise on every OS unless
+#              mise_os narrows it; elsewhere the native identifier applies.
+#   mise_os    OSes (chezmoi .chezmoi.os) where mise installs it; absent = all
+#   mise_arch  per OS, the architectures mise installs it on; absent = all
+#   version    exact pin (or "lts" for node); absent = latest
+#   brew       Homebrew formula, or "cask:<cask>" for a cask
+#   brew_tap   third-party tap the cask comes from, trusted for that cask only
+#              (docs/adr/0018-aerospace-and-trusted-taps.md)
+#   apt        Debian/apt package
+#   winget     winget package identifier
+#
+# A platform with neither a mise entry for it nor a native identifier simply
+# does not get the Application there (e.g. iterm2 outside macOS).
+
+# -- Runtimes for Neovim's Mason (docs/adr/0011-nvim-toolchain.md) ----------
+
+[[application]]
+name     = "node"
+kind     = "runtime"
+profiles = ["personal", "dev", "dev-server"]
+mise     = "node"
+version  = "lts"
+
+[[application]]
+name     = "python"
+kind     = "runtime"
+profiles = ["personal", "dev", "dev-server"]
+mise     = "python"
+version  = "3.13"
+
+# -- CLI tools the configs rely on, every Profile (ADR 0008) -----------------
+
+[[application]]
+name     = "delta"
+kind     = "cli"
+profiles = ["personal", "dev", "dev-server"]
+mise     = "aqua:dandavison/delta"
+mise_os  = ["linux"]
+brew     = "git-delta"
+winget   = "dandavison.delta"
+
+[[application]]
+name     = "starship"
+kind     = "cli"
+profiles = ["personal", "dev", "dev-server"]
+mise     = "aqua:starship/starship"
+mise_os  = ["linux"]
+brew     = "starship"
+winget   = "Starship.Starship"
+
+# Pinned on every OS: nvim/lazy-lock.json only fits one Neovim (ADR 0013).
+[[application]]
+name     = "neovim"
+kind     = "cli"
+profiles = ["personal", "dev", "dev-server"]
+mise     = "aqua:neovim/neovim"
+version  = "0.12.6"
+
+# No Windows entry: psmux, a Bootstrap Package, stands in (ADR 0005).
+[[application]]
+name     = "tmux"
+kind     = "cli"
+profiles = ["personal", "dev", "dev-server"]
+brew     = "tmux"
+apt      = "tmux"
+
+[[application]]
+name     = "fzf"
+kind     = "cli"
+profiles = ["personal", "dev", "dev-server"]
+mise     = "aqua:junegunn/fzf"
+mise_os  = ["linux"]
+brew     = "fzf"
+winget   = "junegunn.fzf"
+
+[[application]]
+name     = "zoxide"
+kind     = "cli"
+profiles = ["personal", "dev", "dev-server"]
+mise     = "aqua:ajeetdsouza/zoxide"
+mise_os  = ["linux"]
+brew     = "zoxide"
+winget   = "ajeetdsouza.zoxide"
+
+[[application]]
+name     = "yazi"
+kind     = "cli"
+profiles = ["personal", "dev", "dev-server"]
+mise     = "aqua:sxyazi/yazi"
+mise_os  = ["linux"]
+brew     = "yazi"
+winget   = "sxyazi.yazi"
+
+[[application]]
+name     = "glow"
+kind     = "cli"
+profiles = ["personal", "dev", "dev-server"]
+mise     = "aqua:charmbracelet/glow"
+mise_os  = ["linux"]
+brew     = "glow"
+winget   = "charmbracelet.glow"
+
+[[application]]
+name     = "bat"
+kind     = "cli"
+profiles = ["personal", "dev", "dev-server"]
+mise     = "aqua:sharkdp/bat"
+mise_os  = ["linux"]
+brew     = "bat"
+winget   = "sharkdp.bat"
+
+[[application]]
+name     = "lazygit"
+kind     = "cli"
+profiles = ["personal", "dev", "dev-server"]
+mise     = "aqua:jesseduffield/lazygit"
+mise_os  = ["linux"]
+brew     = "lazygit"
+winget   = "JesseDuffield.lazygit"
+
+# Pinned with Neovim (ADR 0013): nvim-treesitter builds parsers with it.
+[[application]]
+name     = "tree-sitter-cli"
+kind     = "cli"
+profiles = ["personal", "dev", "dev-server"]
+mise     = "aqua:tree-sitter/tree-sitter"
+version  = "0.27.1"
+
+[[application]]
+name     = "ripgrep"
+kind     = "cli"
+profiles = ["personal", "dev", "dev-server"]
+mise     = "aqua:BurntSushi/ripgrep"
+mise_os  = ["linux"]
+brew     = "ripgrep"
+winget   = "BurntSushi.ripgrep.MSVC"
+
+[[application]]
+name     = "fd"
+kind     = "cli"
+profiles = ["personal", "dev", "dev-server"]
+mise     = "aqua:sharkdp/fd"
+mise_os  = ["linux"]
+brew     = "fd"
+winget   = "sharkdp.fd"
+
+# macOS and Windows ship unzip/Expand-Archive.
+[[application]]
+name     = "unzip"
+kind     = "system"
+profiles = ["personal", "dev", "dev-server"]
+apt      = "unzip"
+
+[[application]]
+name     = "cmake"
+kind     = "cli"
+profiles = ["personal", "dev", "dev-server"]
+brew     = "cmake"
+apt      = "cmake"
+winget   = "Kitware.CMake"
+
+# cc/make: the Xcode Command Line Tools on macOS (Homebrew's own
+# prerequisite); on Windows the VS Build Tools, which need a workload
+# override `winget import` can't pass, so the Windows Application script
+# installs them itself.
+[[application]]
+name     = "build-tools"
+kind     = "system"
+profiles = ["personal", "dev", "dev-server"]
+apt      = "build-essential"
+
+[[application]]
+name     = "eza"
+kind     = "cli"
+profiles = ["personal", "dev", "dev-server"]
+mise     = "aqua:eza-community/eza"
+mise_os  = ["linux"]
+brew     = "eza"
+winget   = "eza-community.eza"
+
+# macOS ships zsh; no zsh on the Windows Target.
+[[application]]
+name     = "zsh"
+kind     = "system"
+profiles = ["personal", "dev", "dev-server"]
+apt      = "zsh"
+
+# macOS ships file; on Windows yazi uses Git for Windows' file.exe.
+[[application]]
+name     = "file"
+kind     = "system"
+profiles = ["personal", "dev", "dev-server"]
+apt      = "file"
+
+[[application]]
+name     = "7zip"
+kind     = "cli"
+profiles = ["personal", "dev", "dev-server"]
+brew     = "sevenzip"
+apt      = "7zip"
+winget   = "7zip.7zip"
+
+# conda backend: apt only ships ImageMagick 6, yazi needs 7's `magick`
+# (docs/adr/0014-yazi-previews-on-every-platform.md).
+[[application]]
+name     = "imagemagick"
+kind     = "cli"
+profiles = ["personal", "dev", "dev-server"]
+mise     = "conda:imagemagick"
+mise_os  = ["linux"]
+brew     = "imagemagick"
+winget   = "ImageMagick.ImageMagick"
+
+[[application]]
+name     = "poppler"
+kind     = "cli"
+profiles = ["personal", "dev", "dev-server"]
+brew     = "poppler"
+apt      = "poppler-utils"
+winget   = "oschwartz10612.Poppler"
+
+# Linux binaries for amd64 only; one tool mise can't install fails the whole
+# `mise install`, so other Linux architectures leave it out.
+[[application]]
+name      = "resvg"
+kind      = "cli"
+profiles  = ["personal", "dev", "dev-server"]
+mise      = "aqua:linebender/resvg"
+mise_os   = ["linux"]
+mise_arch = { linux = ["amd64"] }
+brew      = "resvg"
+winget    = "linebender.resvg"
+
+[[application]]
+name     = "jq"
+kind     = "cli"
+profiles = ["personal", "dev", "dev-server"]
+brew     = "jq"
+apt      = "jq"
+winget   = "jqlang.jq"
+
+[[application]]
+name     = "ffmpeg"
+kind     = "cli"
+profiles = ["personal", "dev", "dev-server"]
+brew     = "ffmpeg"
+apt      = "ffmpeg"
+winget   = "Gyan.FFmpeg"
+
+[[application]]
+name     = "uv"
+kind     = "cli"
+profiles = ["personal", "dev", "dev-server"]
+mise     = "aqua:astral-sh/uv"
+mise_os  = ["linux"]
+brew     = "uv"
+winget   = "astral-sh.uv"
+
+[[application]]
+name     = "helix"
+kind     = "cli"
+profiles = ["personal", "dev", "dev-server"]
+mise     = "aqua:helix-editor/helix"
+mise_os  = ["linux"]
+brew     = "helix"
+winget   = "Helix.Helix"
+
+# No winget package: mise on Windows too, amd64 only (ADR 0017).
+[[application]]
+name      = "hunk"
+kind      = "cli"
+profiles  = ["personal", "dev", "dev-server"]
+mise      = "aqua:modem-dev/hunk"
+mise_os   = ["linux", "windows"]
+mise_arch = { windows = ["amd64"] }
+brew      = "hunk"
+
+# -- GUI apps, per Profile (ADR 0006) ---------------------------------------
+
+[[application]]
+name     = "wezterm"
+kind     = "gui"
+profiles = ["personal", "dev"]
+brew     = "cask:wezterm"
+apt      = "wezterm"
+winget   = "wez.wezterm"
+
+[[application]]
+name     = "vscode"
+kind     = "gui"
+profiles = ["personal", "dev"]
+brew     = "cask:visual-studio-code"
+apt      = "code"
+winget   = "Microsoft.VisualStudioCode"
+
+[[application]]
+name     = "zed"
+kind     = "gui"
+profiles = ["personal", "dev"]
+brew     = "cask:zed"
+apt      = "zed"
+winget   = "ZedIndustries.Zed"
+
+[[application]]
+name     = "windows-terminal"
+kind     = "gui"
+profiles = ["personal", "dev"]
+winget   = "Microsoft.WindowsTerminal"
+
+[[application]]
+name     = "iterm2"
+kind     = "gui"
+profiles = ["personal", "dev"]
+brew     = "cask:iterm2"
+
+# Linux: a chezmoi external (.chezmoiexternal.toml.tmpl), not apt.
+[[application]]
+name     = "jetbrains-mono-nerd-font"
+kind     = "gui"
+profiles = ["personal", "dev"]
+brew     = "cask:font-jetbrains-mono-nerd-font"
+winget   = "DEVCOM.JetBrainsMonoNerdFont"
+
+# Linux: Flatpak, installed by the Linux Application script.
+[[application]]
+name     = "zen"
+kind     = "gui"
+profiles = ["personal", "dev"]
+brew     = "cask:zen"
+winget   = "Zen-Team.Zen-Browser"
+
+[[application]]
+name     = "aerospace"
+kind     = "gui"
+profiles = ["personal", "dev"]
+brew     = "cask:nikitabobko/tap/aerospace"
+brew_tap = "nikitabobko/tap"

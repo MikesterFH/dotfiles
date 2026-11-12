@@ -1,68 +1,25 @@
-{{- /* Homebrew Bundle manifest for the current Profile's Application list
-       (see docs/adr/0006-application-category-and-profile-manifests.md).
-       One `brew` (CLI tool) or `cask` (GUI app) line per app in
-       .applications that has a macOS identifier; apps with no macOS
-       packaging (e.g. windows-terminal) are simply absent — same convention
-       already used for GUI configs limited to one platform. Each app is
-       assigned to exactly one Homebrew identifier here, decided when the
-       app was added — no runtime fallback between formula/cask. unzip, zsh,
-       file and build-tools (cc, make) have no entry: macOS ships the first
-       three, and the Xcode Command Line Tools that Homebrew's own install
-       requires bring the compiler. neovim and tree-sitter-cli have no entry either: they
-       come from mise, pinned, on every OS, see
-       docs/adr/0013-neovim-pinned-via-mise.md. Installed
-       via run_onchange_after_install-macos-applications.sh.tmpl. */ -}}
-{{- $homebrewFormulae := dict
-      "delta" "git-delta"
-      "starship" "starship"
-      "tmux" "tmux"
-      "fzf" "fzf"
-      "zoxide" "zoxide"
-      "yazi" "yazi"
-      "glow" "glow"
-      "bat" "bat"
-      "lazygit" "lazygit"
-      "ripgrep" "ripgrep"
-      "fd" "fd"
-      "cmake" "cmake"
-      "eza" "eza"
-      "7zip" "sevenzip"
-      "imagemagick" "imagemagick"
-      "poppler" "poppler"
-      "resvg" "resvg"
-      "jq" "jq"
-      "ffmpeg" "ffmpeg"
-      "uv" "uv"
-      "helix" "helix"
-      "hunk" "hunk"
--}}
-{{- $homebrewCasks := dict
-      "wezterm" "wezterm"
-      "vscode" "visual-studio-code"
-      "zed" "zed"
-      "iterm2" "iterm2"
-      "jetbrains-mono-nerd-font" "font-jetbrains-mono-nerd-font"
-      "zen" "zen"
-      "aerospace" "nikitabobko/tap/aerospace"
--}}
-{{- /* Third-party taps, trusted for exactly the casks the Brewfile pulls
-       from them (Homebrew refuses to load untrusted tap content), see
-       docs/adr/0018-aerospace-and-trusted-taps.md. */ -}}
-{{- $homebrewTaps := dict
-      "aerospace" (list "nikitabobko/tap" "aerospace")
--}}
+{{- /* Homebrew Bundle manifest for the current Profile, rendered from
+       .chezmoidata/applications.toml (docs/adr/0006-application-category-and-profile-manifests.md,
+       docs/adr/0023-applications-from-one-data-file.md): one `brew` line per
+       Application with a formula in its `brew` field, one `cask` line per
+       `cask:` entry, in file order. Why an Application has no Homebrew entry
+       (macOS ships it, mise installs it) is noted next to it in the data
+       file. Installed via run_onchange_after_install-macos-applications.sh.tmpl. */ -}}
+{{- $apps := includeTemplate "applications.json" . | fromJson -}}
+{{- /* Third-party taps first, each trusted for exactly the cask the
+       Brewfile pulls from it (Homebrew refuses to load untrusted tap
+       content), see docs/adr/0018-aerospace-and-trusted-taps.md. */ -}}
 {{- $lines := list -}}
-{{- range .applications -}}
-{{- if hasKey $homebrewTaps . -}}
-{{- $tap := index $homebrewTaps . -}}
-{{- $lines = append $lines (printf "tap %q, trusted: { casks: [%q] }" (index $tap 0) (index $tap 1)) -}}
+{{- range $apps -}}
+{{-   if and (hasKey . "brew_tap") (hasKey . "brew") -}}
+{{-     $lines = append $lines (printf "tap %q, trusted: { casks: [%q] }" .brew_tap (.brew | splitList "/" | last)) -}}
+{{-   end -}}
 {{- end -}}
-{{- end -}}
-{{- range .applications -}}
-{{- if hasKey $homebrewFormulae . -}}
-{{- $lines = append $lines (printf "brew %q" (index $homebrewFormulae .)) -}}
-{{- else if hasKey $homebrewCasks . -}}
-{{- $lines = append $lines (printf "cask %q" (index $homebrewCasks .)) -}}
-{{- end -}}
+{{- range $apps -}}
+{{-   if and (hasKey . "brew") (not (hasPrefix "cask:" .brew)) -}}
+{{-     $lines = append $lines (printf "brew %q" .brew) -}}
+{{-   else if hasKey . "brew" -}}
+{{-     $lines = append $lines (printf "cask %q" (trimPrefix "cask:" .brew)) -}}
+{{-   end -}}
 {{- end -}}
 {{ $lines | join "\n" }}

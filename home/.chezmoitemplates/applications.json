@@ -1,0 +1,11 @@
+{{- /* The current Profile's Applications from .chezmoidata/applications.toml,
+       in file order, as JSON. Use:
+         {{- $apps := includeTemplate "applications.json" . | fromJson -}}
+       See docs/adr/0023-applications-from-one-data-file.md. */ -}}
+{{- $apps := list -}}
+{{- range .application -}}
+{{-   if has $.profile .profiles -}}
+{{-     $apps = append $apps . -}}
+{{-   end -}}
+{{- end -}}
+{{- $apps | toJson -}}
