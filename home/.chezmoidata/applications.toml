@@ -173,12 +173,14 @@ kind     = "system"
 profiles = ["personal", "dev", "dev-server"]
 apt      = "build-essential"
 
-# No windows-arm64 build: Windows on ARM keeps it on winget.
+# No macOS builds upstream, none for windows-arm64: Macs keep it on Homebrew,
+# Windows on ARM on winget.
 [[application]]
 name      = "eza"
 kind      = "cli"
 profiles  = ["personal", "dev", "dev-server"]
 mise      = "aqua:eza-community/eza"
+mise_os   = ["linux", "windows"]
 mise_arch = { windows = ["amd64"] }
 brew      = "eza"
 winget    = "eza-community.eza"
