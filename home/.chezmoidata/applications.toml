@@ -68,11 +68,14 @@ profiles = ["personal", "dev", "dev-server"]
 mise     = "aqua:neovim/neovim"
 version  = "0.12.6"
 
-# No Windows entry: psmux, a Bootstrap Package, stands in (ADR 0005).
+# No Windows build: psmux, a Bootstrap Package, stands in (ADR 0005).
+# tmux-builds ships static binaries (tmux itself publishes source only).
 [[application]]
 name     = "tmux"
 kind     = "cli"
 profiles = ["personal", "dev", "dev-server"]
+mise     = "aqua:tmux/tmux-builds"
+mise_os  = ["linux", "darwin"]
 brew     = "tmux"
 apt      = "tmux"
 
@@ -159,6 +162,7 @@ apt      = "unzip"
 name     = "cmake"
 kind     = "cli"
 profiles = ["personal", "dev", "dev-server"]
+mise     = "aqua:Kitware/CMake"
 brew     = "cmake"
 apt      = "cmake"
 winget   = "Kitware.CMake"
@@ -199,10 +203,14 @@ kind     = "system"
 profiles = ["personal", "dev", "dev-server"]
 apt      = "file"
 
+# Windows keeps winget: the release has only the standalone 7za there,
+# no 7z.exe for yazi (ADR 0014).
 [[application]]
 name     = "7zip"
 kind     = "cli"
 profiles = ["personal", "dev", "dev-server"]
+mise     = "aqua:ip7z/7zip"
+mise_os  = ["linux", "darwin"]
 brew     = "sevenzip"
 apt      = "7zip"
 winget   = "7zip.7zip"
@@ -244,6 +252,7 @@ winget    = "linebender.resvg"
 name     = "jq"
 kind     = "cli"
 profiles = ["personal", "dev", "dev-server"]
+mise     = "aqua:jqlang/jq"
 brew     = "jq"
 apt      = "jq"
 winget   = "jqlang.jq"

@@ -147,7 +147,7 @@ foreach ($tool in @("aqua:sxyazi/yazi", "aqua:BurntSushi/ripgrep", "aqua:dandavi
 $absentTools = @("tmux")
 if ($arch -eq "arm64") { $absentTools += "hunk" }
 foreach ($tool in $absentTools) {
-    if ($miseConfig | Where-Object { $_ -match "^""[^""]*[:/]$tool""" }) {
+    if ($miseConfig | Where-Object { $_ -match "^""[^""]*$tool" }) {
         Write-Host "[FAIL] mise config (spot check): $tool should not be installed by mise on windows/$arch"
         $script:failed = $true
     } else {

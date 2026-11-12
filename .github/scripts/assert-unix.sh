@@ -120,7 +120,7 @@ while IFS= read -r tool; do
 done < <(mise_tools out)
 # Spot checks independent of the data file: the CLI tools come from mise on
 # Linux and macOS (docs/adr/0023-applications-from-one-data-file.md).
-for tool in aqua:sxyazi/yazi aqua:BurntSushi/ripgrep; do
+for tool in aqua:sxyazi/yazi aqua:BurntSushi/ripgrep aqua:tmux/tmux-builds; do
     if [ -f "$misefile" ] && grep -qF "\"$tool\" = " "$misefile"; then
         ok "mise config (spot check): $tool present"
     else
@@ -231,7 +231,7 @@ if [ "$os" = "Darwin" ]; then
     done < <(native_ids brew)
     # Spot check independent of the data file: CLI tools mise installs stay
     # out of the Brewfile
-    for formula in yazi ripgrep; do
+    for formula in yazi ripgrep tmux; do
         if [ -f "$brewfile" ] && grep -qxF "brew \"$formula\"" "$brewfile"; then
             bad "Brewfile (spot check): $formula should come from mise, not Homebrew"
         else
@@ -288,7 +288,7 @@ if [ "$os" = "Linux" ]; then
         fi
     done < <(native_ids apt)
     # CLI tools moved to mise must not be installed twice
-    for pkg in git-delta starship neovim fzf zoxide yazi glow bat lazygit tree-sitter-cli ripgrep fd-find eza imagemagick; do
+    for pkg in git-delta starship neovim fzf zoxide yazi glow bat lazygit tree-sitter-cli ripgrep fd-find eza imagemagick tmux cmake 7zip jq; do
         if [ -f "$aptfile" ] && grep -qxF "$pkg" "$aptfile"; then
             bad "apt-packages.txt: $pkg should come from mise, not apt"
         fi

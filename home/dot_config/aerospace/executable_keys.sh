@@ -3,7 +3,9 @@
 # running AeroSpace so the list always matches the loaded config. Used by
 # the `aerokeys` alias and the Raycast shortcuts cheat sheet
 # (~/.config/cheatsheet/raycast/shortcuts.sh).
-export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+# jq is a mise tool (docs/adr/0023-applications-from-one-data-file.md); Raycast
+# runs this without a login shell, so add mise's shims next to Homebrew.
+export PATH="$HOME/.local/share/mise/shims:/opt/homebrew/bin:/usr/local/bin:$PATH"
 
 if ! aerospace config --get mode --json >/dev/null 2>&1; then
   echo "== AeroSpace (not running)"
