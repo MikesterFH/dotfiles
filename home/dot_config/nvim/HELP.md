@@ -79,21 +79,8 @@ This Neovim configuration is automatically installed when you run the main dotfi
 - **Ripgrep** for telescope searching
 - **A terminal with true color support**
 
-### Manual Setup
-```bash
-# Backup existing Neovim configuration
-mv ~/.config/nvim ~/.config/nvim.backup
-
-# Clone this configuration
-git clone <dotfiles-repo> ~/.dotfiles
-cd ~/.dotfiles
-
-# Stow the Neovim configuration
-stow nvim
-
-# Start Neovim (plugins will auto-install)
-nvim
-```
+### Setup
+chezmoi deploys this configuration (`chezmoi init --apply MikesterFH/dotfiles`, see the repo README); mise installs the pinned Neovim, node and python. Start `nvim` and the plugins install from `lazy-lock.json`.
 
 ## ⌨️ Key Bindings
 
