@@ -2211,62 +2211,62 @@ url = "https://github.com/junegunn/fzf/releases/download/v0.75.0/fzf-0.75.0-wind
 url_api = "https://api.github.com/repos/junegunn/fzf/releases/assets/720590885"
 
 [[tools."aqua:linebender/resvg"]]
-version = "0.49.0"
+version = "0.50.0"
 backend = "aqua:linebender/resvg"
 specifiers = ["latest"]
 
 [tools."aqua:linebender/resvg"."platforms.linux-x64"]
-checksum = "sha256:216637e75e909e53e3098b0875cd5f7da2fdc8b4359771b4a29b539afff9d3f5"
+checksum = "sha256:5d1c9ffd43c82fb802d92cef8100055c612cd3e248d5a787c20079293a456e21"
 checksum_source = "mise-versions"
-url = "https://github.com/linebender/resvg/releases/download/v0.49.0/resvg-linux-x86_64.tar.gz"
-url_api = "https://api.github.com/repos/linebender/resvg/releases/assets/672458584"
+url = "https://github.com/linebender/resvg/releases/download/v0.50.0/resvg-linux-x86_64.tar.gz"
+url_api = "https://api.github.com/repos/linebender/resvg/releases/assets/736379481"
 
 [tools."aqua:linebender/resvg"."platforms.macos-arm64"]
-checksum = "sha256:847acb5210c7c6244b5e8f07dd62fa1ce596108cce8193628ebfd5750504b259"
+checksum = "sha256:8155b569f2b93723ba3645b53536eead3b591c8faf62bdaafd3033ba37838837"
 checksum_source = "mise-versions"
-url = "https://github.com/linebender/resvg/releases/download/v0.49.0/resvg-macos-aarch64.zip"
-url_api = "https://api.github.com/repos/linebender/resvg/releases/assets/672460044"
+url = "https://github.com/linebender/resvg/releases/download/v0.50.0/resvg-macos-aarch64.zip"
+url_api = "https://api.github.com/repos/linebender/resvg/releases/assets/736385482"
 
 [tools."aqua:linebender/resvg"."platforms.macos-x64"]
-checksum = "sha256:7c92cba55348f0254707c8d2c61e71651296981f8ccfadf8477782e91db5e171"
+checksum = "sha256:f47150b41b41842c629ea9c397ce0f3373451549f47ea1c44f950866a992363f"
 checksum_source = "mise-versions"
-url = "https://github.com/linebender/resvg/releases/download/v0.49.0/resvg-macos-x86_64.zip"
-url_api = "https://api.github.com/repos/linebender/resvg/releases/assets/672463407"
+url = "https://github.com/linebender/resvg/releases/download/v0.50.0/resvg-macos-x86_64.zip"
+url_api = "https://api.github.com/repos/linebender/resvg/releases/assets/736397091"
 
 [[tools."aqua:modem-dev/hunk"]]
-version = "0.24.1"
+version = "0.25.0"
 backend = "aqua:modem-dev/hunk"
 specifiers = ["latest"]
 
 [tools."aqua:modem-dev/hunk"."platforms.linux-arm64"]
-checksum = "sha256:ab49c8aba82c3c9872f1c5eefd96d1c4c2491e5b80647f97b2e81fc6c4676deb"
+checksum = "sha256:12cf4a38ae1df282dee29fffe539134dd6943d667253a11c23b1d9ec249f1d88"
 checksum_source = "mise-versions"
-url = "https://github.com/modem-dev/hunk/releases/download/v0.24.1/hunkdiff-linux-arm64.tar.gz"
-url_api = "https://api.github.com/repos/modem-dev/hunk/releases/assets/673741220"
+url = "https://github.com/modem-dev/hunk/releases/download/v0.25.0/hunkdiff-linux-arm64.tar.gz"
+url_api = "https://api.github.com/repos/modem-dev/hunk/releases/assets/736456196"
 
 [tools."aqua:modem-dev/hunk"."platforms.linux-x64"]
-checksum = "sha256:4b8c98f8d97745499916cc1e1d2f27ffd258c6d6358dd4532f61e41c5eb19692"
+checksum = "sha256:fc3301151a9b35400b0223d73041cea85fb18972d6dc5c97a2bbdc427fad2afe"
 checksum_source = "mise-versions"
-url = "https://github.com/modem-dev/hunk/releases/download/v0.24.1/hunkdiff-linux-x64.tar.gz"
-url_api = "https://api.github.com/repos/modem-dev/hunk/releases/assets/673741222"
+url = "https://github.com/modem-dev/hunk/releases/download/v0.25.0/hunkdiff-linux-x64.tar.gz"
+url_api = "https://api.github.com/repos/modem-dev/hunk/releases/assets/736456200"
 
 [tools."aqua:modem-dev/hunk"."platforms.macos-arm64"]
-checksum = "sha256:5f9afd41d825e2f87958b0702e779e52d38207c0b42d5316efe54218f35b4d7d"
+checksum = "sha256:2a577909b478242bc75982be30bc2c5ebf9a0044fc38aad94b111ab7e9a992e0"
 checksum_source = "mise-versions"
-url = "https://github.com/modem-dev/hunk/releases/download/v0.24.1/hunkdiff-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/modem-dev/hunk/releases/assets/673741225"
+url = "https://github.com/modem-dev/hunk/releases/download/v0.25.0/hunkdiff-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/modem-dev/hunk/releases/assets/736456199"
 
 [tools."aqua:modem-dev/hunk"."platforms.macos-x64"]
-checksum = "sha256:8014b3eb7389c78767dc0f51ea07ff24c773fa7cd5d432811e881b3359d99489"
+checksum = "sha256:d17f9811242e536fcbc3e7180c58f306e27ef43aad40e2e8bc730088b176c960"
 checksum_source = "mise-versions"
-url = "https://github.com/modem-dev/hunk/releases/download/v0.24.1/hunkdiff-darwin-x64.tar.gz"
-url_api = "https://api.github.com/repos/modem-dev/hunk/releases/assets/673741223"
+url = "https://github.com/modem-dev/hunk/releases/download/v0.25.0/hunkdiff-darwin-x64.tar.gz"
+url_api = "https://api.github.com/repos/modem-dev/hunk/releases/assets/736456195"
 
 [tools."aqua:modem-dev/hunk"."platforms.windows-x64"]
-checksum = "sha256:77433c296e4e2a96bd3bec57cab44bd185183997972f796e1649e5fc50c3f6a3"
+checksum = "sha256:d4237d3ac99bb6a5d26866bfe74a390bebd7d4df5b78bc6c9d60e6614ee7cf67"
 checksum_source = "mise-versions"
-url = "https://github.com/modem-dev/hunk/releases/download/v0.24.1/hunkdiff-windows-x64.tar.gz"
-url_api = "https://api.github.com/repos/modem-dev/hunk/releases/assets/673741244"
+url = "https://github.com/modem-dev/hunk/releases/download/v0.25.0/hunkdiff-windows-x64.tar.gz"
+url_api = "https://api.github.com/repos/modem-dev/hunk/releases/assets/736456253"
 
 [[tools."aqua:neovim/neovim"]]
 version = "0.12.6"
