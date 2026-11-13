@@ -111,9 +111,10 @@ Assert-FileExists ".config\tmux\tmux.conf"
 Assert-FileExists "AppData\Local\nvim-data\site\spell\de.utf-8.spl"
 Assert-FileExists "AppData\Local\nvim-data\site\spell\de.utf-8.sug"
 
-# Global mise tools (node, python for nvim's Mason), see
-# docs/adr/0011-nvim-toolchain.md
+# Global mise tools and their lockfile, see
+# docs/adr/0023-applications-from-one-data-file.md
 Assert-FileExists ".config\mise\config.toml"
+Assert-FileExists ".config\mise\mise.lock"
 $miseConfigPath = Join-Path $Dest ".config\mise\config.toml"
 $miseConfig = if (Test-Path -Path $miseConfigPath -PathType Leaf) { Get-Content -Path $miseConfigPath } else { @() }
 # Every Application mise installs on Windows/$arch is present, every one it
