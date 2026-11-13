@@ -1,9 +1,9 @@
 {
   description = "Dotfiles: chezmoi source repo, plus a home-manager module that installs the same tools and configs the Nix way";
 
-  # The module takes `pkgs` from the consuming home-manager config; the inputs are hunk
-  # (not in nixpkgs), the yazi plugins and a newer yazi. Nothing outside home/ is deployed by chezmoi, so
-  # this file and nix/ never reach $HOME.
+  # The module installs the Applications from home/.chezmoidata/applications.toml; the
+  # inputs are their default package set, hunk (not in nixpkgs) and the yazi plugins.
+  # Nothing outside home/ is deployed by chezmoi, so this file and nix/ never reach $HOME.
   inputs.hunk.url = "github:modem-dev/hunk";
   # yazi plugins from package.toml (`ya pkg install` never runs on Nix). Keep the rev
   # equal to the one in home/dot_config/yazi/package.toml.
@@ -12,8 +12,8 @@
     flake = false;
   };
 
-  # yazi only: the plugins above need a newer yazi than a stable nixpkgs release ships
-  # (mise installs the latest). Drop this once the consumer's stable nixpkgs catches up.
+  # Default package set for every Application (ADR 0023): close to the upstream releases
+  # mise installs elsewhere. A consumer can pass its own via `dotfiles.packageSet`.
   inputs.nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
   outputs = { self, hunk, yazi-plugins, nixpkgs-unstable }: {

@@ -64,6 +64,22 @@ If you'd rather review what would happen before anything touches your `$HOME`, r
 
 Inside a DevPod container or devcontainer, answer the `devpod` prompt with `true` (or run `chezmoi init --promptBool devpod=true --apply MikesterFH/dotfiles`). This narrows the managed set down to `git`, `nvim`, `starship`, and `zsh` — no GUI-app configs, no tmux — matching what a container actually needs.
 
+### NixOS (home-manager module)
+
+On a NixOS host chezmoi never runs: add this repo as a flake input and import `homeManagerModules.default` (`nix/home-module.nix`, ADR 0021). It installs the Profile's Applications from their `nix` field in `applications.toml` and links or renders the configs from `home/`:
+
+```nix
+dotfiles = {
+  enable  = true;
+  profile = "dev-server";               # or "personal" (adds the GUI apps)
+  git.work     = { name = "…"; email = "…"; };
+  git.personal = { name = "…"; email = "…"; };
+  # packageSet = pkgs;                  # default: the flake's nixpkgs-unstable input
+};
+```
+
+Every Application comes from `dotfiles.packageSet`, by default this flake's `nixpkgs-unstable` input (with your nixpkgs config, so `allowUnfree` covers VS Code); set it to `pkgs` to use the system's nixpkgs. `nix/ci/flake.nix` is a minimal consumer that CI builds for both Profiles.
+
 ## Making changes afterward
 
 Don't edit the deployed files in `$HOME` directly — edit the Source Dir (this repo) and re-apply:
