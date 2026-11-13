@@ -98,7 +98,21 @@ Every managed file is **copied**, not symlinked — editing the deployed copy in
 chezmoi update             # git pull in the Source Dir, then apply
 ```
 
-If chezmoi warns `config file template has changed, run chezmoi init to regenerate config file`, run `chezmoi init` (it re-renders `~/.config/chezmoi/chezmoi.toml` from `.chezmoi.toml.tmpl` without asking again for answers it already has), then `chezmoi apply`. Skipping it leaves derived data stale — notably the Profile's Application list, so newly added Applications aren't installed.
+If chezmoi warns `config file template has changed, run chezmoi init to regenerate config file`, run `chezmoi init` (it re-renders `~/.config/chezmoi/chezmoi.toml` from `.chezmoi.toml.tmpl` without asking again for answers it already has), then `chezmoi apply`. Skipping it leaves the config's data stale (Profile answers, git identities); the Application list itself comes from `applications.toml` and is always current.
+
+Package managers never remove what they installed before, so after the switch of the CLI tools to mise (ADR 0023) an existing machine keeps its old copies. Once `mise ls` shows nothing missing and `which -a <tool>` lists the mise path first, remove them and old mise versions:
+
+```sh
+mise prune --yes
+# macOS: keep eza (no macOS build in mise) and any formula `brew uses --installed <name>` lists a dependant for
+brew uninstall bat fd fzf glow helix hunk jq lazygit starship tmux yazi zoxide git-delta uv resvg sevenzip cmake imagemagick tree-sitter ripgrep
+# Linux (Debian family)
+sudo apt remove tmux cmake 7zip jq
+# Windows: keep eza on Windows on ARM, 7-Zip, ImageMagick, poppler, resvg (still winget there)
+winget uninstall dandavison.delta Starship.Starship junegunn.fzf ajeetdsouza.zoxide sxyazi.yazi charmbracelet.glow sharkdp.bat JesseDuffield.lazygit BurntSushi.ripgrep.MSVC sharkdp.fd eza-community.eza astral-sh.uv Helix.Helix Kitware.CMake jqlang.jq
+```
+
+`brew uninstall` refuses a formula another one still needs; leave that one installed.
 
 ### Neovim and psmux on Windows
 
