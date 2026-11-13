@@ -62,15 +62,20 @@ case "$os" in
 Darwin) chezmoi_os=darwin ;;
 *) chezmoi_os=linux ;;
 esac
-# app_ids <field>: that field of every Application of this Profile that has it
-app_ids() { jq -r --arg f "$1" '.[] | select(has($f)) | .[$f]' <<<"$apps_json"; }
-# mise_tools <os> <arch> <in|out>: mise keys mise installs (in) or skips (out) there
+# jq predicate: mise installs this Application on $os/$arch
+via_mise_jq='has("mise")
+    and ((has("mise_os") | not) or (.mise_os | index($os) != null))
+    and ((has("mise_arch") | not) or (.mise_arch[$os] == null) or (.mise_arch[$os] | index($arch) != null))'
+# native_ids <field>: that identifier for every Application of this Profile
+# that has it and that mise does not install on this OS/arch
+native_ids() {
+    jq -r --arg f "$1" --arg os "$chezmoi_os" --arg arch "$arch" \
+        ".[] | select(has(\$f) and (($via_mise_jq) | not)) | .[\$f]" <<<"$apps_json"
+}
+# mise_tools <in|out>: mise keys mise installs (in) or skips (out) on this OS/arch
 mise_tools() {
-    jq -r --arg os "$1" --arg arch "$2" --arg want "$3" '
-        .[] | select(has("mise") and .kind != "runtime")
-        | ((has("mise_os") | not) or (.mise_os | index($os) != null)) as $os_ok
-        | ((has("mise_arch") | not) or (.mise_arch[$os] == null) or (.mise_arch[$os] | index($arch) != null)) as $arch_ok
-        | select(($os_ok and $arch_ok) == ($want == "in")) | .mise' <<<"$apps_json"
+    jq -r --arg os "$chezmoi_os" --arg arch "$arch" --arg want "$1" \
+        ".[] | select(has(\"mise\") and .kind != \"runtime\") | select(($via_mise_jq) == (\$want == \"in\")) | .mise" <<<"$apps_json"
 }
 
 echo "--- profile=$profile os=$os ---"
@@ -106,26 +111,22 @@ while IFS= read -r tool; do
     else
         bad "mise config: $tool missing"
     fi
-done < <(mise_tools "$chezmoi_os" "$arch" in)
+done < <(mise_tools in)
 while IFS= read -r tool; do
     [ -n "$tool" ] || continue
     if [ -f "$misefile" ] && grep -qF "\"$tool\"" "$misefile"; then
         bad "mise config: $tool should not be installed by mise on $chezmoi_os/$arch"
     fi
-done < <(mise_tools "$chezmoi_os" "$arch" out)
-# Spot checks independent of the data file: Linux gets the CLI tools from
-# mise, macOS from Homebrew.
-if [ "$os" = "Linux" ]; then
-    for tool in aqua:dandavison/delta aqua:sxyazi/yazi; do
-        if [ -f "$misefile" ] && grep -qF "\"$tool\" = " "$misefile"; then
-            ok "mise config (spot check): $tool present on Linux"
-        else
-            bad "mise config (spot check): $tool missing on Linux"
-        fi
-    done
-elif [ -f "$misefile" ] && grep -qF '"aqua:dandavison/delta"' "$misefile"; then
-    bad "mise config (spot check): aqua:dandavison/delta should come from Homebrew on macOS"
-fi
+done < <(mise_tools out)
+# Spot checks independent of the data file: the CLI tools come from mise on
+# Linux and macOS (docs/adr/0023-applications-from-one-data-file.md).
+for tool in aqua:sxyazi/yazi aqua:BurntSushi/ripgrep; do
+    if [ -f "$misefile" ] && grep -qF "\"$tool\" = " "$misefile"; then
+        ok "mise config (spot check): $tool present"
+    else
+        bad "mise config (spot check): $tool missing"
+    fi
+done
 # Neovim and the tree-sitter CLI come from mise on every OS, pinned to an
 # exact version so the shared lazy-lock.json fits, see
 # docs/adr/0013-neovim-pinned-via-mise.md
@@ -212,10 +213,8 @@ fi
 
 # macOS Application manifest (Homebrew), see
 # docs/adr/0006-application-category-and-profile-manifests.md: macOS-only,
-# one `brew` line per CLI tool (every profile, see
-# docs/adr/0008-cli-tools-are-applications.md) and one `cask` line per GUI
-# app in the Profile's Application list that has a macOS identifier
-# (windows-terminal doesn't, so it's never expected here).
+# one `brew`/`cask` line per Application of the Profile with a Homebrew
+# identifier that mise does not install here (docs/adr/0023-applications-from-one-data-file.md).
 if [ "$os" = "Darwin" ]; then
     brewfile="$dest/.config/homebrew/Brewfile"
     assert_file ".config/homebrew/Brewfile"
@@ -229,13 +228,16 @@ if [ "$os" = "Darwin" ]; then
         else
             bad "Brewfile: $line missing"
         fi
-    done < <(app_ids brew)
-    # Spot check independent of the data file
-    if [ -f "$brewfile" ] && grep -qxF 'brew "git-delta"' "$brewfile"; then
-        ok "Brewfile (spot check): git-delta present"
-    else
-        bad "Brewfile (spot check): git-delta missing"
-    fi
+    done < <(native_ids brew)
+    # Spot check independent of the data file: CLI tools mise installs stay
+    # out of the Brewfile
+    for formula in yazi ripgrep; do
+        if [ -f "$brewfile" ] && grep -qxF "brew \"$formula\"" "$brewfile"; then
+            bad "Brewfile (spot check): $formula should come from mise, not Homebrew"
+        else
+            ok "Brewfile (spot check): no brew \"$formula\""
+        fi
+    done
     for formula in neovim tree-sitter-cli; do
         if [ -f "$brewfile" ] && grep -qE "^brew \"$formula\"\$" "$brewfile"; then
             bad "Brewfile: $formula should come from mise (ADR 0013), not Homebrew"
@@ -284,7 +286,7 @@ if [ "$os" = "Linux" ]; then
         else
             bad "apt-packages.txt: $pkg missing"
         fi
-    done < <(app_ids apt)
+    done < <(native_ids apt)
     # CLI tools moved to mise must not be installed twice
     for pkg in git-delta starship neovim fzf zoxide yazi glow bat lazygit tree-sitter-cli ripgrep fd-find eza imagemagick; do
         if [ -f "$aptfile" ] && grep -qxF "$pkg" "$aptfile"; then

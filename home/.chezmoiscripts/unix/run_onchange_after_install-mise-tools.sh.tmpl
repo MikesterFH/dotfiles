@@ -3,8 +3,9 @@
 # =============================================================================
 # chezmoi run_onchange_after script: installs the global mise tools from
 # ~/.config/mise/config.toml: node, python for Neovim's Mason (see
-# docs/adr/0011-nvim-toolchain.md) and, on Linux, the CLI tool Applications
-# (see docs/adr/0012-linux-cli-tools-via-mise.md). Sorts before the tmux and
+# docs/adr/0011-nvim-toolchain.md) and the CLI tool Applications mise
+# installs on this OS (see docs/adr/0023-applications-from-one-data-file.md).
+# Sorts before the tmux and
 # yazi plugin scripts, so their tools are in place when they run.
 #
 # `_after_` so the config is already written; mise itself is a Bootstrap

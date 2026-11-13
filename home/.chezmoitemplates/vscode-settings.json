@@ -1557,7 +1557,7 @@
   "jenkins.pipeline.linter.connector.url": "https://jenkins-pcm.seb.com/jenkins/pipeline-model-converter/validate",
   // === Windows machine (merged from local) ===
   "terminal.integrated.env.windows": {
-    "PATH": "${env:USERPROFILE}\\.cargo\\bin;${env:LOCALAPPDATA}\\Programs\\Git\\cmd;${env:LOCALAPPDATA}\\Microsoft\\WinGet\\Packages\\JesseDuffield.lazygit_Microsoft.Winget.Source_8wekyb3d8bbwe;${env:PATH}"
+    "PATH": "${env:USERPROFILE}\\.cargo\\bin;${env:LOCALAPPDATA}\\Programs\\Git\\cmd;${env:LOCALAPPDATA}\\mise\\shims;${env:PATH}"
   },
   "workbench.colorTheme": "GitHub Dark Default",
   "security.allowedUNCHosts": [

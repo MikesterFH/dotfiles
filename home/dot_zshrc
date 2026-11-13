@@ -10,8 +10,8 @@ fi
 
 # -- mise ---------------------------------------------------------------------
 
-# Before everything below: on Linux mise provides eza, bat, zoxide, starship
-# and the other CLI tools (docs/adr/0012-linux-cli-tools-via-mise.md), and
+# Before everything below: on Linux and macOS mise provides eza, bat, zoxide,
+# starship and the other CLI tools (docs/adr/0023-applications-from-one-data-file.md), and
 # the aliases and tool inits only set themselves up when those are found.
 command -v mise &>/dev/null && eval "$(mise activate zsh)"
 

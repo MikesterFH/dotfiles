@@ -1,8 +1,9 @@
 {{- if eq .chezmoi.os "windows" -}}
 # =============================================================================
 # chezmoi run_onchange_after script: installs the global mise tools from
-# ~/.config/mise/config.toml (node, python for Neovim's Mason), see
-# docs/adr/0011-nvim-toolchain.md. mise itself is a Bootstrap Package
+# ~/.config/mise/config.toml: the CLI tools with a mise backend and node,
+# python for Neovim's Mason, see docs/adr/0023-applications-from-one-data-file.md
+# and docs/adr/0011-nvim-toolchain.md. mise itself is a Bootstrap Package
 # (run_once_before_install-packages.ps1.tmpl).
 #
 # Rerun trigger: hash of the rendered config, so a changed tool list reruns

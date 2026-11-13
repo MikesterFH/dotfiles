@@ -3,6 +3,15 @@
 # dot_bash_aliases/dot_zsh_aliases that fit PowerShell; `ls` stays
 # Get-ChildItem rather than eza, since PowerShell scripts rely on its objects.
 
+# mise first: it installs the CLI tools (starship included) and node/python
+# for nvim's Mason, so its paths must be in place before anything below looks
+# a tool up, and ahead of leftover winget copies (docs/adr/0023-applications-from-one-data-file.md).
+if (Get-Command mise -ErrorAction SilentlyContinue) {
+  # chpwd hook needs pwsh 7; 5.1 still gets the PATH from activate
+  if ($PSVersionTable.PSVersion.Major -lt 7) { $env:MISE_PWSH_CHPWD_WARNING = 0 }
+  (&mise activate pwsh) | Out-String | Invoke-Expression
+}
+
 Set-Alias vim nvim
 Set-Alias c clear
 Set-Alias gg lazygit
@@ -15,13 +24,6 @@ function gs { git status -s }
 
 if (Get-Command starship -ErrorAction SilentlyContinue) {
   Invoke-Expression (&starship init powershell)
-}
-
-# mise: node, python for nvim's Mason, see docs/adr/0011-nvim-toolchain.md
-if (Get-Command mise -ErrorAction SilentlyContinue) {
-  # chpwd hook needs pwsh 7; 5.1 still gets the PATH from activate
-  if ($PSVersionTable.PSVersion.Major -lt 7) { $env:MISE_PWSH_CHPWD_WARNING = 0 }
-  (&mise activate pwsh) | Out-String | Invoke-Expression
 }
 
 if ((Get-Module PSReadLine).Version -ge [version]"2.1.0" -and -not [Console]::IsOutputRedirected) {

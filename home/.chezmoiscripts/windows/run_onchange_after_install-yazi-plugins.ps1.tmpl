@@ -8,15 +8,19 @@
 # installed on the next `chezmoi apply`.
 # package.toml sha256: {{ include "dot_config/yazi/package.toml" | sha256sum }}
 #
-# Sorts after install-windows-applications (yazi installed) but before
+# Sorts after install-mise-tools (yazi installed) but before
 # set-yazi-env-windows, so YAZI_CONFIG_HOME is set here for this process too.
 # =============================================================================
 $ErrorActionPreference = "Stop"
 
 $env:YAZI_CONFIG_HOME = Join-Path $HOME ".config\yazi"
 
-# winget just installed yazi in a sibling process — pick up its PATH entry.
-$env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" +
+# yazi is a mise tool (docs/adr/0023-applications-from-one-data-file.md);
+# mise installed it in a sibling process this apply, and no profile has
+# activated mise here, so put its shims first. Machine/User PATH is re-read
+# for mise itself, which winget may have just installed.
+$env:Path = (Join-Path $env:LOCALAPPDATA "mise\shims") + ";" +
+    [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" +
     [Environment]::GetEnvironmentVariable("Path", "User")
 
 # Fail rather than skip: a run_onchange script that exits 0 is recorded as

@@ -11,7 +11,7 @@
        timestamp — only the Application list changing should touch it. */ -}}
 {{- $packages := list -}}
 {{- range includeTemplate "applications.json" . | fromJson -}}
-{{-   if hasKey . "winget" -}}
+{{-   if and (hasKey . "winget") (not .via_mise) -}}
 {{-     $packages = append $packages (dict "PackageIdentifier" .winget) -}}
 {{-   end -}}
 {{- end -}}
