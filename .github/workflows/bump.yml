@@ -1,0 +1,105 @@
+# Weekly update of both installation paths in one PR
+# (docs/adr/0023-applications-from-one-data-file.md): mise.lock re-resolved to
+# the newest releases (exact pins stay), and the flake inputs nixpkgs-unstable
+# and hunk updated, plus the CI consumer's home-manager so it keeps matching
+# nixpkgs-unstable. The PR lives on one branch, force-pushed on every run, so
+# there is never more than one; its body carries the drift report.
+#
+# Locks on Linux on purpose: mise on NixOS defaults to compiling python and
+# would write a NixOS-only python entry.
+#
+# Needs "Allow GitHub Actions to create and approve pull requests" in the
+# repository's Actions settings. A PR opened with GITHUB_TOKEN triggers no
+# pull_request workflows, so the run dispatches ci.yml and drift.yml on the
+# branch itself; their checks show up on the PR's head commit.
+name: bump lockfiles
+
+on:
+  schedule:
+    - cron: "0 5 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+concurrency:
+  group: bump-lockfiles
+
+env:
+  BRANCH: bump/lockfiles
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    env:
+      # mise resolves releases through the GitHub API, gh opens the PR.
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Check out default branch
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+
+      - name: Install chezmoi and mise
+        run: |
+          sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin"
+          curl -fsSL https://mise.run | MISE_INSTALL_PATH="$HOME/.local/bin/mise" sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Bump mise.lock
+        run: .github/scripts/mise-lock.sh --bump
+
+      - name: Update flake inputs
+        run: |
+          nix flake update nixpkgs-unstable hunk
+          nix flake update home-manager --flake ./nix/ci
+
+      - name: Build the Nix module
+        run: |
+          nix build --no-link --override-input dotfiles "path:$GITHUB_WORKSPACE" \
+            ./nix/ci#homeConfigurations.personal.activationPackage \
+            ./nix/ci#homeConfigurations.dev-server.activationPackage
+
+      - name: Drift report
+        id: drift
+        continue-on-error: true
+        run: .github/scripts/drift-report.sh "$RUNNER_TEMP/drift.md"
+
+      - name: Open or update the PR
+        run: |
+          files=(home/dot_config/mise/mise.lock flake.lock nix/ci/flake.lock)
+          if [ -z "$(git status --porcelain -- "${files[@]}")" ]; then
+            echo "Nothing to bump"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$BRANCH"
+          git add "${files[@]}"
+          git commit -m "dotfiles: bump mise.lock and nixpkgs-unstable" \
+            -m "Weekly bump by the bump lockfiles workflow: mise.lock re-resolved (pins untouched), flake inputs nixpkgs-unstable and hunk updated."
+          git push --force origin "$BRANCH"
+
+          {
+            echo "Weekly bump of both installation paths (ADR 0023): \`mise lock --bump\` (pins untouched), \`nix flake update nixpkgs-unstable hunk\`, home-manager in \`nix/ci\`."
+            echo
+            echo "Drift report: ${{ steps.drift.outcome }}"
+            echo
+            cat "$RUNNER_TEMP/drift.md" 2>/dev/null || echo "(no report)"
+            echo
+            echo "Before merging: check pinned tools (neovim, tree-sitter-cli) still fit, and that the dispatched CI runs are green."
+          } > "$RUNNER_TEMP/body.md"
+
+          title="dotfiles: bump mise.lock and nixpkgs-unstable"
+          if gh pr view "$BRANCH" --json state --jq .state 2>/dev/null | grep -q OPEN; then
+            gh pr edit "$BRANCH" --title "$title" --body-file "$RUNNER_TEMP/body.md"
+          else
+            gh pr create --head "$BRANCH" --title "$title" --body-file "$RUNNER_TEMP/body.md"
+          fi
+
+          gh workflow run ci.yml --ref "$BRANCH"
+          gh workflow run drift.yml --ref "$BRANCH"

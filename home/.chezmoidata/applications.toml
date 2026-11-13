@@ -239,7 +239,7 @@ mise_os  = ["linux", "darwin"]
 brew     = "sevenzip"
 apt      = "7zip"
 winget   = "7zip.7zip"
-nix      = "p7zip"
+nix      = "_7zz"
 
 # conda backend: apt only ships ImageMagick 6, yazi needs 7's `magick`
 # (docs/adr/0014-yazi-previews-on-every-platform.md). Windows keeps winget:
