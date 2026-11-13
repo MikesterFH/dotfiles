@@ -101,6 +101,15 @@ persistent-workspaces = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
     enter = 'mode main'
     esc = 'mode main'
 
+    # Same with ctrl-alt held: the Corne's WM layer (hold TAB) sends every
+    # key with ctrl-alt, so resizing works without releasing TAB, and
+    # ctrl-alt-r (the key that entered the mode) leaves it again
+    ctrl-alt-h = 'resize width -50'
+    ctrl-alt-l = 'resize width +50'
+    ctrl-alt-j = 'resize height +50'
+    ctrl-alt-k = 'resize height -50'
+    ctrl-alt-r = 'mode main'
+
 [mode.service.binding]
     esc = ['reload-config', 'mode main']
     r = ['flatten-workspace-tree', 'mode main'] # reset layout
