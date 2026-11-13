@@ -11,20 +11,22 @@
 # present, so a rerun is cheap.
 # tmux.conf sha256: {{ include "dot_config/tmux/tmux.conf" | sha256sum }}
 #
-# Sorts after the darwin/ and linux/ Application installs, so tmux itself is
-# already installed by then. macOS/Linux only, and not on devpod (no tmux
+# Sorts after the mise-tools script, which installs tmux
+# (docs/adr/0023-applications-from-one-data-file.md). macOS/Linux only, and not on devpod (no tmux
 # config there, see .chezmoiignore); Windows' psmux has its own plugin
 # manager, set up by hand (see README).
 # =============================================================================
 set -euo pipefail
 
-# chezmoi runs each script as its own process — re-derive Homebrew's PATH,
-# same as the macOS Application script, since a fresh Mac lacks it.
+# chezmoi runs each script as its own process, with no shell profile: put
+# mise's shims on the PATH, where tmux comes from. Homebrew's PATH is kept
+# for git on a fresh Mac and for a tmux still installed by Homebrew.
 if [ -x /opt/homebrew/bin/brew ]; then
   eval "$(/opt/homebrew/bin/brew shellenv)"
 elif [ -x /usr/local/bin/brew ]; then
   eval "$(/usr/local/bin/brew shellenv)"
 fi
+export PATH="$HOME/.local/share/mise/shims:$PATH"
 
 if ! command -v tmux &>/dev/null; then
   echo "[WARN]  tmux not installed; skipping tmux plugins."
