@@ -103,3 +103,23 @@ jobs:
 
       - name: Check mise.lock against applications.toml
         run: .github/scripts/mise-lock.sh --check
+
+  # The home-manager module (docs/adr/0021-nix-home-manager-module.md) builds
+  # its package list from applications.toml's `nix` fields. Building the
+  # minimal consumer for both supported Profiles fails on an unknown nixpkgs
+  # attribute, flake input or module option, and renders the templates the
+  # module uses.
+  nix-module:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+
+      - name: Build the module for personal and dev-server
+        run: |
+          nix build --no-link --override-input dotfiles "path:$GITHUB_WORKSPACE" \
+            ./nix/ci#homeConfigurations.personal.activationPackage \
+            ./nix/ci#homeConfigurations.dev-server.activationPackage
