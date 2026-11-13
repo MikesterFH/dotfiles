@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# mise-lock.sh [--check]
+# mise-lock.sh [--check | --bump]
 #
 # Keeps home/dot_config/mise/mise.lock in step with the Application data file
 # (home/.chezmoidata/applications.toml, docs/adr/0023-applications-from-one-data-file.md).
@@ -10,8 +10,11 @@
 # Without arguments: starts from the committed lockfile and runs
 # `mise lock --global` once per platform, for the tools mise installs there.
 # Versions already locked stay as they are; new tools and platforms are
-# added, tools gone from the data file are dropped. Raising versions is
-# `mise lock --bump`'s job (the scheduled bump PR).
+# added, tools gone from the data file are dropped.
+#
+# --bump: the same, but every `latest`/`lts`/prefix request is re-resolved
+# to the newest release (`mise lock --bump`); exact pins stay. The scheduled
+# bump PR (.github/workflows/bump.yml) runs this.
 #
 # --check: no mise needed. Fails when the lockfile is missing a tool or one
 # of its platforms, lists a tool no longer in the data file, or was locked
@@ -81,10 +84,13 @@ print(f"mise.lock matches applications.toml ({len(expected['tools'])} tools)")
 EOF
 }
 
-if [ "${1:-}" = "--check" ]; then
-    check
-    exit
-fi
+bump=()
+case "${1:-}" in
+    --check) check; exit ;;
+    --bump)  bump=(--bump) ;;
+    "")      ;;
+    *)       echo "usage: $0 [--check | --bump]" >&2; exit 2 ;;
+esac
 
 home="$tmp/home"
 mkdir -p "$home/.config/mise"
@@ -119,7 +125,7 @@ for platform in $(jq -r '.platforms | keys[]' "$tmp/expected.json"); do
     mapfile -t tools < <(jq -r --arg p "$platform" '.platforms[$p][]' "$tmp/expected.json")
     echo "::group::mise lock $platform (${#tools[@]} tools)"
     (cd "$tmp" && env -u XDG_CONFIG_HOME -u MISE_CONFIG_DIR -u MISE_GLOBAL_CONFIG_FILE \
-        HOME="$home" mise lock --global --platform "$platform" "${tools[@]}")
+        HOME="$home" mise lock --global "${bump[@]}" --platform "$platform" "${tools[@]}")
     echo "::endgroup::"
 done
 

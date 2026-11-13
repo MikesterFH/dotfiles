@@ -1,0 +1,31 @@
+# Version drift between the two installation paths
+# (docs/adr/0023-applications-from-one-data-file.md): mise.lock on the
+# chezmoi Targets, nixpkgs-unstable (flake.lock) in the Nix module. Warns on
+# a minor, fails on a major difference; the table lands in the job summary.
+# Runs on PRs that change either lockfile or the data file, and when the
+# bump workflow dispatches it on its branch (a PR opened with GITHUB_TOKEN
+# triggers no pull_request workflows).
+name: drift report
+
+on:
+  pull_request:
+    paths:
+      - home/dot_config/mise/mise.lock
+      - home/.chezmoidata/applications.toml
+      - flake.lock
+      - nix/**
+      - .github/scripts/drift-report.sh
+  workflow_dispatch:
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+
+      - name: Compare mise.lock with the Nix module
+        run: .github/scripts/drift-report.sh
