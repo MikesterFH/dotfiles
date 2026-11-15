@@ -21,9 +21,18 @@
 # not the bootstrap scripts' side effects.
 name: chezmoi apply verification
 
+# keyboard/ never deploys (ADR 0025) and has its own workflow
+# (keyboard.yml); a push touching only it skips this one. A push that also
+# touches anything else still runs it.
 on:
   push:
+    paths-ignore:
+      - keyboard/**
+      - .github/workflows/keyboard.yml
   pull_request:
+    paths-ignore:
+      - keyboard/**
+      - .github/workflows/keyboard.yml
   workflow_dispatch:
 
 jobs:
