@@ -210,6 +210,8 @@ if ($MachineProfile -eq "dev-server") {
     Assert-Absent "AppData\Roaming\Zed"
     Assert-Absent ".config\zen-profile"
     Assert-Absent "AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe"
+    Assert-Absent ".glzr\glazewm"
+    Assert-Absent ".glzr\zebar"
 } else {
     Assert-FileExists ".config\wezterm\wezterm.lua"
     Assert-FileExists "AppData\Roaming\Code\User\settings.json"
@@ -218,6 +220,9 @@ if ($MachineProfile -eq "dev-server") {
     Assert-FileExists ".config\zen-profile\user.js"
     Assert-FileExists ".config\zen-profile\chrome\userChrome.css"
     Assert-FileExists "AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
+    # GlazeWM and Zebar, see docs/adr/0024-glazewm-and-zebar-on-windows.md
+    Assert-FileExists ".glzr\glazewm\config.yaml"
+    Assert-FileExists ".glzr\zebar\settings.json"
 }
 
 # macOS Application manifest (Homebrew) is macOS-only, and the Linux
@@ -239,7 +244,7 @@ if (Test-Path -Path $wingetManifestPath -PathType Leaf) {
     # Spot checks independent of the data file: ImageMagick stays on winget
     # (conda build unverified on Windows), the mise tools are gone from it
     $spotIds = @("ImageMagick.ImageMagick")
-    if ($MachineProfile -ne "dev-server") { $spotIds += "Microsoft.WindowsTerminal" }
+    if ($MachineProfile -ne "dev-server") { $spotIds += "Microsoft.WindowsTerminal", "glzr-io.glazewm", "glzr-io.zebar" }
     foreach ($id in $spotIds) {
         if ($packageIds -contains $id) {
             Write-Host "[OK]   winget manifest (spot check): $id present"
