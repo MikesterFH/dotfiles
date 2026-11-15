@@ -1,0 +1,222 @@
+# GlazeWM tiling window manager (Windows only), the counterpart to
+# AeroSpace on macOS (.config/aerospace/aerospace.toml). See
+# docs/adr/0024-glazewm-and-zebar-on-windows.md and
+# https://github.com/glzr-io/glazewm
+#
+# Same keys as AeroSpace, with lctrl+lalt for ⌃⌥. Bound to the *left* keys
+# on purpose: on the Swiss German layout AltGr types characters
+# (AltGr+2 = @, AltGr+7 = |, AltGr+ü/¨ = [ ]) and Windows reports AltGr as
+# ctrl+ralt, so a plain ctrl+alt binding would swallow them. lalt also keeps
+# Neovim's <M-h/j/k/l> split resizing free, as on macOS.
+# Left unbound for parity with macOS: lctrl+lalt+space, +c, +n, +b.
+#
+# AeroSpace features GlazeWM has no command for are left out: the accordion
+# layout (ctrl-alt-a), balance-sizes, flatten-workspace-tree, join-with and
+# close-all-windows-but-current.
+#
+# Starting GlazeWM at login is a tray setting (right-click the tray icon,
+# "Run on system startup"), not part of this file.
+
+general:
+  # GlazeWM owns Zebar's lifetime (docs/adr/0024-glazewm-and-zebar-on-windows.md)
+  startup_commands: ['shell-exec zebar']
+  shutdown_commands: ['shell-exec taskkill /IM zebar.exe /F']
+  config_reload_commands: []
+
+  focus_follows_cursor: false
+  toggle_workspace_on_refocus: false
+
+  # Like AeroSpace's on-focused-monitor-changed = move-mouse monitor-lazy-center
+  cursor_jump:
+    enabled: true
+    trigger: 'monitor_focus'
+
+  hide_method: 'cloak'
+  show_all_in_taskbar: false
+
+gaps:
+  scale_with_dpi: true
+  inner_gap: '8px'
+  # top leaves room for Zebar's 40px bar (.glzr/zebar/settings.json)
+  outer_gap:
+    top: '48px'
+    right: '8px'
+    bottom: '8px'
+    left: '8px'
+
+window_effects:
+  focused_window:
+    border:
+      enabled: true
+      color: '#8dbcff'
+  other_windows:
+    border:
+      enabled: true
+      color: '#a1a1a1'
+
+window_behavior:
+  initial_state: 'tiling'
+  state_defaults:
+    floating:
+      centered: true
+      shown_on_top: false
+    fullscreen:
+      maximized: false
+      shown_on_top: false
+
+workspaces:
+  - name: '1'
+    keep_alive: true
+  - name: '2'
+    keep_alive: true
+  - name: '3'
+    keep_alive: true
+  - name: '4'
+    keep_alive: true
+  - name: '5'
+    keep_alive: true
+  - name: '6'
+    keep_alive: true
+  - name: '7'
+    keep_alive: true
+  - name: '8'
+    keep_alive: true
+  - name: '9'
+    keep_alive: true
+
+window_rules:
+  - commands: ['ignore']
+    match:
+      # Zebar's own windows
+      - window_process: { equals: 'zebar' }
+      # Browser picture-in-picture
+      - window_title: { regex: '[Pp]icture.in.[Pp]icture' }
+        window_class: { regex: 'Chrome_WidgetWin_1|MozillaDialogClass' }
+      # PowerToys overlays and Office dialogs (from GlazeWM's sample config)
+      - window_process: { equals: 'PowerToys' }
+        window_class: { regex: 'HwndWrapper\[PowerToys\.PowerAccent.*?\]' }
+      - window_title: { equals: 'Command Palette' }
+        window_class: { equals: 'WinUIDesktopWin32WindowClass' }
+      - window_process: { equals: 'PowerToys' }
+        window_title: { regex: '.*? - Peek' }
+      - window_process: { equals: 'EXCEL' }
+        window_class: { not_regex: 'XLMAIN' }
+      - window_process: { equals: 'WINWORD' }
+        window_class: { not_regex: 'OpusApp' }
+      - window_process: { equals: 'POWERPNT' }
+        window_class: { not_regex: 'PPTFrameClass' }
+
+  # Dialog-like apps float instead of being squeezed into a tile, the same
+  # three as in aerospace.toml. Find a window's process name with
+  # `glazewm query windows`.
+  - commands: ['set-floating --centered']
+    match:
+      - window_process: { equals: 'SystemSettings' }
+      - window_process: { equals: 'CalculatorApp' }
+      - window_process: { equals: 'Taskmgr' }
+
+binding_modes:
+  # lctrl+lalt+r: h/j/k/l resize
+  - name: 'resize'
+    keybindings:
+      - commands: ['resize --width -50px']
+        bindings: ['h', 'lctrl+lalt+h']
+      - commands: ['resize --width +50px']
+        bindings: ['l', 'lctrl+lalt+l']
+      - commands: ['resize --height +50px']
+        bindings: ['j', 'lctrl+lalt+j']
+      - commands: ['resize --height -50px']
+        bindings: ['k', 'lctrl+lalt+k']
+      # The lctrl+lalt variants above and lctrl+lalt+r here: the Corne's WM
+      # layer (hold TAB) sends every key with ctrl-alt, so resizing works
+      # without releasing TAB, and the key that entered the mode leaves it
+      - commands: ['wm-disable-binding-mode --name resize']
+        bindings: ['escape', 'enter', 'lctrl+lalt+r']
+
+  # lctrl+lalt+s: reload, redraw
+  - name: 'service'
+    keybindings:
+      - commands: ['wm-reload-config', 'wm-disable-binding-mode --name service']
+        bindings: ['escape']
+      - commands: ['wm-redraw', 'wm-disable-binding-mode --name service']
+        bindings: ['r']
+
+keybindings:
+  # Focus / move, vim directions
+  - commands: ['focus --direction left']
+    bindings: ['lctrl+lalt+h']
+  - commands: ['focus --direction down']
+    bindings: ['lctrl+lalt+j']
+  - commands: ['focus --direction up']
+    bindings: ['lctrl+lalt+k']
+  - commands: ['focus --direction right']
+    bindings: ['lctrl+lalt+l']
+
+  - commands: ['move --direction left']
+    bindings: ['lctrl+lalt+shift+h']
+  - commands: ['move --direction down']
+    bindings: ['lctrl+lalt+shift+j']
+  - commands: ['move --direction up']
+    bindings: ['lctrl+lalt+shift+k']
+  - commands: ['move --direction right']
+    bindings: ['lctrl+lalt+shift+l']
+
+  # Layout: t = toggle tiling direction, f = fullscreen, shift-f =
+  # float/tile the window
+  - commands: ['toggle-tiling-direction']
+    bindings: ['lctrl+lalt+t']
+  - commands: ['toggle-fullscreen']
+    bindings: ['lctrl+lalt+f']
+  - commands: ['toggle-floating --centered']
+    bindings: ['lctrl+lalt+shift+f']
+
+  # Workspaces
+  - commands: ['focus --workspace 1']
+    bindings: ['lctrl+lalt+1']
+  - commands: ['focus --workspace 2']
+    bindings: ['lctrl+lalt+2']
+  - commands: ['focus --workspace 3']
+    bindings: ['lctrl+lalt+3']
+  - commands: ['focus --workspace 4']
+    bindings: ['lctrl+lalt+4']
+  - commands: ['focus --workspace 5']
+    bindings: ['lctrl+lalt+5']
+  - commands: ['focus --workspace 6']
+    bindings: ['lctrl+lalt+6']
+  - commands: ['focus --workspace 7']
+    bindings: ['lctrl+lalt+7']
+  - commands: ['focus --workspace 8']
+    bindings: ['lctrl+lalt+8']
+  - commands: ['focus --workspace 9']
+    bindings: ['lctrl+lalt+9']
+
+  - commands: ['move --workspace 1']
+    bindings: ['lctrl+lalt+shift+1']
+  - commands: ['move --workspace 2']
+    bindings: ['lctrl+lalt+shift+2']
+  - commands: ['move --workspace 3']
+    bindings: ['lctrl+lalt+shift+3']
+  - commands: ['move --workspace 4']
+    bindings: ['lctrl+lalt+shift+4']
+  - commands: ['move --workspace 5']
+    bindings: ['lctrl+lalt+shift+5']
+  - commands: ['move --workspace 6']
+    bindings: ['lctrl+lalt+shift+6']
+  - commands: ['move --workspace 7']
+    bindings: ['lctrl+lalt+shift+7']
+  - commands: ['move --workspace 8']
+    bindings: ['lctrl+lalt+shift+8']
+  - commands: ['move --workspace 9']
+    bindings: ['lctrl+lalt+shift+9']
+
+  - commands: ['focus --recent-workspace']
+    bindings: ['lctrl+lalt+tab']
+  # GlazeWM has no wrap-around; moves the workspace to the monitor on the right
+  - commands: ['move-workspace --direction right']
+    bindings: ['lctrl+lalt+shift+tab']
+
+  # Modes: r = resize with h/j/k/l, s = service (reload, redraw)
+  - commands: ['wm-enable-binding-mode --name resize']
+    bindings: ['lctrl+lalt+r']
+  - commands: ['wm-enable-binding-mode --name service']
+    bindings: ['lctrl+lalt+s']

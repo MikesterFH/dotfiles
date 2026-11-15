@@ -2,9 +2,9 @@
 # Per-OS paths, one switch on .chezmoi.os for everything that differs by
 # Target: vscode's settings live at a different real path per OS (macOS:
 # Library/, Linux: .config/Code, Windows: AppData); the iTerm2 Dynamic
-# Profile (Library/), AeroSpace (.config/aerospace) and PowerShell profile
-# (.config/powershell, stubbed into Documents/ by a run_after script) are
-# single-OS only;
+# Profile (Library/), AeroSpace (.config/aerospace), GlazeWM and Zebar
+# (.glzr) and PowerShell profile (.config/powershell, stubbed into
+# Documents/ by a run_after script) are single-OS only;
 # zed and helix live at .config/<app> everywhere except Windows
 # (AppData/Roaming/Zed, AppData/Roaming/helix);
 # the macOS Application manifest (.config/homebrew), the Linux Application
@@ -19,6 +19,7 @@
 # safe, not a guess.
 {{ if eq .chezmoi.os "darwin" }}
 .psmux.conf
+.glzr
 .config/Code
 AppData
 Documents
@@ -27,6 +28,7 @@ Documents
 .config/winget
 {{ else if eq .chezmoi.os "linux" }}
 .psmux.conf
+.glzr
 .config/aerospace
 .config/cheatsheet
 Library
@@ -52,6 +54,7 @@ Library
 .config/apt-packages.txt
 {{ else }}
 .psmux.conf
+.glzr
 .config/aerospace
 .config/cheatsheet
 Library
@@ -115,6 +118,12 @@ AppData/Local/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe
 {{ if not (has "aerospace" $appNames) }}
 .config/aerospace
 .config/cheatsheet
+{{ end }}
+{{ if not (has "glazewm" $appNames) }}
+.glzr/glazewm
+{{ end }}
+{{ if not (has "zebar" $appNames) }}
+.glzr/zebar
 {{ end }}
 {{ if not (has "iterm2" $appNames) }}
 Library/Application Support/iTerm2
