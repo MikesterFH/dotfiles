@@ -8,4 +8,4 @@ manifest:
       revision: 4dd95d7840eb3d5a3f59bb29fbf1ab054715ef85 # main 2026-11, switch to v0.4 once released
       import: app/west.yml
   self:
-    path: config
+    path: keyboard

@@ -1,5 +1,9 @@
 # Corne Wireless (nice!view) – ZMK Config
 
+Lives in the dotfiles repo (`keyboard/`, see `docs/adr/0025-keyboard-firmware-in-the-dotfiles.md`)
+so keymap and window-manager configs change together. Never deployed by chezmoi
+(outside `home/`).
+
 ZMK firmware configuration for a Typeractive Corne Wireless (nice!nano v2 + nice!view)
 used with the **Swiss German (CH-DE) OS layout** on **Windows and macOS**.
 
@@ -11,12 +15,15 @@ used with the **Swiss German (CH-DE) OS layout** on **Windows and macOS**.
 ### Repository layout
 
 ```
-.github/workflows/build.yml   CI: builds firmware via ZMK's reusable workflow on every push
-build.yaml                    Build matrix: board + shields per keyboard half
-config/west.yml               ZMK version (pinned commit)
-config/corne.conf             Kconfig options (BT TX power, debounce, sleep)
-config/corne.keymap           The keymap: defines, macros, conditional layers, layers
+.github/workflows/keyboard.yml  CI (repo root): builds firmware on changes under keyboard/
+keyboard/build.yaml             Build matrix: board + shields per keyboard half
+keyboard/west.yml               ZMK version (pinned commit)
+keyboard/corne.conf             Kconfig options (BT TX power, debounce, sleep)
+keyboard/corne.keymap           The keymap: defines, macros, conditional layers, layers
 ```
+
+`keyboard/` is the ZMK config directory itself (`config_path: keyboard`): ZMK's build workflow
+copies it with a plain `mkdir`, so it must be one level deep and must not be named `zmk`.
 
 ### Key concept: ZMK sends positions, not characters
 
@@ -121,7 +128,7 @@ Hold TAB:      Windows mode ──▶ WM_WIN (Alt+key,      GlazeWM)
 - Tapping `TAB` still sends `TAB`; holding it opens the layer (`&lt`, flavor `balanced`, 200 ms).
 - Every key sends the OS window-manager modifier plus the key, so both WMs bind the same keys:
   - Windows (GlazeWM): `Alt` – `Ctrl+Alt` is AltGr on Windows and would swallow `@ # |`.
-  - macOS (AeroSpace): `Ctrl+Alt` – matches `~/.config/aerospace/aerospace.toml` in the dotfiles.
+  - macOS (AeroSpace): `Ctrl+Alt` – matches `home/dot_config/aerospace/aerospace.toml`.
 - `SHFT` (left, or right thumb) adds Shift, i.e. the "move" variant: `TAB` + `SHFT` + `H` = move window
   left, `TAB` + `SHFT` + `3` = move window to workspace 3.
 - Unused positions are `&none`, so a stray key in the layer does nothing.
@@ -145,7 +152,7 @@ The diagram shows the **key sent**, not the physical key. Physical key (base lay
 AeroSpace modes, reachable while still holding `TAB`:
 
 - **Resize** (`V`): `H/L` narrower/wider, `J/K` taller/shorter, `V` again (or `esc`) leaves.
-  The `ctrl-alt-*` variants live in the dotfiles' `aerospace.toml` resize mode.
+  The `ctrl-alt-*` variants live in `aerospace.toml`'s resize mode.
 - **Service** (`S`), one-shot maintenance, each key returns to normal mode. Not ctrl-alt bound
   yet, so release `TAB` first: `esc` reload config, `r` reset (flatten) the workspace layout,
   `backspace` close all other windows, `Shift+H/J/K/L` join the window with its neighbour into a
@@ -158,8 +165,8 @@ AeroSpace modes, reachable while still holding `TAB`:
 
 ### Workflow
 
-1. Create a branch: `git checkout -b dev`
-2. Edit `config/corne.keymap`:
+1. Create a branch in the dotfiles repo, e.g. `git checkout -b feat/keymap-<topic>`
+2. Edit `keyboard/corne.keymap`:
    - **Change a key:** replace the binding at the same position in the `bindings = < ... >` block
      of the layer. Each layer has 42 positions (3 × 12 + 6 thumbs), in reading order.
    - **New symbol:** add a `#define` with the CH-DE combination. Use `CH_*` if it is the same on
@@ -167,12 +174,14 @@ AeroSpace modes, reachable while still holding `TAB`:
      Raise layer.
    - **Keep both Raise layers in sync:** same arrangement, only the `WIN_*` / `MAC_*` defines differ.
    - Update the ASCII comment above the layer.
-3. Commit and push. GitHub Actions builds both halves
-   (`gh run list --branch dev`, or the repo's *Actions* tab).
+   - **Window-manager keys:** a change to the WM layer usually needs the matching change in
+     `home/dot_config/aerospace/aerospace.toml` (and the GlazeWM config) in the same commit.
+3. Commit (`dotfiles: …`) and push. The `keyboard firmware` workflow builds both halves
+   (`gh run list --workflow keyboard.yml --branch <branch>`).
 4. Download the `firmware` artifact from the run.
 5. Flash each half: `LWR` + `RSE` → `BOOT` on that half (or double-tap reset), then copy the
    matching `.uf2` (`corne_left…` / `corne_right…`) onto the `NICENANO` drive.
-6. Test on Windows **and** macOS, then merge into `master`.
+6. Test on Windows **and** macOS, then merge the PR into `main`.
 
 ### Common bindings
 
@@ -191,11 +200,11 @@ Keymap basics: [Keymaps](https://zmk.dev/docs/keymaps). Repo/CI setup: [User set
 
 ### Build settings
 
-- **ZMK version** – `config/west.yml` pins ZMK to a known-good `main` commit. Switch to `v0.4`
+- **ZMK version** – `keyboard/west.yml` pins ZMK to a known-good `main` commit. Switch to `v0.4`
   once it is released (first release with Zephyr 4.1).
-- **Board** – `build.yaml` uses `nice_nano//zmk` (Zephyr 4.1 naming, formerly `nice_nano_v2`, see
+- **Board** – `keyboard/build.yaml` uses `nice_nano//zmk` (Zephyr 4.1 naming, formerly `nice_nano_v2`, see
   [ZMK blog](https://zmk.dev/blog/2025/12/09/zephyr-4-1)).
-- **Kconfig** – `config/corne.conf`: `CONFIG_BT_CTLR_TX_PWR_PLUS_8` (range), debounce timings;
+- **Kconfig** – `keyboard/corne.conf`: `CONFIG_BT_CTLR_TX_PWR_PLUS_8` (range), debounce timings;
   sleep and USB logging are available but commented out.
 
 ## 4. Troubleshooting
@@ -206,5 +215,5 @@ Keymap basics: [Keymaps](https://zmk.dev/docs/keymaps). Repo/CI setup: [User set
 | Symbols wrong only on one OS | Wrong mode active | `LWR` + `RSE` → `MAC` to toggle; check nice!view shows `Mac` |
 | macOS: symbols work in VS Code but not in a terminal (WezTerm) | Terminals treat **left** Option as Meta | Keep `MAC_*` on `RA(...)` (right Option) |
 | macOS: `<` `>` print `§` `°` | macOS swaps ISO keys `NUBS` and `GRAVE` on ZMK boards | Mac layer sends `GRAVE` for `<` `>`; if it flips after changing the macOS keyboard type, swap back to `NUBS` |
-| CI: `Invalid BOARD` | Old board name after a ZMK update | Use `nice_nano//zmk` in `build.yaml` |
-| Build breaks without local change | Upstream ZMK changed | Keep `config/west.yml` pinned; read the error in `gh run view <id> --log-failed` |
+| CI: `Invalid BOARD` | Old board name after a ZMK update | Use `nice_nano//zmk` in `keyboard/build.yaml` |
+| Build breaks without local change | Upstream ZMK changed | Keep `keyboard/west.yml` pinned; read the error in `gh run view <id> --log-failed` |

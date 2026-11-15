@@ -1,0 +1,25 @@
+# Builds the Corne keyboard firmware from keyboard/ (ADR 0025) with ZMK's
+# reusable workflow. Runs only when keyboard/ or this file changes; the
+# firmware is the `firmware` artifact of the run.
+#
+# The reusable workflow is pinned to the same ZMK commit as keyboard/west.yml,
+# so an upstream change can't break the build; bump both together.
+name: keyboard firmware
+
+on:
+  push:
+    paths:
+      - keyboard/**
+      - .github/workflows/keyboard.yml
+  pull_request:
+    paths:
+      - keyboard/**
+      - .github/workflows/keyboard.yml
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: zmkfirmware/zmk/.github/workflows/build-user-config.yml@4dd95d7840eb3d5a3f59bb29fbf1ab054715ef85
+    with:
+      config_path: keyboard
+      build_matrix_path: keyboard/build.yaml

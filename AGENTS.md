@@ -1,6 +1,6 @@
 # dotfiles
 
-chezmoi Source Dir for macOS, Linux/WSL and native Windows. `.chezmoiroot` points chezmoi at `home/`, which mirrors `$HOME` in chezmoi's naming (`dot_`, `private_`, `empty_`, `create_`, `.tmpl`). Everything outside `home/` is repo meta (docs, CI) and never deploys. Vocabulary (Source Dir, Target, Profile, Application, Bootstrap Package) lives in `CONTEXT.md`; use those terms.
+chezmoi Source Dir for macOS, Linux/WSL and native Windows. `.chezmoiroot` points chezmoi at `home/`, which mirrors `$HOME` in chezmoi's naming (`dot_`, `private_`, `empty_`, `create_`, `.tmpl`). Everything outside `home/` is repo meta (docs, CI, the keyboard firmware in `keyboard/`, ADR 0025) and never deploys. Vocabulary (Source Dir, Target, Profile, Application, Bootstrap Package) lives in `CONTEXT.md`; use those terms.
 
 ## Workflow
 
