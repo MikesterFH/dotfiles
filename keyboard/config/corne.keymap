@@ -1,0 +1,288 @@
+/*
+ * Copyright (c) 2020 The ZMK Contributors
+ *
+ * SPDX-License-Identifier: MIT
+ */
+
+#include <behaviors.dtsi>
+#include <dt-bindings/zmk/keys.h>
+#include <dt-bindings/zmk/bt.h>
+
+// Layout im Betriebssystem: Deutsch (Schweiz) / Schweizerdeutsch.
+// ZMK sendet nur US-Tastenpositionen, darum werden Symbole hier als
+// Tastenkombinationen fuer das CH-DE Layout definiert.
+
+#define BASE      0
+#define LOWER     1
+#define RAISE_WIN 2
+#define MAC       3
+#define RAISE_MAC 4
+#define ADJUST    5
+#define WM_WIN    6
+#define WM_MAC    7
+
+// CH-DE, gleich auf Windows und macOS
+#define CH_UE    LBKT        // ü
+#define CH_OE    SEMI        // ö
+#define CH_AE    SQT         // ä
+#define CH_EXCL  LS(RBKT)    // !
+#define CH_DQT   LS(N2)      // "
+#define CH_DLLR  BSLH        // $
+#define CH_PRCNT LS(N5)      // %
+#define CH_AMPS  LS(N6)      // &
+#define CH_FSLH  LS(N7)      // /
+#define CH_ASTRK LS(N3)      // *
+#define CH_LPAR  LS(N8)      // (
+#define CH_RPAR  LS(N9)      // )
+#define CH_EQUAL LS(N0)      // =
+#define CH_PLUS  LS(N1)      // +
+#define CH_SQT   MINUS       // '
+#define CH_QMARK LS(MINUS)   // ?
+#define CH_MINUS FSLH        // -
+#define CH_UNDER LS(FSLH)    // _
+#define CH_LT    NUBS        // <
+#define CH_GT    LS(NUBS)    // >
+
+// CH-DE Windows (AltGr = rechte Alt-Taste)
+#define WIN_AT   RA(N2)      // @
+#define WIN_HASH RA(N3)      // #
+#define WIN_PIPE RA(N7)      // |
+#define WIN_BSLH RA(NUBS)    // backslash
+#define WIN_LBKT RA(LBKT)    // [
+#define WIN_RBKT RA(RBKT)    // ]
+#define WIN_LBRC RA(SQT)     // {
+#define WIN_RBRC RA(BSLH)    // }
+#define WIN_EURO RA(E)       // €
+
+// Schweizerdeutsch macOS (rechte Option: Terminals wie WezTerm werten linke Option als Meta)
+#define MAC_AT   RA(G)       // @
+#define MAC_HASH RA(N3)      // #
+#define MAC_PIPE RA(N7)      // |
+#define MAC_BSLH RA(LS(N7))  // backslash
+#define MAC_LBKT RA(N5)      // [
+#define MAC_RBKT RA(N6)      // ]
+#define MAC_LBRC RA(N8)      // {
+#define MAC_RBRC RA(N9)      // }
+#define MAC_EURO RA(E)       // €
+// macOS vertauscht bei ZMK-Boards die ISO-Tasten < und §, darum GRAVE statt NUBS
+#define MAC_LT   GRAVE       // <
+#define MAC_GT   LS(GRAVE)   // >
+
+// Fenstermanager-Layer: gleiche Tasten, Modifier pro OS
+// Windows GlazeWM: Alt (Ctrl+Alt waere AltGr), macOS AeroSpace: Ctrl+Alt
+#define WIN_WM(key) LA(key)
+#define MAC_WM(key) LC(LA(key))
+
+// TAB halten = WM-Layer. balanced: Layer schon, wenn waehrend TAB eine
+// andere Taste gedrueckt und losgelassen wird (sonst erst nach 200 ms)
+&lt {
+        flavor = "balanced";
+        tapping-term-ms = <200>;
+};
+
+/ {
+        // ^ ` ~ sind auf CH-DE Dead Keys: Taste + Space ergibt das Zeichen direkt
+        macros {
+                ch_caret: ch_caret {
+                        compatible = "zmk,behavior-macro";
+                        #binding-cells = <0>;
+                        bindings = <&macro_tap &kp EQUAL &kp SPACE>;
+                };
+                ch_grave: ch_grave {
+                        compatible = "zmk,behavior-macro";
+                        #binding-cells = <0>;
+                        bindings = <&macro_tap &kp LS(EQUAL) &kp SPACE>;
+                };
+                win_tilde: win_tilde {
+                        compatible = "zmk,behavior-macro";
+                        #binding-cells = <0>;
+                        bindings = <&macro_tap &kp RA(EQUAL) &kp SPACE>;
+                };
+                mac_tilde: mac_tilde {
+                        compatible = "zmk,behavior-macro";
+                        #binding-cells = <0>;
+                        bindings = <&macro_tap &kp RA(N) &kp SPACE>;
+                };
+
+                // Ctrl/Shift auf Raise: zuerst Raise ausschalten, dann Modifier halten,
+                // damit darunter die Buchstaben vom Base-Layer erreichbar sind.
+                // &to statt &tog: schaltet sicher aus (Base bleibt, im Mac-Modus auch MAC)
+                win_rctrl: win_rctrl {
+                        compatible = "zmk,behavior-macro";
+                        #binding-cells = <0>;
+                        wait-ms = <0>;
+                        tap-ms = <0>;
+                        bindings
+                                = <&macro_tap &to BASE>
+                                , <&macro_press &kp RCTRL>
+                                , <&macro_pause_for_release>
+                                , <&macro_release &kp RCTRL>;
+                };
+                win_rshft: win_rshft {
+                        compatible = "zmk,behavior-macro";
+                        #binding-cells = <0>;
+                        wait-ms = <0>;
+                        tap-ms = <0>;
+                        bindings
+                                = <&macro_tap &to BASE>
+                                , <&macro_press &kp RSHFT>
+                                , <&macro_pause_for_release>
+                                , <&macro_release &kp RSHFT>;
+                };
+                mac_rctrl: mac_rctrl {
+                        compatible = "zmk,behavior-macro";
+                        #binding-cells = <0>;
+                        wait-ms = <0>;
+                        tap-ms = <0>;
+                        bindings
+                                = <&macro_tap &to MAC>
+                                , <&macro_press &kp RCTRL>
+                                , <&macro_pause_for_release>
+                                , <&macro_release &kp RCTRL>;
+                };
+                mac_rshft: mac_rshft {
+                        compatible = "zmk,behavior-macro";
+                        #binding-cells = <0>;
+                        wait-ms = <0>;
+                        tap-ms = <0>;
+                        bindings
+                                = <&macro_tap &to MAC>
+                                , <&macro_press &kp RSHFT>
+                                , <&macro_pause_for_release>
+                                , <&macro_release &kp RSHFT>;
+                };
+        };
+
+        // Lower + Raise gleichzeitig halten aktiviert Adjust (Windows- und Mac-Modus)
+        conditional_layers {
+                compatible = "zmk,conditional-layers";
+                adjust_win {
+                        if-layers = <LOWER RAISE_WIN>;
+                        then-layer = <ADJUST>;
+                };
+                adjust_mac {
+                        if-layers = <LOWER RAISE_MAC>;
+                        then-layer = <ADJUST>;
+                };
+        };
+
+        keymap {
+                compatible = "zmk,keymap";
+
+                default_layer {
+// -----------------------------------------------------------------------------------------
+// |TAB/WM|  Q  |  W  |  E  |  R  |  T  |   |  Z  |  U   |  I  |  O  |  P  | BKSP |
+// | CTRL |  A  |  S  |  D  |  F  |  G  |   |  H  |  J   |  K  |  L  |  ö  |  ä   |
+// | SHFT |  Y  |  X  |  C  |  V  |  B  |   |  N  |  M   |  ,  |  .  |  -  | ESC  |
+//                    | GUI | LWR | SPC |   | ENT | RSE  | ALT |
+                        display-name = "Win";
+                        bindings = <
+   &lt WM_WIN TAB &kp Q &kp W &kp E &kp R &kp T   &kp Y &kp U  &kp I     &kp O   &kp P    &kp BSPC
+   &kp LCTRL &kp A &kp S &kp D &kp F &kp G   &kp H &kp J  &kp K     &kp L   &kp SEMI &kp SQT
+   &kp LSHFT &kp Z &kp X &kp C &kp V &kp B   &kp N &kp M  &kp COMMA &kp DOT &kp FSLH &kp ESC
+                  &kp LGUI &mo LOWER &kp SPACE   &kp RET &mo RAISE_WIN &kp LALT
+                        >;
+                };
+                lower_layer {
+// -----------------------------------------------------------------------------------------
+// |  TAB |  1  |  2  |  3  |  4  |  5  |   |  6  |  7  |  8  |  9  |  0  | BKSP |
+// | CTRL |     |     |     |     |     |   | LFT | DWN |  UP | RGT |     |      |
+// | SHFT |     |     |     |     |     |   | HOME| PGDN| PGUP| END |     |      |
+//                    | GUI |     | SPC |   | ENT |     | ALT |
+                        display-name = "Lower";
+                        bindings = <
+   &kp TAB    &kp N1 &kp N2 &kp N3 &kp N4 &kp N5   &kp N6   &kp N7    &kp N8    &kp N9    &kp N0 &kp BSPC
+   &kp LCTRL  &trans &trans &trans &trans &trans   &kp LEFT &kp DOWN  &kp UP    &kp RIGHT &trans &trans
+   &kp LSHFT  &trans &trans &trans &trans &trans   &kp HOME &kp PG_DN &kp PG_UP &kp END   &trans &trans
+                          	        &kp LGUI     &trans       &kp SPACE      &kp RET  &trans   &kp LALT
+                        >;
+                };
+
+                raise_win_layer {
+// -----------------------------------------------------------------------------------------
+// |  TAB |  !  |  @  |  #  |  $  |  %  |   |  ^  |  &  |  *  |  (  |  )  | BKSP |
+// | CTRL |  ü  |  ~  |  `  |  '  |  "  |   |  -  |  =  |  [  |  ]  |  \  | CTRL |
+// | SHFT |  <  |  >  |  ?  |  €  |  /  |   |  _  |  +  |  {  |  }  | "|" | SHFT |
+//                    | GUI |     | SPC |   | ENT |     | ALT |
+                        display-name = "Raise Win";
+                        bindings = <
+   &kp  TAB  &kp CH_EXCL &kp WIN_AT &kp WIN_HASH &kp CH_DLLR  &kp CH_PRCNT   &ch_caret    &kp CH_AMPS  &kp CH_ASTRK &kp CH_LPAR  &kp CH_RPAR  &kp BSPC
+   &kp LCTRL &kp CH_UE   &win_tilde &ch_grave    &kp CH_SQT   &kp CH_DQT     &kp CH_MINUS &kp CH_EQUAL &kp WIN_LBKT &kp WIN_RBKT &kp WIN_BSLH &win_rctrl
+   &kp LSHFT &kp CH_LT   &kp CH_GT  &kp CH_QMARK &kp WIN_EURO &kp CH_FSLH    &kp CH_UNDER &kp CH_PLUS  &kp WIN_LBRC &kp WIN_RBRC &kp WIN_PIPE &win_rshft
+                    	     &kp LGUI     &trans       &kp SPACE      &kp RET      &trans       &kp LALT
+                        >;
+                };
+
+                mac_layer {
+// Overlay, aktiv im Mac-Modus: Raise-Taste oeffnet den macOS Symbol-Layer,
+// TAB halten den AeroSpace-Layer
+                        display-name = "Mac";
+                        bindings = <
+   &lt WM_MAC TAB &trans &trans &trans &trans &trans   &trans &trans &trans &trans &trans &trans
+   &trans &trans &trans &trans &trans &trans   &trans &trans &trans &trans &trans &trans
+   &trans &trans &trans &trans &trans &trans   &trans &trans &trans &trans &trans &trans
+                        &trans &trans &trans   &trans &mo RAISE_MAC &trans
+                        >;
+                };
+
+                raise_mac_layer {
+// -----------------------------------------------------------------------------------------
+// |  TAB |  !  |  @  |  #  |  $  |  %  |   |  ^  |  &  |  *  |  (  |  )  | BKSP |
+// | CTRL |  ü  |  ~  |  `  |  '  |  "  |   |  -  |  =  |  [  |  ]  |  \  | CTRL |
+// | SHFT |  <  |  >  |  ?  |  €  |  /  |   |  _  |  +  |  {  |  }  | "|" | SHFT |
+//                    | GUI |     | SPC |   | ENT |     | ALT |
+                        display-name = "Raise Mac";
+                        bindings = <
+   &kp  TAB  &kp CH_EXCL &kp MAC_AT &kp MAC_HASH &kp CH_DLLR  &kp CH_PRCNT   &ch_caret    &kp CH_AMPS  &kp CH_ASTRK &kp CH_LPAR  &kp CH_RPAR  &kp BSPC
+   &kp LCTRL &kp CH_UE   &mac_tilde &ch_grave    &kp CH_SQT   &kp CH_DQT     &kp CH_MINUS &kp CH_EQUAL &kp MAC_LBKT &kp MAC_RBKT &kp MAC_BSLH &mac_rctrl
+   &kp LSHFT &kp MAC_LT  &kp MAC_GT &kp CH_QMARK &kp MAC_EURO &kp CH_FSLH    &kp CH_UNDER &kp CH_PLUS  &kp MAC_LBRC &kp MAC_RBRC &kp MAC_PIPE &mac_rshft
+                    	     &kp LGUI     &trans       &kp SPACE      &kp RET      &trans       &kp LALT
+                        >;
+                };
+
+                adjust_layer {
+// -----------------------------------------------------------------------------------------
+// | BOOT |  F1 |  F2 |  F3 |  F4 |  F5 |   |  F6 |  F7 |  F8 |  F9 | F10 | BOOT |
+// | BTCLR| BT1 | BT2 | BT3 | BT4 | BT5 |   | PREV| VOL-| VOL+| NEXT| F11 |  F12 |
+// |      | MAC |     |     |     |     |   | MUTE| PLAY| BRI-| BRI+|     |      |
+//                    |     |     |     |   |     |     |     |
+// BOOT: Bootloader der jeweiligen Haelfte (zum Flashen)
+// MAC:  schaltet Symbol-Layer zwischen Windows (Standard) und macOS um
+                        display-name = "Adjust";
+                        bindings = <
+   &bootloader &kp F1       &kp F2       &kp F3       &kp F4       &kp F5         &kp F6     &kp F7       &kp F8       &kp F9       &kp F10 &bootloader
+   &bt BT_CLR  &bt BT_SEL 0 &bt BT_SEL 1 &bt BT_SEL 2 &bt BT_SEL 3 &bt BT_SEL 4   &kp C_PREV &kp C_VOL_DN &kp C_VOL_UP &kp C_NEXT   &kp F11 &kp F12
+   &trans      &tog MAC     &trans       &trans       &trans       &trans         &kp C_MUTE &kp C_PP     &kp C_BRI_DN &kp C_BRI_UP &trans  &trans
+                                         &trans       &trans       &trans         &trans     &trans       &trans
+                        >;
+                };
+
+                wm_win_layer {
+// -----------------------------------------------------------------------------------------
+// | hold |  1  |  2  |  3  |  4  |  5  |   |  6  |  7  |  8  |  9  | TAB |      |
+// |      |  A  |  S  |     |  F  |  T  |   |  H  |  J  |  K  |  L  |     |      |
+// | SHFT |     |     |  C  |  R  |     |   |     |     |     |     |     |      |
+//                    |     |     | SPC |   |     | SHFT|     |
+// Jede Taste sendet Modifier + Taste (Windows: Alt, z.B. Alt+H)
+// SHFT (links oder Daumen) ergibt die Shift-Variante (verschieben)
+                        display-name = "WM Win";
+                        bindings = <
+   &trans &kp WIN_WM(N1) &kp WIN_WM(N2) &kp WIN_WM(N3) &kp WIN_WM(N4) &kp WIN_WM(N5)   &kp WIN_WM(N6) &kp WIN_WM(N7) &kp WIN_WM(N8) &kp WIN_WM(N9) &kp WIN_WM(TAB) &none
+   &none  &kp WIN_WM(A)  &kp WIN_WM(S)  &none          &kp WIN_WM(F)  &kp WIN_WM(T)    &kp WIN_WM(H)  &kp WIN_WM(J)  &kp WIN_WM(K)  &kp WIN_WM(L)  &none           &none
+   &kp LSHFT &none       &none          &kp WIN_WM(C)  &kp WIN_WM(R)  &none            &none          &none          &none          &none          &none           &none
+                                        &none          &none          &kp WIN_WM(SPACE)   &none     &kp LSHFT      &none
+                        >;
+                };
+
+                wm_mac_layer {
+// Wie WM Win, Modifier macOS: Ctrl+Alt (AeroSpace, z.B. Ctrl+Alt+H)
+                        display-name = "WM Mac";
+                        bindings = <
+   &trans &kp MAC_WM(N1) &kp MAC_WM(N2) &kp MAC_WM(N3) &kp MAC_WM(N4) &kp MAC_WM(N5)   &kp MAC_WM(N6) &kp MAC_WM(N7) &kp MAC_WM(N8) &kp MAC_WM(N9) &kp MAC_WM(TAB) &none
+   &none  &kp MAC_WM(A)  &kp MAC_WM(S)  &none          &kp MAC_WM(F)  &kp MAC_WM(T)    &kp MAC_WM(H)  &kp MAC_WM(J)  &kp MAC_WM(K)  &kp MAC_WM(L)  &none           &none
+   &kp LSHFT &none       &none          &kp MAC_WM(C)  &kp MAC_WM(R)  &none            &none          &none          &none          &none          &none           &none
+                                        &none          &none          &kp MAC_WM(SPACE)   &none     &kp LSHFT      &none
+                        >;
+                };
+        };
+};
