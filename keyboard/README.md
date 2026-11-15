@@ -56,8 +56,7 @@ The prefixes in `corne.keymap`:
 | 3 | `MAC`       | Mac       | toggle `MAC` in Adjust; overlay that only remaps `RSE` |
 | 4 | `RAISE_MAC` | Raise Mac | hold right thumb `RSE` (Mac mode) |
 | 5 | `ADJUST`    | Adjust    | hold `LWR` + `RSE` (conditional layer) |
-| 6 | `WM_WIN`    | WM Win    | hold `TAB` (Windows mode) |
-| 7 | `WM_MAC`    | WM Mac    | hold `TAB` (Mac mode, via `MAC` overlay) |
+| 6 | `WM`        | WM        | hold `TAB` (both modes) |
 
 Data flow when pressing `RSE`:
 
@@ -66,8 +65,7 @@ Windows mode:  BASE ──RSE──▶ RAISE_WIN
 Mac mode:      BASE + MAC ──RSE──▶ RAISE_MAC   (MAC overlay replaces &mo RAISE_WIN)
 Both:          LWR + RSE ──▶ ADJUST            (conditional_layers)
 
-Hold TAB:      Windows mode ──▶ WM_WIN (Alt+key,      GlazeWM)
-               Mac mode     ──▶ WM_MAC (Ctrl+Alt+key, AeroSpace)
+Hold TAB:      both modes   ──▶ WM (Ctrl+Alt+key: AeroSpace on macOS, GlazeWM on Windows)
 ```
 
 ## 2. Usage
@@ -126,16 +124,18 @@ Hold TAB:      Windows mode ──▶ WM_WIN (Alt+key,      GlazeWM)
 ```
 
 - Tapping `TAB` still sends `TAB`; holding it opens the layer (`&lt`, flavor `balanced`, 200 ms).
-- Every key sends the OS window-manager modifier plus the key, so both WMs bind the same keys:
-  - Windows (GlazeWM): `Alt` – `Ctrl+Alt` is AltGr on Windows and would swallow `@ # |`.
-  - macOS (AeroSpace): `Ctrl+Alt` – matches `home/dot_config/aerospace/aerospace.toml`.
+- Every key sends **left Ctrl + left Alt** plus the key (`WM_KEY`), the same on both systems:
+  - macOS (AeroSpace): `ctrl-alt-*` in `home/dot_config/aerospace/aerospace.toml`.
+  - Windows (GlazeWM): `lctrl+lalt+*` in `home/dot_glzr/glazewm/config.yaml`. Windows reports
+    AltGr as `lctrl+ralt`, so binding the *left* Alt keeps `@ # | [ ] { }` typeable (ADR 0024).
+    Without GlazeWM running, a WM key reaches the app as AltGr (e.g. `2` types `@`).
 - `SHFT` (left, or right thumb) adds Shift, i.e. the "move" variant: `TAB` + `SHFT` + `H` = move window
   left, `TAB` + `SHFT` + `3` = move window to workspace 3.
 - Unused positions are `&none`, so a stray key in the layer does nothing.
 
 The diagram shows the **key sent**, not the physical key. Physical key (base layer) → action:
 
-| Physical key | Sends (macOS) | AeroSpace | `+ SHFT` |
+| Physical key | Sends | AeroSpace | `+ SHFT` |
 |---|---|---|---|
 | `Q W E R T` | `⌃⌥1`–`⌃⌥5` | workspace 1–5 | move window to workspace 1–5 |
 | `Z U I O` | `⌃⌥6`–`⌃⌥9` | workspace 6–9 | move window to workspace 6–9 |
@@ -148,6 +148,9 @@ The diagram shows the **key sent**, not the physical key. Physical key (base lay
 | `C` | `⌃⌥c` | Raycast shortcuts cheat sheet | – |
 | `V` | `⌃⌥r` | resize mode | – |
 | `SPC` | `⌃⌥space` | Raycast | – |
+
+GlazeWM binds the same keys. Actions without a GlazeWM command (accordion, most of service
+mode) and the macOS-only `C`/`SPC` (Raycast) are unbound on Windows (ADR 0024).
 
 AeroSpace modes, reachable while still holding `TAB`:
 
@@ -175,7 +178,8 @@ AeroSpace modes, reachable while still holding `TAB`:
    - **Keep both Raise layers in sync:** same arrangement, only the `WIN_*` / `MAC_*` defines differ.
    - Update the ASCII comment above the layer.
    - **Window-manager keys:** a change to the WM layer usually needs the matching change in
-     `home/dot_config/aerospace/aerospace.toml` (and the GlazeWM config) in the same commit.
+     `home/dot_config/aerospace/aerospace.toml` and `home/dot_glzr/glazewm/config.yaml` in the
+     same commit.
 3. Commit (`dotfiles: …`) and push. The `keyboard firmware` workflow builds both halves
    (`gh run list --workflow keyboard.yml --branch <branch>`).
 4. Download the `firmware` artifact from the run.

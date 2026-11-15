@@ -18,8 +18,7 @@
 #define MAC       3
 #define RAISE_MAC 4
 #define ADJUST    5
-#define WM_WIN    6
-#define WM_MAC    7
+#define WM        6
 
 // CH-DE, gleich auf Windows und macOS
 #define CH_UE    LBKT        // ü
@@ -68,10 +67,10 @@
 #define MAC_LT   GRAVE       // <
 #define MAC_GT   LS(GRAVE)   // >
 
-// Fenstermanager-Layer: gleiche Tasten, Modifier pro OS
-// Windows GlazeWM: Alt (Ctrl+Alt waere AltGr), macOS AeroSpace: Ctrl+Alt
-#define WIN_WM(key) LA(key)
-#define MAC_WM(key) LC(LA(key))
+// Fenstermanager-Layer: linkes Ctrl + linkes Alt + Taste auf beiden OS
+// (macOS AeroSpace ctrl-alt, Windows GlazeWM lctrl+lalt). AltGr meldet
+// Windows als lctrl+ralt, die CH-Symbole bleiben dadurch frei.
+#define WM_KEY(key) LC(LA(key))
 
 // TAB halten = WM-Layer. balanced: Layer schon, wenn waehrend TAB eine
 // andere Taste gedrueckt und losgelassen wird (sonst erst nach 200 ms)
@@ -177,7 +176,7 @@
 //                    | GUI | LWR | SPC |   | ENT | RSE  | ALT |
                         display-name = "Win";
                         bindings = <
-   &lt WM_WIN TAB &kp Q &kp W &kp E &kp R &kp T   &kp Y &kp U  &kp I     &kp O   &kp P    &kp BSPC
+   &lt WM TAB &kp Q &kp W &kp E &kp R &kp T   &kp Y &kp U  &kp I     &kp O   &kp P    &kp BSPC
    &kp LCTRL &kp A &kp S &kp D &kp F &kp G   &kp H &kp J  &kp K     &kp L   &kp SEMI &kp SQT
    &kp LSHFT &kp Z &kp X &kp C &kp V &kp B   &kp N &kp M  &kp COMMA &kp DOT &kp FSLH &kp ESC
                   &kp LGUI &mo LOWER &kp SPACE   &kp RET &mo RAISE_WIN &kp LALT
@@ -214,11 +213,10 @@
                 };
 
                 mac_layer {
-// Overlay, aktiv im Mac-Modus: Raise-Taste oeffnet den macOS Symbol-Layer,
-// TAB halten den AeroSpace-Layer
+// Overlay, aktiv im Mac-Modus: Raise-Taste oeffnet den macOS Symbol-Layer
                         display-name = "Mac";
                         bindings = <
-   &lt WM_MAC TAB &trans &trans &trans &trans &trans   &trans &trans &trans &trans &trans &trans
+   &trans &trans &trans &trans &trans &trans   &trans &trans &trans &trans &trans &trans
    &trans &trans &trans &trans &trans &trans   &trans &trans &trans &trans &trans &trans
    &trans &trans &trans &trans &trans &trans   &trans &trans &trans &trans &trans &trans
                         &trans &trans &trans   &trans &mo RAISE_MAC &trans
@@ -257,31 +255,20 @@
                         >;
                 };
 
-                wm_win_layer {
+                wm_layer {
 // -----------------------------------------------------------------------------------------
 // | hold |  1  |  2  |  3  |  4  |  5  |   |  6  |  7  |  8  |  9  | TAB |      |
 // |      |  A  |  S  |     |  F  |  T  |   |  H  |  J  |  K  |  L  |     |      |
 // | SHFT |     |     |  C  |  R  |     |   |     |     |     |     |     |      |
 //                    |     |     | SPC |   |     | SHFT|     |
-// Jede Taste sendet Modifier + Taste (Windows: Alt, z.B. Alt+H)
+// Jede Taste sendet Ctrl+Alt + Taste (AeroSpace und GlazeWM, z.B. Ctrl+Alt+H)
 // SHFT (links oder Daumen) ergibt die Shift-Variante (verschieben)
-                        display-name = "WM Win";
+                        display-name = "WM";
                         bindings = <
-   &trans &kp WIN_WM(N1) &kp WIN_WM(N2) &kp WIN_WM(N3) &kp WIN_WM(N4) &kp WIN_WM(N5)   &kp WIN_WM(N6) &kp WIN_WM(N7) &kp WIN_WM(N8) &kp WIN_WM(N9) &kp WIN_WM(TAB) &none
-   &none  &kp WIN_WM(A)  &kp WIN_WM(S)  &none          &kp WIN_WM(F)  &kp WIN_WM(T)    &kp WIN_WM(H)  &kp WIN_WM(J)  &kp WIN_WM(K)  &kp WIN_WM(L)  &none           &none
-   &kp LSHFT &none       &none          &kp WIN_WM(C)  &kp WIN_WM(R)  &none            &none          &none          &none          &none          &none           &none
-                                        &none          &none          &kp WIN_WM(SPACE)   &none     &kp LSHFT      &none
-                        >;
-                };
-
-                wm_mac_layer {
-// Wie WM Win, Modifier macOS: Ctrl+Alt (AeroSpace, z.B. Ctrl+Alt+H)
-                        display-name = "WM Mac";
-                        bindings = <
-   &trans &kp MAC_WM(N1) &kp MAC_WM(N2) &kp MAC_WM(N3) &kp MAC_WM(N4) &kp MAC_WM(N5)   &kp MAC_WM(N6) &kp MAC_WM(N7) &kp MAC_WM(N8) &kp MAC_WM(N9) &kp MAC_WM(TAB) &none
-   &none  &kp MAC_WM(A)  &kp MAC_WM(S)  &none          &kp MAC_WM(F)  &kp MAC_WM(T)    &kp MAC_WM(H)  &kp MAC_WM(J)  &kp MAC_WM(K)  &kp MAC_WM(L)  &none           &none
-   &kp LSHFT &none       &none          &kp MAC_WM(C)  &kp MAC_WM(R)  &none            &none          &none          &none          &none          &none           &none
-                                        &none          &none          &kp MAC_WM(SPACE)   &none     &kp LSHFT      &none
+   &trans &kp WM_KEY(N1) &kp WM_KEY(N2) &kp WM_KEY(N3) &kp WM_KEY(N4) &kp WM_KEY(N5)   &kp WM_KEY(N6) &kp WM_KEY(N7) &kp WM_KEY(N8) &kp WM_KEY(N9) &kp WM_KEY(TAB) &none
+   &none  &kp WM_KEY(A)  &kp WM_KEY(S)  &none          &kp WM_KEY(F)  &kp WM_KEY(T)    &kp WM_KEY(H)  &kp WM_KEY(J)  &kp WM_KEY(K)  &kp WM_KEY(L)  &none           &none
+   &kp LSHFT &none       &none          &kp WM_KEY(C)  &kp WM_KEY(R)  &none            &none          &none          &none          &none          &none           &none
+                                        &none          &none          &kp WM_KEY(SPACE)   &none     &kp LSHFT      &none
                         >;
                 };
         };
