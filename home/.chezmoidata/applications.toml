@@ -389,3 +389,17 @@ profiles = ["personal", "dev"]
 brew     = "cask:nikitabobko/tap/aerospace"
 brew_tap = "nikitabobko/tap"
 nix      = "aerospace"
+
+# Windows counterpart to AeroSpace, with Zebar as its status bar
+# (docs/adr/0024-glazewm-and-zebar-on-windows.md). GlazeWM starts Zebar.
+[[application]]
+name     = "glazewm"
+kind     = "gui"
+profiles = ["personal", "dev"]
+winget   = "glzr-io.glazewm"
+
+[[application]]
+name     = "zebar"
+kind     = "gui"
+profiles = ["personal", "dev"]
+winget   = "glzr-io.zebar"

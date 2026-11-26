@@ -211,6 +211,8 @@ else
         assert_absent ".config/cheatsheet"
     fi
 fi
+# GlazeWM and Zebar are Windows-only (docs/adr/0024-glazewm-and-zebar-on-windows.md)
+assert_absent ".glzr"
 
 # macOS Application manifest (Homebrew), see
 # docs/adr/0006-application-category-and-profile-manifests.md: macOS-only,
