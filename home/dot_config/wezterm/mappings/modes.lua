@@ -10,6 +10,8 @@ local split = require "mappings.split"
 local Config = {}
 
 local key_tables = {
+  leader_mode = require "mappings.leader",
+
   -- Repeat leader resizing until Escape, an unrelated key, or 1 second of inactivity.
   resize_mode = {
     { "<ESC>", "PopKeyTable", "exit" },
@@ -142,25 +144,13 @@ local key_tables = {
     ---quick split and nav
     { '<C-S-">', split.right, "vsplit" },
     { "<C-S-%>", split.down, "hsplit" },
-    { "<C-M-h>", act.ActivatePaneDirection "Left", "move left" },
-    { "<C-M-j>", act.ActivatePaneDirection "Down", "mode down" },
-    { "<C-M-k>", act.ActivatePaneDirection "Up", "move up" },
-    { "<C-M-l>", act.ActivatePaneDirection "Right", "move right" },
+    { "<W-S-h>", act.ActivatePaneDirection "Left", "move left" },
+    { "<W-S-j>", act.ActivatePaneDirection "Down", "move down" },
+    { "<W-S-k>", act.ActivatePaneDirection "Up", "move up" },
+    { "<W-S-l>", act.ActivatePaneDirection "Right", "move right" },
 
     ---key tables
-    { "<leader>h", act.ActivateKeyTable { name = "help_mode", one_shot = true }, "help" },
-    {
-      "<leader>w",
-      act.ActivateKeyTable { name = "window_mode", one_shot = false },
-      "window mode",
-    },
-    {
-      "<leader>f",
-      act.ActivateKeyTable { name = "font_mode", one_shot = false },
-      "font mode",
-    },
-    { "<leader>c", act.ActivateCopyMode, "copy mode" },
-    { "<leader>s", act.Search "CurrentSelectionOrEmptyString", "search mode" },
+    { "<C-f>", act.ActivateKeyTable { name = "leader_mode", one_shot = true }, "leader" },
   },
   -- }}}
 

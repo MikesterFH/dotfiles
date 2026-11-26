@@ -48,3 +48,23 @@ bindkey '^[[B' history-search-forward
 
 command -v zoxide &>/dev/null && eval "$(zoxide init zsh)"
 command -v starship &>/dev/null && eval "$(starship init zsh)"
+
+# -- wezterm ------------------------------------------------------------------
+
+# Shell integration: sets the WEZTERM_PROG user var to the running command, so
+# wezterm can forward C-f / C-hjkl to ssh/tmux panes (utils/passthrough.lua).
+# Panes in the unix mux domain do not expose their foreground process otherwise.
+if [[ "$TERM_PROGRAM" == "WezTerm" ]]; then
+  for f in /Applications/WezTerm.app/Contents/Resources/wezterm.sh \
+           /usr/share/wezterm/shell-integration/wezterm.sh; do
+    [[ -r "$f" ]] && { source "$f"; break; }
+  done
+fi
+
+# Reset terminal modes a dropped ssh/tmux session left on (mouse tracking, focus
+# events, application cursor keys), else every mouse move becomes shell input.
+__reset_term_modes() {
+  printf '\e[?1000l\e[?1002l\e[?1003l\e[?1005l\e[?1006l\e[?1015l\e[?1004l\e[?1l'
+}
+autoload -Uz add-zsh-hook
+add-zsh-hook precmd __reset_term_modes

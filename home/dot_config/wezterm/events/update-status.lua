@@ -42,6 +42,7 @@ e.__get_modes = function()
   ---@field help_mode table "NORMAL" mode.
   ---@field pick_mode table "PICK" mode.
   return {
+    leader_mode = { i = "󰌌", txt = "LEADER", bg = e.theme.ansi[4], pad = 5 },
     search_mode = { i = "󰍉", txt = "SEARCH", bg = e.theme.brights[4], pad = 5 },
     window_mode = { i = "󱂬", txt = "WINDOW", bg = e.theme.ansi[6], pad = 4 },
     copy_mode = { i = "󰆏", txt = "COPY", bg = e.theme.brights[3], pad = 5 },
