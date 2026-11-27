@@ -1,0 +1,25 @@
+{{- /* Global APM manifest (docs/adr/0026-agent-config-via-apm.md).
+       `apm install -g` reads it from ~/.apm and deploys every dependency
+       into the harnesses' user dirs (~/.claude, ~/.copilot,
+       ~/.config/opencode). It runs from
+       run_onchange_after_sync-apm-packages whenever this file or the
+       agents/ package renders differently.
+
+       - The own package is agents/ at the repo root, by absolute path:
+         APM refuses relative local paths at user scope. That path differs
+         per machine, so ~/.apm/apm.lock.yaml is local state and is not
+         committed. Pin every remote dependency to a tag or commit here
+         instead (`owner/repo#v1.2.0`).
+       - MCP servers: `registry: false` entries with `transport` and
+         `command`/`args` or `url`/`headers`. Secrets only as `${VAR}`;
+         the sync script runs APM with every such variable unset, otherwise
+         APM writes the resolved value into ~/.claude.json.
+       - Edit here, never with `apm install -g <pkg>`: the next apply
+         restores this file and APM removes the package again. */ -}}
+name: dotfiles-global
+version: 1.0.0
+targets: [claude, copilot, opencode]
+dependencies:
+  apm:
+    - {{ joinPath .chezmoi.workingTree "agents" | toJson }}
+  mcp: []

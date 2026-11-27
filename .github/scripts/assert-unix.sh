@@ -153,6 +153,38 @@ assert_file ".config/helix/config.toml"
 assert_file ".config/helix/languages.toml"
 assert_file ".config/hunk/config.toml"
 
+# Agent harness config via APM (docs/adr/0026-agent-config-via-apm.md): the
+# global manifest points at the repo's agents/ package by absolute path and
+# names the three harnesses; apm itself is a pinned mise tool. The lockfile
+# is per-machine state, never deployed.
+if jq -e 'any(.[]; .name == "apm")' <<<"$apps_json" >/dev/null; then
+    apmfile="$dest/.apm/apm.yml"
+    assert_file ".apm/apm.yml"
+    assert_absent ".apm/apm.lock.yaml"
+    if [ -f "$apmfile" ] && grep -qE '^    - "/.*/agents"$' "$apmfile"; then
+        ok "apm.yml: agents/ package by absolute path"
+    else
+        bad "apm.yml: agents/ package reference missing or not absolute"
+    fi
+    if [ -f "$apmfile" ] && grep -qxF 'targets: [claude, copilot, opencode]' "$apmfile"; then
+        ok "apm.yml: targets claude, copilot, opencode"
+    else
+        bad "apm.yml: targets line missing or changed"
+    fi
+    if [ -f "$repo/agents/apm.yml" ]; then
+        ok "agents/ package manifest present in repo"
+    else
+        bad "agents/apm.yml missing in repo"
+    fi
+    if [ -f "$misefile" ] && grep -qE '^"github:microsoft/apm" = "[0-9]+\.[0-9]+\.[0-9]+"$' "$misefile"; then
+        ok "mise config: github:microsoft/apm pinned"
+    else
+        bad "mise config: github:microsoft/apm missing or not pinned to an exact version"
+    fi
+else
+    assert_absent ".apm"
+fi
+
 # Windows-only paths must not appear on macOS/Linux
 assert_absent ".psmux.conf"
 assert_absent ".config/powershell/profile.ps1"

@@ -129,6 +129,13 @@ AppData/Local/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe
 Library/Application Support/iTerm2
 {{ end }}
 
+# Global APM manifest, deployed into the agent harnesses by the
+# sync-apm-packages scripts (docs/adr/0026-agent-config-via-apm.md). Only
+# where apm is an Application; never on devpod (see below).
+{{ if not (has "apm" $appNames) }}
+.apm
+{{ end }}
+
 # DevPod/devcontainer opt-in (chezmoi init --promptBool devpod=true), narrows
 # the managed set to today's install-devpod-dotfiles.sh PACKAGES: git, nvim,
 # starship, zsh. Listed on top of whatever the OS switch above already
@@ -152,6 +159,7 @@ Library/Application Support/iTerm2
 .config/apt-packages.txt
 .config/yazi
 .config/zen-profile
+.apm
 {{ end }}
 
 # Preserves install.sh's SKIP_FILES/SKIP_DIRS behavior: matched by name,

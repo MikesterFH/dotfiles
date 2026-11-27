@@ -158,6 +158,8 @@ home/                 # mirrors $HOME
   .chezmoitemplates/  # shared template partials (VS Code/zed settings reused across OS paths)
   .chezmoiscripts/    # run_* scripts, grouped by OS; creates no directory in $HOME
     unix/  darwin/  linux/  windows/
+agents/               # own APM package: skills etc. for every agent harness (ADR 0026)
+keyboard/             # Corne ZMK config (ADR 0025)
 docs/  .github/       # ADRs, agent docs, CI
 ```
 

@@ -324,6 +324,20 @@ mise_arch = { windows = ["amd64"] }
 brew      = "hunk"
 nix       = { flake = "hunk" }
 
+# -- Agent harness config (docs/adr/0026-agent-config-via-apm.md) -----------
+
+# APM deploys the agents/ package and MCP servers from ~/.apm/apm.yml into
+# Claude Code, Copilot and opencode. Pinned: APM is 0.x and has moved
+# deploy paths between minors. Release binaries are x86_64-only on Windows.
+# Not on Nix yet (no nixpkgs package).
+[[application]]
+name      = "apm"
+kind      = "cli"
+profiles  = ["personal", "dev", "dev-server"]
+mise      = "github:microsoft/apm"
+mise_arch = { windows = ["amd64"] }
+version   = "0.39.1"
+
 # -- GUI apps, per Profile (ADR 0006) ---------------------------------------
 
 [[application]]

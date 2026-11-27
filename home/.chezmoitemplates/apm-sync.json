@@ -1,0 +1,29 @@
+{{- /* Inputs for the run_onchange_after_sync-apm-packages scripts
+       (docs/adr/0026-agent-config-via-apm.md), as JSON:
+         enabled  apm is an Application of this Profile and mise installs it
+                  on this OS/arch (no Windows ARM build), so there is an apm
+                  to run
+         hash    rerun trigger: the rendered ~/.apm/apm.yml plus the path
+                  and content of every file in the agents/ package, so a
+                  new, renamed or edited skill reruns `apm install -g`
+         secrets  every ${VAR} / ${env:VAR} the manifest references; the
+                  scripts unset them so APM keeps the reference instead of
+                  writing the value into ~/.claude.json
+       Use: {{- $apm := includeTemplate "apm-sync.json" . | fromJson -}} */ -}}
+{{- $enabled := false -}}
+{{- range includeTemplate "applications.json" . | fromJson -}}
+{{-   if and (eq .name "apm") .via_mise -}}{{ $enabled = true }}{{- end -}}
+{{- end -}}
+{{- $manifest := includeTemplate "dot_apm/apm.yml.tmpl" . -}}
+{{- $pkg := joinPath .chezmoi.workingTree "agents" -}}
+{{- $parts := list ($manifest | sha256sum) -}}
+{{- range glob (joinPath $pkg "**") -}}
+{{-   if not (stat .).isDir -}}
+{{-     $parts = append $parts (printf "%s:%s" (trimPrefix $pkg .) (include . | sha256sum)) -}}
+{{-   end -}}
+{{- end -}}
+{{- $secrets := list -}}
+{{- range regexFindAll "\\$\\{(?:env:)?[A-Za-z_][A-Za-z0-9_]*\\}" $manifest -1 -}}
+{{-   $secrets = append $secrets (regexReplaceAll "^\\$\\{(?:env:)?|\\}$" . "") -}}
+{{- end -}}
+{{- dict "enabled" $enabled "hash" ($parts | join "\n" | sha256sum) "secrets" ($secrets | uniq) | toJson -}}
