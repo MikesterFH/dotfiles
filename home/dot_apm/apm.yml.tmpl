@@ -9,7 +9,9 @@
          APM refuses relative local paths at user scope. That path differs
          per machine, so ~/.apm/apm.lock.yaml is local state and is not
          committed. Pin every remote dependency to a tag or commit here
-         instead (`owner/repo#v1.2.0`).
+         instead (`owner/repo#v1.2.0`). The Nix module sets `apmAgentsPath`
+         to a writable copy: APM fails on a read-only local package, such as
+         one in the Nix store.
        - MCP servers: `registry: false` entries with `transport` and
          `command`/`args` or `url`/`headers`. Secrets only as `${VAR}`;
          the sync script runs APM with every such variable unset, otherwise
@@ -21,5 +23,5 @@ version: 1.0.0
 targets: [claude, copilot, opencode]
 dependencies:
   apm:
-    - {{ joinPath .chezmoi.workingTree "agents" | toJson }}
+    - {{ get . "apmAgentsPath" | default (joinPath .chezmoi.workingTree "agents") | toJson }}
   mcp: []
