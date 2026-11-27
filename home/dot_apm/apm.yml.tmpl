@@ -16,6 +16,10 @@
          `command`/`args` or `url`/`headers`. Secrets only as `${VAR}`;
          the sync script runs APM with every such variable unset, otherwise
          APM writes the resolved value into ~/.claude.json.
+       - azure-devops (dev profile, org from the chezmoi config prompt
+         azureDevops.org): microsoft/azure-devops-mcp over stdio via npx,
+         pinned (via `cmd /c` on Windows, which can't spawn npx.cmd
+         directly); it signs in through the browser (Entra) on first use.
        - Edit here, never with `apm install -g <pkg>`: the next apply
          restores this file and APM removes the package again. */ -}}
 name: dotfiles-global
@@ -24,4 +28,19 @@ targets: [claude, copilot, opencode]
 dependencies:
   apm:
     - {{ get . "apmAgentsPath" | default (joinPath .chezmoi.workingTree "agents") | toJson }}
+{{- $adoOrg := dig "azureDevops" "org" "" . }}
+{{- if and (eq .profile "dev") $adoOrg }}
+  mcp:
+    - name: azure-devops
+      registry: false
+      transport: stdio
+{{-   if eq .chezmoi.os "windows" }}
+      command: cmd
+      args: ["/c", "npx", "-y", "@azure-devops/mcp@2.11.0", {{ $adoOrg | toJson }}]
+{{-   else }}
+      command: npx
+      args: ["-y", "@azure-devops/mcp@2.11.0", {{ $adoOrg | toJson }}]
+{{-   end }}
+{{- else }}
   mcp: []
+{{- end }}

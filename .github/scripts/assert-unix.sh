@@ -181,6 +181,18 @@ if jq -e 'any(.[]; .name == "apm")' <<<"$apps_json" >/dev/null; then
     else
         bad "mise config: github:microsoft/apm missing or not pinned to an exact version"
     fi
+    # azure-devops MCP: dev only (CI seeds azureDevops.org), pinned npx package
+    if [ "$profile" = "dev" ]; then
+        if [ -f "$apmfile" ] && grep -qE '^      args: \["-y", "@azure-devops/mcp@[0-9]+\.[0-9]+\.[0-9]+", "ci-org"\]$' "$apmfile"; then
+            ok "apm.yml: azure-devops MCP pinned, with the org"
+        else
+            bad "apm.yml: azure-devops MCP missing, unpinned or without the org"
+        fi
+    elif [ -f "$apmfile" ] && grep -qF 'azure-devops' "$apmfile"; then
+        bad "apm.yml: azure-devops MCP outside the dev profile"
+    else
+        ok "apm.yml: no azure-devops MCP outside dev"
+    fi
 else
     assert_absent ".apm"
 fi

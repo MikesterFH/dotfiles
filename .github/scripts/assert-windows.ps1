@@ -213,6 +213,21 @@ if ($apmApp) {
             $script:failed = $true
         }
     }
+    # azure-devops MCP: dev only (CI seeds azureDevops.org), pinned npx
+    # package behind cmd /c
+    if ($MachineProfile -eq "dev") {
+        if ($apmManifest -match '(?m)^      args: \["/c", "npx", "-y", "@azure-devops/mcp@\d+\.\d+\.\d+", "ci-org"\]\r?$') {
+            Write-Host "[OK]   apm.yml: azure-devops MCP pinned, with the org"
+        } else {
+            Write-Host "[FAIL] apm.yml: azure-devops MCP missing, unpinned or without the org"
+            $script:failed = $true
+        }
+    } elseif ($apmManifest -match 'azure-devops') {
+        Write-Host "[FAIL] apm.yml: azure-devops MCP outside the dev profile"
+        $script:failed = $true
+    } else {
+        Write-Host "[OK]   apm.yml: no azure-devops MCP outside dev"
+    }
 } else {
     Assert-Absent ".apm"
 }
