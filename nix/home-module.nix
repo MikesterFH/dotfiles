@@ -165,7 +165,8 @@ in {
     # activation, not at build time. The manifest is copied, not linked:
     # `apm compile -g` refuses a symlinked apm.yml. agents/ is copied out of the
     # store with write permission: APM fails on a read-only local package
-    # ("open() missing required argument 'flags'"). Reruns when the hash of
+    # ("open() missing required argument 'flags'", microsoft/apm#5544; drop the
+    # copy and apmAgentsPath once that is fixed). Reruns when the hash of
     # manifest + agents/ changes; the stamp is only written on success, and a
     # failure (name clash with an unmanaged skill, an MCP entry edited in a
     # harness) warns instead of failing the switch, so the next switch retries.

@@ -11,7 +11,7 @@
          committed. Pin every remote dependency to a tag or commit here
          instead (`owner/repo#v1.2.0`). The Nix module sets `apmAgentsPath`
          to a writable copy: APM fails on a read-only local package, such as
-         one in the Nix store.
+         one in the Nix store (microsoft/apm#5544).
        - MCP servers: `registry: false` entries with `transport` and
          `command`/`args` or `url`/`headers`. Secrets only as `${VAR}`;
          the sync script runs APM with every such variable unset, otherwise
