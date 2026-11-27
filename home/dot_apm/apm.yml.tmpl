@@ -1,0 +1,46 @@
+{{- /* Global APM manifest (docs/adr/0026-agent-config-via-apm.md).
+       `apm install -g` reads it from ~/.apm and deploys every dependency
+       into the harnesses' user dirs (~/.claude, ~/.copilot,
+       ~/.config/opencode). It runs from
+       run_onchange_after_sync-apm-packages whenever this file or the
+       agents/ package renders differently.
+
+       - The own package is agents/ at the repo root, by absolute path:
+         APM refuses relative local paths at user scope. That path differs
+         per machine, so ~/.apm/apm.lock.yaml is local state and is not
+         committed. Pin every remote dependency to a tag or commit here
+         instead (`owner/repo#v1.2.0`). The Nix module sets `apmAgentsPath`
+         to a writable copy: APM fails on a read-only local package, such as
+         one in the Nix store (microsoft/apm#5544).
+       - MCP servers: `registry: false` entries with `transport` and
+         `command`/`args` or `url`/`headers`. Secrets only as `${VAR}`;
+         the sync script runs APM with every such variable unset, otherwise
+         APM writes the resolved value into ~/.claude.json.
+       - azure-devops (dev profile, org from the chezmoi config prompt
+         azureDevops.org): microsoft/azure-devops-mcp over stdio via npx,
+         pinned (via `cmd /c` on Windows, which can't spawn npx.cmd
+         directly); it signs in through the browser (Entra) on first use.
+       - Edit here, never with `apm install -g <pkg>`: the next apply
+         restores this file and APM removes the package again. */ -}}
+name: dotfiles-global
+version: 1.0.0
+targets: [claude, copilot, opencode]
+dependencies:
+  apm:
+    - {{ get . "apmAgentsPath" | default (joinPath .chezmoi.workingTree "agents") | toJson }}
+{{- $adoOrg := dig "azureDevops" "org" "" . }}
+{{- if and (eq .profile "dev") $adoOrg }}
+  mcp:
+    - name: azure-devops
+      registry: false
+      transport: stdio
+{{-   if eq .chezmoi.os "windows" }}
+      command: cmd
+      args: ["/c", "npx", "-y", "@azure-devops/mcp@2.11.0", {{ $adoOrg | toJson }}]
+{{-   else }}
+      command: npx
+      args: ["-y", "@azure-devops/mcp@2.11.0", {{ $adoOrg | toJson }}]
+{{-   end }}
+{{- else }}
+  mcp: []
+{{- end }}

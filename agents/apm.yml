@@ -1,0 +1,11 @@
+# The dotfiles' own APM package: skills, instructions, prompts and agents
+# shared by every agent harness (docs/adr/0026-agent-config-via-apm.md).
+# Pulled in by ~/.apm/apm.yml (home/dot_apm/apm.yml.tmpl) as a local
+# dependency; `apm install -g` deploys it into Claude Code, Copilot and
+# opencode. Content lives under .apm/ in APM's layout:
+#   .apm/skills/<name>/SKILL.md
+#   .apm/instructions/<name>.instructions.md
+#   .apm/prompts/<name>.prompt.md
+#   .apm/agents/<name>.agent.md
+name: dotfiles-agents
+version: 1.0.0

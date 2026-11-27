@@ -21,6 +21,14 @@
 {{-   $clientEmail = promptStringOnce . "git.client.email" "Client git user.email" -}}
 {{- end -}}
 
+{{- /* Azure DevOps organization for the azure-devops MCP server in
+       ~/.apm/apm.yml: dev profile only, per machine, not in the repo. Empty
+       leaves the server out. */ -}}
+{{- $adoOrg := "" -}}
+{{- if eq $profile "dev" -}}
+{{-   $adoOrg = promptStringOnce . "azureDevops.org" "Azure DevOps organization (empty: no MCP server)" -}}
+{{- end -}}
+
 {{- /* No Application list here: the Applications and the Profiles that
        get them live in .chezmoidata/applications.toml, which this config
        template cannot read; every consumer filters by .profile itself (see
@@ -56,4 +64,8 @@ sourceDir = {{ .chezmoi.workingTree | quote }}
 [data.git.client]
     name = {{ $clientName | quote }}
     email = {{ $clientEmail | quote }}
+{{ end -}}
+{{ if eq $profile "dev" }}
+[data.azureDevops]
+    org = {{ $adoOrg | quote }}
 {{ end -}}

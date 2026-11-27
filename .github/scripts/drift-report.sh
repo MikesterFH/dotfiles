@@ -20,7 +20,7 @@ repo=$(cd "$(dirname "$0")/../.." && pwd)
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 
-nix eval --json --override-input dotfiles "path:$repo" "$repo/nix/ci#versions" > "$tmp/nix.json"
+nix eval --json --override-input dotfiles "path:$repo" "path:$repo/nix/ci#versions" > "$tmp/nix.json"
 
 python3 - "$repo/home/.chezmoidata/applications.toml" "$repo/home/dot_config/mise/mise.lock" "$tmp/nix.json" "${1:-}" <<'EOF'
 import json, os, re, sys, tomllib

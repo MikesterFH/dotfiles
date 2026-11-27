@@ -1,0 +1,55 @@
+{{- $apm := includeTemplate "apm-sync.json" . | fromJson -}}
+{{- if and (eq .chezmoi.os "windows") $apm.enabled -}}
+# =============================================================================
+# chezmoi run_onchange_after script: deploys ~/.apm/apm.yml (the agents/
+# package and MCP servers) into Claude Code, Copilot and opencode with
+# `apm install -g`, then writes opencode's global AGENTS.md with
+# `apm compile -g`. Windows sibling of
+# unix/run_onchange_after_sync-apm-packages.sh.tmpl; see
+# docs/adr/0026-agent-config-via-apm.md.
+#
+# Rerun trigger: hash of the rendered manifest and of every file in agents/
+# (.chezmoitemplates/apm-sync.json).
+# apm sha256: {{ $apm.hash }}
+#
+# Sorts after install-mise-tools, which installs apm.
+# =============================================================================
+$ErrorActionPreference = "Stop"
+
+# apm is a mise tool (docs/adr/0023-applications-from-one-data-file.md);
+# mise installed it in a sibling process this apply, so put its shims first.
+$env:Path = (Join-Path $env:LOCALAPPDATA "mise\shims") + ";" +
+    [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" +
+    [Environment]::GetEnvironmentVariable("Path", "User")
+
+# Fail rather than skip: a run_onchange script that exits 0 is recorded as
+# done and never reruns until the manifest or agents/ changes.
+if (-not (Get-Command apm -ErrorAction SilentlyContinue)) {
+    Write-Error "apm not installed; cannot deploy agent config."
+    exit 1
+}
+
+# APM resolves ${VAR} at install time for Claude Code and would write the
+# secret into ~/.claude.json; with the variable unset it keeps the reference
+# for the harness to resolve at runtime.
+{{- range $apm.secrets }}
+Remove-Item Env:{{ . }} -ErrorAction SilentlyContinue
+{{- end }}
+
+Set-Location $HOME
+Write-Host "[INFO]  Deploying agent config with APM..."
+# A failure here (a name clash with an unmanaged skill, an APM-managed MCP
+# server edited in a harness) fails the apply on purpose: APM prints which
+# file or entry to move aside, and the next apply retries.
+apm install -g
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "apm install -g failed (exit code $LASTEXITCODE)"
+    exit 1
+}
+apm compile -g
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "apm compile -g failed (exit code $LASTEXITCODE)"
+    exit 1
+}
+Write-Host "[OK]    Agent config deployed."
+{{- end -}}

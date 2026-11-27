@@ -183,6 +183,55 @@ Assert-FileExists "AppData\Roaming\helix\languages.toml"
 Assert-Absent ".config\helix"
 Assert-FileExists ".config\hunk\config.toml"
 
+# Agent harness config via APM (docs/adr/0026-agent-config-via-apm.md): the
+# global manifest points at the repo's agents/ package by absolute path and
+# names the three harnesses; apm itself is a pinned mise tool (x86_64 only).
+# The lockfile is per-machine state, never deployed.
+$apmApp = $apps | Where-Object { $_.name -eq "apm" }
+if ($apmApp) {
+    Assert-FileExists ".apm\apm.yml"
+    Assert-Absent ".apm\apm.lock.yaml"
+    $apmManifestPath = Join-Path $Dest ".apm\apm.yml"
+    $apmManifest = if (Test-Path -Path $apmManifestPath -PathType Leaf) { Get-Content -Path $apmManifestPath -Raw } else { "" }
+    if ($apmManifest -match '(?m)^    - "[A-Za-z]:\\\\.*agents"\r?$') {
+        Write-Host "[OK]   apm.yml: agents/ package by absolute path"
+    } else {
+        Write-Host "[FAIL] apm.yml: agents/ package reference missing or not absolute"
+        $script:failed = $true
+    }
+    if ($apmManifest -match '(?m)^targets: \[claude, copilot, opencode\]\r?$') {
+        Write-Host "[OK]   apm.yml: targets claude, copilot, opencode"
+    } else {
+        Write-Host "[FAIL] apm.yml: targets line missing or changed"
+        $script:failed = $true
+    }
+    if (Test-ViaMise $apmApp) {
+        if ($miseConfig -match '^"github:microsoft/apm" = "\d+\.\d+\.\d+"$') {
+            Write-Host "[OK]   mise config: github:microsoft/apm pinned"
+        } else {
+            Write-Host "[FAIL] mise config: github:microsoft/apm missing or not pinned to an exact version"
+            $script:failed = $true
+        }
+    }
+    # azure-devops MCP: dev only (CI seeds azureDevops.org), pinned npx
+    # package behind cmd /c
+    if ($MachineProfile -eq "dev") {
+        if ($apmManifest -match '(?m)^      args: \["/c", "npx", "-y", "@azure-devops/mcp@\d+\.\d+\.\d+", "ci-org"\]\r?$') {
+            Write-Host "[OK]   apm.yml: azure-devops MCP pinned, with the org"
+        } else {
+            Write-Host "[FAIL] apm.yml: azure-devops MCP missing, unpinned or without the org"
+            $script:failed = $true
+        }
+    } elseif ($apmManifest -match 'azure-devops') {
+        Write-Host "[FAIL] apm.yml: azure-devops MCP outside the dev profile"
+        $script:failed = $true
+    } else {
+        Write-Host "[OK]   apm.yml: no azure-devops MCP outside dev"
+    }
+} else {
+    Assert-Absent ".apm"
+}
+
 # PowerShell profile, Windows-only, unconditional across every profile
 Assert-FileExists ".config\powershell\profile.ps1"
 

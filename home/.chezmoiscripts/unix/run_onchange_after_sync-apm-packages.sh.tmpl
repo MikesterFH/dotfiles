@@ -1,0 +1,46 @@
+{{- $apm := includeTemplate "apm-sync.json" . | fromJson -}}
+{{- if and (ne .chezmoi.os "windows") (not .devpod) $apm.enabled -}}
+#!/usr/bin/env bash
+# =============================================================================
+# chezmoi run_onchange_after script: deploys ~/.apm/apm.yml (the agents/
+# package and MCP servers) into Claude Code, Copilot and opencode with
+# `apm install -g`, then writes opencode's global AGENTS.md with
+# `apm compile -g`. See docs/adr/0026-agent-config-via-apm.md.
+#
+# Rerun trigger: hash of the rendered manifest and of every file in agents/
+# (.chezmoitemplates/apm-sync.json).
+# apm sha256: {{ $apm.hash }}
+#
+# Sorts after install-mise-tools, which installs apm. macOS/Linux only,
+# and not on devpod; Windows has its own sibling.
+# =============================================================================
+set -euo pipefail
+
+# apm is a mise tool (docs/adr/0023-applications-from-one-data-file.md),
+# installed in a sibling process this apply; shims first, ahead of any
+# older apm from APM's own installer in /usr/local/bin.
+export PATH="$HOME/.local/share/mise/shims:$PATH"
+
+# Fail rather than skip: a run_onchange script that exits 0 is recorded as
+# done and never reruns until the manifest or agents/ changes.
+if ! command -v apm &>/dev/null; then
+  echo "[ERROR] apm not installed; cannot deploy agent config." >&2
+  exit 1
+fi
+
+# APM resolves ${VAR} at install time for Claude Code and would write the
+# secret into ~/.claude.json; with the variable unset it keeps the reference
+# for the harness to resolve at runtime.
+{{- range $apm.secrets }}
+unset {{ . }}
+{{- end }}
+
+cd "$HOME"
+echo "[INFO]  Deploying agent config with APM..."
+# A failure here (a name clash with an unmanaged skill, an APM-managed MCP
+# server edited in a harness) fails the apply on purpose: APM prints which
+# file or entry to move aside, and the next apply retries.
+apm install -g
+apm compile -g
+echo "[OK]    Agent config deployed."
+{{- end -}}

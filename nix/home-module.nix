@@ -63,14 +63,24 @@ let
       inherit (cfg) profile;
       devpod = false;
       git = { inherit (cfg.git) work personal; };
+      # APM fails on a read-only local package, so the manifest points at the
+      # writable copy home.activation.apm makes of ${self}/agents.
+      apmAgentsPath = apmAgentsCopy;
     };
   });
+  apmAgentsCopy = "${config.home.homeDirectory}/.apm/packages/dotfiles-agents";
 
   render = name: tmpl: pkgs.runCommand name { nativeBuildInputs = [ pkgs.chezmoi ]; } ''
     export HOME="$TMPDIR"
     chezmoi execute-template --source ${self} --config ${chezmoiConfig} \
       < ${home}/${tmpl} > $out
   '';
+
+  # Agent harness config via APM (docs/adr/0026-agent-config-via-apm.md). The
+  # manifest points at apmAgentsCopy; apm-sync.json carries the rerun hash (over
+  # ${self}/agents) and the ${VAR}s to unset, read with jq at activation.
+  apmManifest = render "apm.yml" "dot_apm/apm.yml.tmpl";
+  apmSync     = render "apm-sync.json" ".chezmoitemplates/apm-sync.json";
 
   # Global git hooks: chezmoi strips the `executable_` prefix and sets +x.
   gitHooks = pkgs.runCommand "dotfiles-git-hooks" { } ''
@@ -149,5 +159,40 @@ in {
       ".config/git/config.local.personal".source   = render "git-config-personal" "dot_config/git/config.local.personal.tmpl";
       ".config/git/hooks".source                   = gitHooks;
     };
+
+    # The Nix counterpart of the run_onchange_after_sync-apm-packages scripts
+    # (ADR 0026): APM writes into the harnesses' own, mutable dirs, so it runs at
+    # activation, not at build time. The manifest is copied, not linked:
+    # `apm compile -g` refuses a symlinked apm.yml. agents/ is copied out of the
+    # store with write permission: APM fails on a read-only local package
+    # ("open() missing required argument 'flags'", microsoft/apm#5544; drop the
+    # copy and apmAgentsPath once that is fixed). Reruns when the hash of
+    # manifest + agents/ changes; the stamp is only written on success, and a
+    # failure (name clash with an unmanaged skill, an MCP entry edited in a
+    # harness) warns instead of failing the switch, so the next switch retries.
+    home.activation.apm = lib.mkIf (installs "apm") (lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      if [[ ! -v DRY_RUN ]]; then
+        apmStamp="$HOME/.apm/.dotfiles-sync"
+        apmHash="$(${pkgs.jq}/bin/jq -r .hash ${apmSync})"
+        ${pkgs.coreutils}/bin/install -Dm0644 ${apmManifest} "$HOME/.apm/apm.yml"
+        if [[ "$(cat "$apmStamp" 2>/dev/null)" != "$apmHash" ]]; then
+          ${pkgs.coreutils}/bin/rm -rf "${apmAgentsCopy}"
+          ${pkgs.coreutils}/bin/mkdir -p "$HOME/.apm/packages"
+          ${pkgs.coreutils}/bin/cp -R --no-preserve=mode ${self}/agents "${apmAgentsCopy}"
+          if (
+            # APM resolves ''${VAR} for Claude Code at install time; unset, the
+            # reference stays in ~/.claude.json instead of the secret.
+            for v in $(${pkgs.jq}/bin/jq -r '.secrets[]' ${apmSync}); do unset "$v"; done
+            export PATH="${lib.makeBinPath [ set.git ]}:$PATH"
+            cd "$HOME"
+            ${lib.getExe set.apm-cli} install -g && ${lib.getExe set.apm-cli} compile -g
+          ); then
+            echo "$apmHash" > "$apmStamp"
+          else
+            warnEcho "apm install -g failed; agent config not deployed (see above). Retried on the next switch."
+          fi
+        fi
+      fi
+    '');
   };
 }
